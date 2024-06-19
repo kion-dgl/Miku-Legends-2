@@ -1,0 +1,69 @@
+[
+    {
+      "name": "00_BODY",
+      "triCount": 14,
+      "quadCount": 1,
+      "vertCount": 0,
+      "triOfs": 23592960,
+      "quadOfs": 0,
+      "vertOfs": 0,
+      "triShadowOfs": 1006632965,
+      "quadShadowOfs": 1006895109
+    },
+    {
+      "name": "01_HIP",
+      "triCount": 6,
+      "quadCount": 0,
+      "vertCount": 8,
+      "triOfs": 1007419398,
+      "quadOfs": 0,
+      "vertOfs": 0,
+      "triShadowOfs": 0,
+      "quadShadowOfs": 0
+    },
+    {
+      "name": "02_LEG_RIGHT_TOP",
+      "triCount": 4,
+      "quadCount": 34,
+      "vertCount": 44,
+      "triOfs": 272,
+      "quadOfs": 704,
+      "vertOfs": 1592,
+      "triShadowOfs": 2032,
+      "quadShadowOfs": 2208
+    },
+    {
+      "name": "03_LEG_RIGHT_BOTTOM",
+      "triCount": 4,
+      "quadCount": 10,
+      "vertCount": 14,
+      "triOfs": 320,
+      "quadOfs": 1112,
+      "vertOfs": 1768,
+      "triShadowOfs": 2384,
+      "quadShadowOfs": 2440
+    },
+    {
+      "name": "04_LEG_LEFT_TOP",
+      "triCount": 4,
+      "quadCount": 5,
+      "vertCount": 9,
+      "triOfs": 368,
+      "quadOfs": 1232,
+      "vertOfs": 1824,
+      "triShadowOfs": 2496,
+      "quadShadowOfs": 2532
+    },
+    {
+      "name": "05_LEG_LEFT_BOTTOM",
+      "triCount": 10,
+      "quadCount": 10,
+      "vertCount": 17,
+      "triOfs": 416,
+      "quadOfs": 1292,
+      "vertOfs": 1860,
+      "triShadowOfs": 2568,
+      "quadShadowOfs": 2636
+    }
+  ]
+  

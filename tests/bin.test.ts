@@ -1,4 +1,3 @@
-import { file } from "bun";
 import { test, expect } from "bun:test";
 import { readFileSync } from "fs";
 
