@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { readFileSync } from "fs";
 import ByteReader from '../src/ByteReader';
-import shoesAsbestos from '../fixtures/shoes-asbestos.json'
+import shoesHydro from '../fixtures/shoes-hydro.json'
 
 type MeshHeader = {
     name: string;
@@ -17,12 +17,12 @@ type MeshHeader = {
 
 test("Reading the strip offsets for the shoes", () => {
 
-    const buffer = readFileSync(`./bin/PL00P003.BIN`);
+    const buffer = readFileSync(`./bin/PL00P004.BIN`);
     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
     const reader = new ByteReader(dat.buffer as ArrayBuffer);
 
     const FEET_OFS = 0x1800
-    const names = ["20_ASBESTOS_RIGHT_FOOT", "21_ASBESTOS_LEFT_FOOT"];
+    const names = ["20_HYDRO_RIGHT_FOOT", "21_HYDRO_LEFT_FOOT"];
     reader.seek(FEET_OFS);
 
     const meshes: MeshHeader[] = [];
@@ -52,6 +52,6 @@ test("Reading the strip offsets for the shoes", () => {
         })
     });
 
-    expect(meshes).toEqual(shoesAsbestos);
+    expect(meshes).toEqual(shoesHydro);
 
 });
