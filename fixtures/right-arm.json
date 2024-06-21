@@ -1,0 +1,35 @@
+[
+    {
+        "name": "30_RIGHT_SHOULDER",
+        "triCount": 0,
+        "quadCount": 0,
+        "vertCount": 0,
+        "triOfs": 0,
+        "quadOfs": 0,
+        "vertOfs": 0,
+        "triShadowOfs": 0,
+        "quadShadowOfs": 0
+    },
+    {
+        "name": "31_RIGHT_ARM",
+        "triCount": 0,
+        "quadCount": 0,
+        "vertCount": 0,
+        "triOfs": 0,
+        "quadOfs": 0,
+        "vertOfs": 0,
+        "triShadowOfs": 0,
+        "quadShadowOfs": 0
+    },
+    {
+        "name": "32_RIGHT_HAND",
+        "triCount": 14,
+        "quadCount": 11,
+        "vertCount": 20,
+        "triOfs": 7704,
+        "quadOfs": 7896,
+        "vertOfs": 8232,
+        "triShadowOfs": 8400,
+        "quadShadowOfs": 8480
+    }
+]

@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { readFileSync } from "fs";
 import ByteReader from '../src/ByteReader';
-import helmet from '../fixtures/helmet.json';
+import rightArm from '../fixtures/right-arm.json';
 
 type MeshHeader = {
     name: string;
@@ -21,9 +21,9 @@ test("dat reader", () => {
     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
     const reader = new ByteReader(dat.buffer as ArrayBuffer);
 
-    const HEAD_OFS = 0xb60;
-    const names = ["10_HELMET", "11_FACE", "12_MOUTH"];
-    reader.seek(HEAD_OFS);
+    const RIGHT_ARM_OFS = 0x1dd0
+    const names = ["30_RIGHT_SHOULDER", "31_RIGHT_ARM", "32_RIGHT_HAND"];
+    reader.seek(RIGHT_ARM_OFS);
 
     const meshes: MeshHeader[] = [];
     names.forEach((name) => {
@@ -52,6 +52,7 @@ test("dat reader", () => {
         })
     });
 
-    expect(meshes).toEqual(helmet);
+    console.log(JSON.stringify(meshes, null, 2));
+    expect(meshes).toEqual(rightArm);
 
 });

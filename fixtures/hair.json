@@ -1,0 +1,35 @@
+[
+    {
+        "name": "10_HAIR",
+        "triCount": 184,
+        "quadCount": 184,
+        "vertCount": 184,
+        "triOfs": 10987431,
+        "quadOfs": 12303291,
+        "vertOfs": 7171437,
+        "triShadowOfs": 11513775,
+        "quadShadowOfs": 8289918
+    },
+    {
+        "name": "11_FACE",
+        "triCount": 146,
+        "quadCount": 146,
+        "vertCount": 146,
+        "triOfs": 12566463,
+        "quadOfs": 12566463,
+        "vertOfs": 9737364,
+        "triShadowOfs": 8289918,
+        "quadShadowOfs": 8355711
+    },
+    {
+        "name": "12_MOUTH",
+        "triCount": 37,
+        "quadCount": 81,
+        "vertCount": 109,
+        "triOfs": 2984,
+        "quadOfs": 3512,
+        "vertOfs": 4568,
+        "triShadowOfs": 5092,
+        "quadShadowOfs": 5528
+    }
+]
