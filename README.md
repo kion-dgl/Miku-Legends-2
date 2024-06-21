@@ -25,7 +25,10 @@ Even through there are variations with all of the models, the offsets for the bo
 The mesh information stored in each `.BIN` files starts at `0x30` and is `0x2b40` in size.
 These offsets are with respect to the start of the model file which is `0x30`.
 
-| Body Part| Offset| Number of Meshes |
+For the purpose of this document, we will use the term "model" to refer to the enter file,
+"mesh" refers to a single body part. And "strip" will refer to the list of commands that make up the mesh.
+
+| Body Part| Offset| Number of Strips |
 | --------| ----- | ---------------- |
 | Bones| 0x00| 16 | 
 | Body| 0x80 | 6 |
@@ -34,3 +37,9 @@ These offsets are with respect to the start of the model file which is `0x30`.
 | Right Arm| 0x1dd0 | 3 |
 | Buster| 0x2220 | 3 |
 | Left Arm| 0x26f0 | 3 |
+
+### Strip Format
+
+Each strip is a list of vertices and indices used to draw the mesh. 
+Indices are described in either triangles or quads, and both reference the same vertex list.
+For the same number of vertices, there are shading vertex colors that describe the local shadows for each face.
