@@ -15,7 +15,7 @@ type MeshHeader = {
     quadShadowOfs: number;
 }
 
-test("dat reader", () => {
+test("Reading the strip offsets for the hair", () => {
 
     const buffer = readFileSync(`./bin/PL00P001.BIN`);
     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);

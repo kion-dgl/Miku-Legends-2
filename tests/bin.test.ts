@@ -16,7 +16,7 @@ const files = [
     "PL00P015.BIN",
 ];
 
-test("dat reader", () => {
+test("Reading the header for the model bin files", () => {
     files.forEach((file) => {
         const buffer = readFileSync(`./bin/${file}`);
         // Type

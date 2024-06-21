@@ -15,7 +15,7 @@ type MeshHeader = {
     quadShadowOfs: number;
 }
 
-test("dat reader", () => {
+test("Reading the strip offsets for the right arm", () => {
 
     const buffer = readFileSync(`./bin/PL00P000.BIN`);
     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);

@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { readFileSync } from "fs";
 import ByteReader from '../src/ByteReader';
-import buster from '../fixtures/buster.json';
+import shoesNormal from '../fixtures/shoes-normal.json';
 
 type MeshHeader = {
     name: string;
@@ -15,15 +15,15 @@ type MeshHeader = {
     quadShadowOfs: number;
 }
 
-test("Reading the strip offsets for the buster", () => {
+test("Reading the strip offsets for the shoes", () => {
 
     const buffer = readFileSync(`./bin/PL00P000.BIN`);
     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
     const reader = new ByteReader(dat.buffer as ArrayBuffer);
 
-    const BUSTER_OFS = 0x2220;
-    const names = ["40_LEFT_SHOULDER", "41_BUSTER", "42_BULLET_MAYBE"];
-    reader.seek(BUSTER_OFS);
+    const FEET_OFS = 0x1800
+    const names = ["20_NORM_RIGHT_FOOT", "21_NORM_LEFT_FOOT"];
+    reader.seek(FEET_OFS);
 
     const meshes: MeshHeader[] = [];
     names.forEach((name) => {
@@ -52,6 +52,6 @@ test("Reading the strip offsets for the buster", () => {
         })
     });
 
-    expect(meshes).toEqual(buster);
+    expect(meshes).toEqual(shoesNormal);
 
 });
