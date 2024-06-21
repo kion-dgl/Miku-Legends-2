@@ -21,9 +21,9 @@ test("dat reader", () => {
     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
     const reader = new ByteReader(dat.buffer as ArrayBuffer);
 
-    const RIGHT_ARM_OFS = 0x1dd0
+    const LEFT_ARM_OFS = 0x1dd0
     const names = ["30_RIGHT_SHOULDER", "31_RIGHT_ARM", "32_RIGHT_HAND"];
-    reader.seek(RIGHT_ARM_OFS);
+    reader.seek(LEFT_ARM_OFS);
 
     const meshes: MeshHeader[] = [];
     names.forEach((name) => {
@@ -52,7 +52,6 @@ test("dat reader", () => {
         })
     });
 
-    console.log(JSON.stringify(meshes, null, 2));
     expect(meshes).toEqual(rightArm);
 
 });

@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { readFileSync } from "fs";
 import ByteReader from '../src/ByteReader';
-import hair from '../fixtures/hair.json';
+import buster from '../fixtures/buster.json';
 
 type MeshHeader = {
     name: string;
@@ -17,13 +17,13 @@ type MeshHeader = {
 
 test("dat reader", () => {
 
-    const buffer = readFileSync(`./bin/PL00P001.BIN`);
+    const buffer = readFileSync(`./bin/PL00P000.BIN`);
     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
     const reader = new ByteReader(dat.buffer as ArrayBuffer);
 
-    const HEAD_OFS = 0xb60
-    const names = ["10_HAIR", "11_FACE", "12_MOUTH"];
-    reader.seek(HEAD_OFS);
+    const BUSTER_OFS = 0x2220;
+    const names = ["40_LEFT_SHOULDER", "41_BUSTER", "42_BULLET_MAYBE"];
+    reader.seek(BUSTER_OFS);
 
     const meshes: MeshHeader[] = [];
     names.forEach((name) => {
@@ -51,7 +51,7 @@ test("dat reader", () => {
             quadShadowOfs
         })
     });
-
-    expect(meshes).toEqual(hair);
+    
+    expect(meshes).toEqual(buster);
 
 });

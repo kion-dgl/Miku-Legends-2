@@ -1,0 +1,35 @@
+[
+    {
+        "name": "40_LEFT_SHOULDER",
+        "triCount": 159,
+        "quadCount": 159,
+        "vertCount": 159,
+        "triOfs": 8355711,
+        "quadOfs": 8421504,
+        "vertOfs": 8421504,
+        "triShadowOfs": 8421504,
+        "quadShadowOfs": 8421504
+    },
+    {
+        "name": "41_LEFT_ARM",
+        "triCount": 128,
+        "quadCount": 128,
+        "vertCount": 128,
+        "triOfs": 8421504,
+        "quadOfs": 8421504,
+        "vertOfs": 8421504,
+        "triShadowOfs": 0,
+        "quadShadowOfs": 0
+    },
+    {
+        "name": "42_LEFT_HAND",
+        "triCount": 14,
+        "quadCount": 11,
+        "vertCount": 20,
+        "triOfs": 10040,
+        "quadOfs": 10232,
+        "vertOfs": 10568,
+        "triShadowOfs": 10736,
+        "quadShadowOfs": 10816
+    }
+]
