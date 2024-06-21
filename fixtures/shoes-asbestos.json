@@ -1,0 +1,24 @@
+[
+    {
+        "name": "20_ASBESTOS_RIGHT_FOOT",
+        "triCount": 128,
+        "quadCount": 128,
+        "vertCount": 128,
+        "triOfs": 8421504,
+        "quadOfs": 8421504,
+        "vertOfs": 8421504,
+        "triShadowOfs": 8421504,
+        "quadShadowOfs": 8421504
+    },
+    {
+        "name": "21_ASBESTOS_LEFT_FOOT",
+        "triCount": 128,
+        "quadCount": 128,
+        "vertCount": 128,
+        "triOfs": 8421504,
+        "quadOfs": 8421504,
+        "vertOfs": 8421504,
+        "triShadowOfs": 8421504,
+        "quadShadowOfs": 0
+    }
+]
