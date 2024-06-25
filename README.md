@@ -43,3 +43,21 @@ For the purpose of this document, we will use the term "model" to refer to the e
 Each strip is a list of vertices and indices used to draw the mesh. 
 Indices are described in either triangles or quads, and both reference the same vertex list.
 For the same number of vertices, there are shading vertex colors that describe the local shadows for each face.
+
+```c
+typedef struct {
+    utin8_t triCount;
+    utin8_t quadCount;
+    utin8_t vertexCount;
+    uint8_t nop;
+    uint32_t triOffset;
+    uint32_t quadOffset;
+    uint32_t vertexOffset;
+    utin32_t triShadowOffset;
+    utin32_t quadShadowOffset;
+} StripHeader;
+```
+
+| 0x00 | 0x01 | 0x02 | 0x03 | 0x04 | 0x08 | 0x0c | 0x10 | 0x14 | 
+| --------| ----- | ---------------- | ----- | ---- | ----- | ---- | ----- | --- |
+| Tri Count | Quad Count  | Vertex Count | NOP | Tri Ofs | Quad Ofs | Vertex Ofs | Tri Shadow Ofs | Quad Shadow Ofs |

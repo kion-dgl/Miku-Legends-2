@@ -3,12 +3,14 @@
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/three": "^0.165.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "bytereader": "^0.1.0"
+    "bytereader": "^0.1.0",
+    "three": "^0.165.0"
   }
 }
