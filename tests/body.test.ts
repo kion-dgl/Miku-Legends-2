@@ -3,7 +3,8 @@ import { readFileSync } from "fs";
 import ByteReader from '../src/ByteReader';
 import body from '../fixtures/body.json';
 import fixtureGeometry from '../fixtures/body-data.json';
-import { readStrips, readVertexList, readFace } from '../src/MeshReader';
+import { readStrips, readVertexList, readVertex, readFace } from '../src/MeshReader';
+import { encodeVertex } from '../src/MeshWriter';
 
 
 test("Reading the strip offsets for the body", () => {
@@ -37,4 +38,22 @@ test("Reading the vertex and face data for the body", () => {
     });
     
     expect(geometry).toEqual(fixtureGeometry);
+});
+
+test('Re-encoding the vertices read from the body', () => {
+    const buffer = readFileSync(`./bin/PL00P000.BIN`);
+    const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
+    const reader = new ByteReader(dat.buffer as ArrayBuffer);
+    
+    body.map((mesh) => {
+        const { vertOfs, vertCount } = mesh;
+        reader.seek(vertOfs);
+
+        for(let i = 0; i < vertCount; i++) {
+            const { x, y, z, dword } = readVertex(reader);
+            const reEncoded = encodeVertex(x, y, z);
+            expect(dword).toEqual(reEncoded);
+        }
+    });
+
 });
