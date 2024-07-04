@@ -78,8 +78,8 @@ const readVertex = (
         (yHigh + yLow),
         (zHigh + zLow)
     );
-    vec3.multiplyScalar(SCALE);
-    vec3.applyMatrix4(ROT);
+    // vec3.multiplyScalar(SCALE);
+    // vec3.applyMatrix4(ROT);
 
     const { x, y, z } = vec3;
     return { x, y, z, dword };

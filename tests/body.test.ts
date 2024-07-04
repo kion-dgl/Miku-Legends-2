@@ -52,7 +52,9 @@ test('Re-encoding the vertices read from the body', () => {
         for(let i = 0; i < vertCount; i++) {
             const { x, y, z, dword } = readVertex(reader);
             const reEncoded = encodeVertex(x, y, z);
+            console.log(i, dword, reEncoded)
             expect(dword).toEqual(reEncoded);
+            
         }
     });
 

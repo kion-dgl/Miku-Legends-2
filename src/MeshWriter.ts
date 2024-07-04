@@ -7,9 +7,8 @@ const encodeVertex = (xRaw: number, yRaw: number, zRaw: number) => {
     ROT_X.makeRotationX(Math.PI);
 
     const vec3 = new Vector3(xRaw, yRaw, zRaw);
-    vec3.multiplyScalar(SCALE);
-    vec3.applyMatrix4(ROT_X);
-    // vec3.applyMatrix4(ROT_Y);
+    // vec3.multiplyScalar(SCALE);
+    // vec3.applyMatrix4(ROT_X);
 
     // // Round each value to nearest whole int
     vec3.x = Math.round(vec3.x)
