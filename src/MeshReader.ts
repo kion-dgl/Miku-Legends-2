@@ -52,6 +52,39 @@ const readStrips = (
     return meshes;
 }
 
+const readVertex = (
+    reader: ByteReader,
+) => {
+    const VERTEX_MASK = 0b1111111111;
+    const VERTEX_MSB = 0b1000000000;
+    const VERTEX_LOW = 0b0111111111;
+
+    const dword = reader.readUInt32();
+    const xBytes = (dword >> 0x00) & VERTEX_MASK;
+    const yBytes = (dword >> 0x0a) & VERTEX_MASK;
+    const zBytes = (dword >> 0x14) & VERTEX_MASK;
+
+    const xHigh = (xBytes & VERTEX_MSB) * -1;
+    const xLow = xBytes & VERTEX_LOW;
+
+    const yHigh = (yBytes & VERTEX_MSB) * -1;
+    const yLow = yBytes & VERTEX_LOW;
+
+    const zHigh = (zBytes & VERTEX_MSB) * -1;
+    const zLow = zBytes & VERTEX_LOW;
+
+    const vec3 = new Vector3(
+        (xHigh + xLow),
+        (yHigh + yLow),
+        (zHigh + zLow)
+    );
+    vec3.multiplyScalar(SCALE);
+    vec3.applyMatrix4(ROT);
+
+    const { x, y, z } = vec3;
+    return { x, y, z, dword };
+}
+
 const readVertexList = (
     reader: ByteReader,
     vertexOfs: number,
@@ -93,8 +126,8 @@ const readVertexList = (
 
 const readFace = (
     reader: ByteReader,
-    faceOfs: number, 
-    faceCount: number, 
+    faceOfs: number,
+    faceCount: number,
     isQuad: boolean
 ) => {
     const FACE_MASK = 0x7f;
@@ -120,7 +153,7 @@ const readFace = (
         const indexC = (dword >> 0x0e) & FACE_MASK;
         const indexD = (dword >> 0x15) & FACE_MASK;
 
-        const a ={
+        const a = {
             materialIndex,
             index: indexA,
             u: au * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
@@ -152,4 +185,4 @@ const readFace = (
     }
 }
 
-export { readStrips, readVertexList, readFace }
+export { readStrips, readVertexList, readFace, readVertex }
