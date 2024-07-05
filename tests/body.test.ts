@@ -78,10 +78,21 @@ test('Re-encoding the vertices read from the body', () => {
 
             const vec3 = new Vector3(x, y, z);
             vec3.multiplyScalar(SCALE);
-            
-            expect(encodeVertexBits(Math.round(vec3.x * RESTORE))).toEqual(xBytes);
-            expect(encodeVertexBits(Math.round(vec3.y * RESTORE))).toEqual(yBytes);
-            expect(encodeVertexBits(Math.round(vec3.z * RESTORE))).toEqual(zBytes);
+            vec3.applyMatrix4(ROT); // Rotate across the Y axis
+
+            const v = vec3.clone();
+            v.applyMatrix4(ROT); 
+            v.multiplyScalar(RESTORE);
+            v.x = Math.round(v.x)
+            v.y = Math.round(v.y)
+            v.z = Math.round(v.z)
+            v.x === -0 ? v.x = 0 : v.x = v.x;
+            v.y === -0 ? v.y = 0 : v.y = v.y;
+            v.z === -0 ? v.z = 0 : v.z = v.z;
+
+            expect(encodeVertexBits(v.x)).toEqual(xBytes);
+            expect(encodeVertexBits(v.y)).toEqual(yBytes);
+            expect(encodeVertexBits(v.z)).toEqual(zBytes);
             console.log(i, x, xBytes);
         }
     });
