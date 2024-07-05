@@ -5,7 +5,11 @@ import body from '../fixtures/body.json';
 import fixtureGeometry from '../fixtures/body-data.json';
 import { readStrips, readVertexList, readVertex, readFace } from '../src/MeshReader';
 import { encodeVertexBits } from '../src/MeshWriter';
-
+import { Vector3, Matrix4 } from "three";
+const SCALE = 0.00125;
+const RESTORE = 800;
+const ROT = new Matrix4();
+ROT.makeRotationX(Math.PI);
 
 test("Reading the strip offsets for the body", () => {
     const buffer = readFileSync(`./bin/PL00P000.BIN`);
@@ -50,9 +54,9 @@ test('Re-encoding the vertices read from the body', () => {
         reader.seek(vertOfs);
 
         for(let i = 0; i < vertCount; i++) {
-            const VERTEX_MASK = 0b1111111111; // 10 bits
-            const VERTEX_MSB = 0b1000000000; // bit 9
-            const VERTEX_LOW = 0b0111111111; // bits 0 - 8
+            const VERTEX_MASK = 0x3ff; // 10 bits
+            const VERTEX_MSB = 0x200; // bit 9
+            const VERTEX_LOW = 0x1ff; // bits 0 - 8
 
             const dword = reader.readUInt32();
             const xBytes = (dword >> 0x00) & VERTEX_MASK;
@@ -70,11 +74,14 @@ test('Re-encoding the vertices read from the body', () => {
 
             const x = xHigh + xLow
             const y = yHigh + yLow
-            const z = zHigh + zLow        
+            const z = zHigh + zLow
+
+            const vec3 = new Vector3(x, y, z);
+            vec3.multiplyScalar(SCALE);
             
-            expect(encodeVertexBits(x)).toEqual(xBytes);
-            expect(encodeVertexBits(y)).toEqual(yBytes);
-            expect(encodeVertexBits(z)).toEqual(zBytes);
+            expect(encodeVertexBits(Math.round(vec3.x * RESTORE))).toEqual(xBytes);
+            expect(encodeVertexBits(Math.round(vec3.y * RESTORE))).toEqual(yBytes);
+            expect(encodeVertexBits(Math.round(vec3.z * RESTORE))).toEqual(zBytes);
             console.log(i, x, xBytes);
         }
     });
