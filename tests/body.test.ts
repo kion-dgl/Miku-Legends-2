@@ -4,7 +4,7 @@ import ByteReader from '../src/ByteReader';
 import body from '../fixtures/body.json';
 import fixtureGeometry from '../fixtures/body-data.json';
 import { readStrips, readVertexList, readVertex, readFace } from '../src/MeshReader';
-import { encodeVertex } from '../src/MeshWriter';
+import { encodeVertexBits } from '../src/MeshWriter';
 
 
 test("Reading the strip offsets for the body", () => {
@@ -50,11 +50,32 @@ test('Re-encoding the vertices read from the body', () => {
         reader.seek(vertOfs);
 
         for(let i = 0; i < vertCount; i++) {
-            const { x, y, z, dword } = readVertex(reader);
-            const reEncoded = encodeVertex(x, y, z);
-            console.log(i, dword, reEncoded)
-            expect(dword).toEqual(reEncoded);
+            const VERTEX_MASK = 0b1111111111; // 10 bits
+            const VERTEX_MSB = 0b1000000000; // bit 9
+            const VERTEX_LOW = 0b0111111111; // bits 0 - 8
+
+            const dword = reader.readUInt32();
+            const xBytes = (dword >> 0x00) & VERTEX_MASK;
+            const yBytes = (dword >> 0x0a) & VERTEX_MASK;
+            const zBytes = (dword >> 0x14) & VERTEX_MASK;
+
+            const xHigh = (xBytes & VERTEX_MSB) * -1;
+            const xLow = xBytes & VERTEX_LOW;
+
+            const yHigh = (yBytes & VERTEX_MSB) * -1;
+            const yLow = yBytes & VERTEX_LOW;
+
+            const zHigh = (zBytes & VERTEX_MSB) * -1;
+            const zLow = zBytes & VERTEX_LOW;
+
+            const x = xHigh + xLow
+            const y = yHigh + yLow
+            const z = zHigh + zLow        
             
+            expect(encodeVertexBits(x)).toEqual(xBytes);
+            expect(encodeVertexBits(y)).toEqual(yBytes);
+            expect(encodeVertexBits(z)).toEqual(zBytes);
+            console.log(i, x, xBytes);
         }
     });
 

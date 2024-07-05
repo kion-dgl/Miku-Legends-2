@@ -61,4 +61,4 @@ const encodeVertexBits = (num: number) => {
     }
 }
 
-export { encodeVertex }
+export { encodeVertex, encodeVertexBits }
