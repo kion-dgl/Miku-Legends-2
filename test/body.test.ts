@@ -118,15 +118,63 @@ test('Re-encoding the vertices read from the body', () => {
 
 });
 
-// test('Re-encoding the faces read from the body', () => {
-//     const buffer = readFileSync(`./bin/PL00P000.BIN`);
-//     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
-//     const reader = new ByteReader(dat.buffer as ArrayBuffer);
+test('Re-encoding the faces read from the body', () => {
+	const buffer = readFileSync(`./bin/PL00P000.BIN`);
+	const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
+	const reader = new ByteReader(dat.buffer as ArrayBuffer);
 
-//     const geometry = body.map((mesh) => {
-//         const { triOfs, triCount  } = mesh;
-    
-//         const triList = readFace(reader, triOfs, triCount, false);
-   
-//     });
-// });
+	const FACE_MASK = 0x7f;
+	const PIXEL_TO_FLOAT_RATIO = 0.00390625;
+	const PIXEL_ADJUSTMEST = 0.001953125;
+
+	const geometry = body.map((mesh) => {
+		const { triOfs, triCount  } = mesh;
+    		reader.seek(triOfs)
+		for (let i = 0; i < triCount; i++) {
+			const au = reader.readUInt8();
+			const av = reader.readUInt8();
+			const bu = reader.readUInt8();
+			const bv = reader.readUInt8();
+			const cu = reader.readUInt8();
+			const cv = reader.readUInt8();
+			reader.seekRel(2);
+
+			const dword = reader.readUInt32();
+			const materialIndex = ((dword >> 28) & 0x3);
+
+			const indexA = (dword >> 0x00) & FACE_MASK;
+			const indexB = (dword >> 0x07) & FACE_MASK;
+			const indexC = (dword >> 0x0e) & FACE_MASK;
+
+			const a = {
+				materialIndex,
+				index: indexA,
+				u : au * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+				v : av * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+			}
+
+			const b = {
+				materialIndex,
+				index: indexB,
+				u : bu * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+				v : bv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+			}
+			const c = {
+				materialIndex,
+				index: indexC,
+				u : cu * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+				v : cv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+			}
+			
+			expect(Math.floor((a.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(au);
+			expect(Math.floor((a.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(av);
+			expect(Math.floor((b.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bu);
+			expect(Math.floor((b.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bv);
+			expect(Math.floor((c.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cu);
+			expect(Math.floor((c.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cv);
+
+			expect(indexA | (indexB << 7) | (indexC << 14) | (materialIndex << 28)).toEqual(dword);
+	    }
+
+	});
+});
