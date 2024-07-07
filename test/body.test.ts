@@ -172,6 +172,8 @@ test('Re-encoding the faces read from the body', () => {
 			expect(Math.floor((b.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bv);
 			expect(Math.floor((c.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cu);
 			expect(Math.floor((c.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cv);
+
+			expect(indexA | (indexB << 7) | (indexC << 14) | (materialIndex << 28)).toEqual(dword);
 	    }
 
 	});
