@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 import ByteReader from '../src/ByteReader';
 import body from '../fixtures/body.json';
 import fixtureGeometry from '../fixtures/body-data.json';
-import { readStrips, readVertexList, readVertex, readFace } from '../src/MeshReader';
+import { readStrips, readVertexList, dwordString, readFace } from '../src/MeshReader';
 import { encodeVertexBits } from '../src/MeshWriter';
 import { Vector3, Matrix4 } from "three";
 const SCALE = 0.00125;
@@ -44,11 +44,7 @@ test("Reading the vertex and face data for the body", () => {
     expect(geometry).toEqual(fixtureGeometry);
 });
 
-const dwordString = (dword: number) => {
-    const str = dword.toString(2).padStart(32, '0');
-    // return `${str.slice(0, 2)}-${str.slice(2, 12)}-${str.slice(12 - 22)}-${str.slice(22, 32)}`;
-    return `00-${str.slice(2, 12)}-${str.slice(12 - 22)}-${str.slice(22, 32)}`;
-}
+
 
 test('Re-encoding the vertices read from the body', () => {
     const buffer = readFileSync(`./bin/PL00P000.BIN`);

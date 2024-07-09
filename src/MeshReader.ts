@@ -16,6 +16,12 @@ type MeshHeader = {
     quadShadowOfs: number;
 }
 
+
+const dwordString = (dword: number) => {
+    const str = dword.toString(2).padStart(32, '0');
+    return `00-${str.slice(2, 12)}-${str.slice(12 - 22)}-${str.slice(22, 32)}`;
+}
+
 const readStrips = (
     reader: ByteReader,
     stripOfs: number,
@@ -185,4 +191,4 @@ const readFace = (
     }
 }
 
-export { readStrips, readVertexList, readFace, readVertex }
+export { readStrips, readVertexList, readFace, readVertex, dwordString }
