@@ -1,28 +1,6 @@
 [
     {
         "name": "30_RIGHT_SHOULDER",
-        "triCount": 0,
-        "quadCount": 0,
-        "vertCount": 0,
-        "triOfs": 0,
-        "quadOfs": 0,
-        "vertOfs": 0,
-        "triShadowOfs": 0,
-        "quadShadowOfs": 0
-    },
-    {
-        "name": "31_RIGHT_ARM",
-        "triCount": 0,
-        "quadCount": 0,
-        "vertCount": 0,
-        "triOfs": 0,
-        "quadOfs": 0,
-        "vertOfs": 0,
-        "triShadowOfs": 0,
-        "quadShadowOfs": 0
-    },
-    {
-        "name": "32_RIGHT_HAND",
         "triCount": 14,
         "quadCount": 11,
         "vertCount": 20,
@@ -31,5 +9,27 @@
         "vertOfs": 8232,
         "triShadowOfs": 8400,
         "quadShadowOfs": 8480
+    },
+    {
+        "name": "31_RIGHT_ARM",
+        "triCount": 0,
+        "quadCount": 10,
+        "vertCount": 12,
+        "triOfs": 7872,
+        "quadOfs": 8028,
+        "vertOfs": 8312,
+        "triShadowOfs": 8560,
+        "quadShadowOfs": 8608
+    },
+    {
+        "name": "32_RIGHT_HAND",
+        "triCount": 2,
+        "quadCount": 7,
+        "vertCount": 10,
+        "triOfs": 7872,
+        "quadOfs": 8148,
+        "vertOfs": 8360,
+        "triShadowOfs": 8656,
+        "quadShadowOfs": 8696
     }
 ]
