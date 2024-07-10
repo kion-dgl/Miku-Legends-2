@@ -1,24 +1,25 @@
 [
     {
-        "name": "20_HYDRO_RIGHT_FOOT",
-        "triCount": 128,
-        "quadCount": 128,
-        "vertCount": 128,
-        "triOfs": 8421504,
-        "quadOfs": 8421504,
-        "vertOfs": 8421504,
-        "triShadowOfs": 8421504,
-        "quadShadowOfs": 8421504
+      "name": "20_HYDRO_RIGHT_FOOT",
+      "triCount": 7,
+      "quadCount": 20,
+      "vertCount": 31,
+      "triOfs": 6192,
+      "quadOfs": 6360,
+      "vertOfs": 6840,
+      "triShadowOfs": 7088,
+      "quadShadowOfs": 7212
     },
     {
-        "name": "21_HYDRO_LEFT_FOOT",
-        "triCount": 128,
-        "quadCount": 128,
-        "vertCount": 128,
-        "triOfs": 8421504,
-        "quadOfs": 8421504,
-        "vertOfs": 8421504,
-        "triShadowOfs": 8421504,
-        "quadShadowOfs": 0
+      "name": "21_HYDRO_LEFT_FOOT",
+      "triCount": 7,
+      "quadCount": 20,
+      "vertCount": 31,
+      "triOfs": 6276,
+      "quadOfs": 6600,
+      "vertOfs": 6964,
+      "triShadowOfs": 7336,
+      "quadShadowOfs": 7460
     }
-]
+  ]
+  

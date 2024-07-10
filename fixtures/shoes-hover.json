@@ -1,24 +1,24 @@
 [
     {
         "name": "20_HOVER_RIGHT_FOOT",
-        "triCount": 128,
-        "quadCount": 128,
-        "vertCount": 128,
-        "triOfs": 8421504,
-        "quadOfs": 8421504,
-        "vertOfs": 8421504,
-        "triShadowOfs": 8421504,
-        "quadShadowOfs": 8421504
+        "triCount": 9,
+        "quadCount": 17,
+        "vertCount": 29,
+        "triOfs": 6192,
+        "quadOfs": 6408,
+        "vertOfs": 6816,
+        "triShadowOfs": 7048,
+        "quadShadowOfs": 7164
     },
     {
         "name": "21_HOVER_LEFT_FOOT",
-        "triCount": 128,
-        "quadCount": 128,
-        "vertCount": 128,
-        "triOfs": 8421504,
-        "quadOfs": 8421504,
-        "vertOfs": 8421504,
-        "triShadowOfs": 8421504,
-        "quadShadowOfs": 0
+        "triCount": 9,
+        "quadCount": 17,
+        "vertCount": 29,
+        "triOfs": 6300,
+        "quadOfs": 6612,
+        "vertOfs": 6932,
+        "triShadowOfs": 7280,
+        "quadShadowOfs": 7396
     }
 ]
