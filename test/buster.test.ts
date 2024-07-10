@@ -16,10 +16,10 @@ type MeshHeader = {
 }
 
 test("Reading the strip offsets for the buster", () => {
-
-    const buffer = readFileSync(`./bin/PL00P000.BIN`);
-    const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
-    const reader = new ByteReader(dat.buffer as ArrayBuffer);
+    const file = readFileSync(`./bin/PL00P000.BIN`);
+    const dat = file.subarray(0x30, 0x30 + 0x2b40);
+    const { buffer } = Buffer.from(dat);
+    const reader = new ByteReader(buffer as ArrayBuffer);
 
     const BUSTER_OFS = 0x2220;
     const names = ["40_LEFT_SHOULDER", "41_BUSTER", "42_BULLET_MAYBE"];
@@ -53,5 +53,4 @@ test("Reading the strip offsets for the buster", () => {
     });
 
     expect(meshes).toEqual(buster);
-
 });

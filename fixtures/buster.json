@@ -1,35 +1,36 @@
 [
     {
-        "name": "40_LEFT_SHOULDER",
-        "triCount": 145,
-        "quadCount": 145,
-        "vertCount": 145,
-        "triOfs": 7039851,
-        "quadOfs": 6316128,
-        "vertOfs": 10197915,
-        "triShadowOfs": 7039851,
-        "quadShadowOfs": 9671571
+      "name": "40_LEFT_SHOULDER",
+      "triCount": 14,
+      "quadCount": 11,
+      "vertCount": 20,
+      "triOfs": 8808,
+      "quadOfs": 8976,
+      "vertOfs": 9384,
+      "triShadowOfs": 9576,
+      "quadShadowOfs": 9656
     },
     {
-        "name": "41_BUSTER",
-        "triCount": 138,
-        "quadCount": 138,
-        "vertCount": 138,
-        "triOfs": 10197915,
-        "quadOfs": 9211020,
-        "vertOfs": 9671571,
-        "triShadowOfs": 9539985,
-        "quadShadowOfs": 7039851
+      "name": "41_BUSTER",
+      "triCount": 0,
+      "quadCount": 22,
+      "vertCount": 24,
+      "triOfs": 8976,
+      "quadOfs": 9108,
+      "vertOfs": 9464,
+      "triShadowOfs": 9736,
+      "quadShadowOfs": 9832
     },
     {
-        "name": "42_BULLET_MAYBE",
-        "triCount": 14,
-        "quadCount": 11,
-        "vertCount": 20,
-        "triOfs": 8808,
-        "quadOfs": 8976,
-        "vertOfs": 9384,
-        "triShadowOfs": 9576,
-        "quadShadowOfs": 9656
+      "name": "42_BULLET_MAYBE",
+      "triCount": 0,
+      "quadCount": 1,
+      "vertCount": 4,
+      "triOfs": 8976,
+      "quadOfs": 9372,
+      "vertOfs": 9560,
+      "triShadowOfs": 9928,
+      "quadShadowOfs": 9944
     }
-]
+  ]
+  
