@@ -1,24 +1,25 @@
 [
     {
-        "name": "20_JET_RIGHT_FOOT",
-        "triCount": 128,
-        "quadCount": 128,
-        "vertCount": 128,
-        "triOfs": 8421504,
-        "quadOfs": 8421504,
-        "vertOfs": 8421504,
-        "triShadowOfs": 8421504,
-        "quadShadowOfs": 8421504
+      "name": "20_JET_RIGHT_FOOT",
+      "triCount": 4,
+      "quadCount": 19,
+      "vertCount": 29,
+      "triOfs": 6192,
+      "quadOfs": 6288,
+      "vertOfs": 6744,
+      "triShadowOfs": 6976,
+      "quadShadowOfs": 7092
     },
     {
-        "name": "21_JET_LEFT_FOOT",
-        "triCount": 128,
-        "quadCount": 128,
-        "vertCount": 128,
-        "triOfs": 8421504,
-        "quadOfs": 8421504,
-        "vertOfs": 8421504,
-        "triShadowOfs": 8421504,
-        "quadShadowOfs": 0
+      "name": "21_JET_LEFT_FOOT",
+      "triCount": 4,
+      "quadCount": 19,
+      "vertCount": 29,
+      "triOfs": 6240,
+      "quadOfs": 6516,
+      "vertOfs": 6860,
+      "triShadowOfs": 7208,
+      "quadShadowOfs": 7324
     }
-]
+  ]
+  
