@@ -27,20 +27,20 @@ test("Reading the vertex and face data for the body", () => {
     const buffer = readFileSync(`./bin/PL00P000.BIN`);
     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
     const reader = new ByteReader(dat.buffer as ArrayBuffer);
-    
+
     const geometry = body.map((mesh) => {
         const { name, vertOfs, vertCount, triOfs, triCount, quadOfs, quadCount } = mesh;
         const vertexList = readVertexList(reader, vertOfs, vertCount);
         const vertices = vertexList.map((v) => {
             const { x, y, z } = v;
-            return {x, y, z};
+            return { x, y, z };
         })
 
         const triList = readFace(reader, triOfs, triCount, false);
         const quadList = readFace(reader, quadOfs, quadCount, true);
-        return  { name, vertices, triList, quadList }
+        return { name, vertices, triList, quadList }
     });
-    
+
     expect(geometry).toEqual(fixtureGeometry);
 });
 
@@ -50,12 +50,12 @@ test('Re-encoding the vertices read from the body', () => {
     const buffer = readFileSync(`./bin/PL00P000.BIN`);
     const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
     const reader = new ByteReader(dat.buffer as ArrayBuffer);
-    
+
     body.map((mesh) => {
         const { vertOfs, vertCount } = mesh;
         reader.seek(vertOfs);
 
-        for(let i = 0; i < vertCount; i++) {
+        for (let i = 0; i < vertCount; i++) {
             const VERTEX_MASK = 0x3ff; // 10 bits
             const VERTEX_MSB = 0x200; // bit 9
             const VERTEX_LOW = 0x1ff; // bits 0 - 8
@@ -84,11 +84,11 @@ test('Re-encoding the vertices read from the body', () => {
 
             const vec3 = new Vector3(x, y, z);
             vec3.multiplyScalar(SCALE);
-            vec3.applyMatrix4(ROT); 
+            vec3.applyMatrix4(ROT);
 
             // Encode the vertex data
             const v = vec3.clone();
-            v.applyMatrix4(ROT); 
+            v.applyMatrix4(ROT);
             v.multiplyScalar(RESTORE);
             v.x = Math.round(v.x)
             v.y = Math.round(v.y)
@@ -105,7 +105,7 @@ test('Re-encoding the vertices read from the body', () => {
             expect(encodedx).toEqual(xBytes);
             expect(encodedy).toEqual(yBytes);
             expect(encodedz).toEqual(zBytes);
-            
+
             // Check that the re-encoded vertex data matches the original
             dwords[1] = encodedx | (encodedy << 0x0a) | (encodedz << 0x14)
             expect(dwordString(dwords[1])).toEqual(dwordString(dwords[0]));
@@ -114,63 +114,136 @@ test('Re-encoding the vertices read from the body', () => {
 
 });
 
-test('Re-encoding the faces read from the body', () => {
-	const buffer = readFileSync(`./bin/PL00P000.BIN`);
-	const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
-	const reader = new ByteReader(dat.buffer as ArrayBuffer);
+test('Re-encoding the tris read from the body', () => {
+    const buffer = readFileSync(`./bin/PL00P000.BIN`);
+    const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
+    const reader = new ByteReader(dat.buffer as ArrayBuffer);
 
-	const FACE_MASK = 0x7f;
-	const PIXEL_TO_FLOAT_RATIO = 0.00390625;
-	const PIXEL_ADJUSTMEST = 0.001953125;
+    const FACE_MASK = 0x7f;
+    const PIXEL_TO_FLOAT_RATIO = 0.00390625;
+    const PIXEL_ADJUSTMEST = 0.001953125;
 
-	const geometry = body.map((mesh) => {
-		const { triOfs, triCount  } = mesh;
-    		reader.seek(triOfs)
-		for (let i = 0; i < triCount; i++) {
-			const au = reader.readUInt8();
-			const av = reader.readUInt8();
-			const bu = reader.readUInt8();
-			const bv = reader.readUInt8();
-			const cu = reader.readUInt8();
-			const cv = reader.readUInt8();
-			reader.seekRel(2);
+    body.map((mesh) => {
+        const { triOfs, triCount } = mesh;
+        reader.seek(triOfs)
+        for (let i = 0; i < triCount; i++) {
+            const au = reader.readUInt8();
+            const av = reader.readUInt8();
+            const bu = reader.readUInt8();
+            const bv = reader.readUInt8();
+            const cu = reader.readUInt8();
+            const cv = reader.readUInt8();
+            reader.seekRel(2);
 
-			const dword = reader.readUInt32();
-			const materialIndex = ((dword >> 28) & 0x3);
+            const dword = reader.readUInt32();
+            const materialIndex = ((dword >> 28) & 0x3);
 
-			const indexA = (dword >> 0x00) & FACE_MASK;
-			const indexB = (dword >> 0x07) & FACE_MASK;
-			const indexC = (dword >> 0x0e) & FACE_MASK;
+            const indexA = (dword >> 0x00) & FACE_MASK;
+            const indexB = (dword >> 0x07) & FACE_MASK;
+            const indexC = (dword >> 0x0e) & FACE_MASK;
 
-			const a = {
-				materialIndex,
-				index: indexA,
-				u : au * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
-				v : av * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
-			}
+            const a = {
+                materialIndex,
+                index: indexA,
+                u: au * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+                v: av * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+            }
 
-			const b = {
-				materialIndex,
-				index: indexB,
-				u : bu * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
-				v : bv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
-			}
-			const c = {
-				materialIndex,
-				index: indexC,
-				u : cu * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
-				v : cv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
-			}
-			
-			expect(Math.floor((a.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(au);
-			expect(Math.floor((a.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(av);
-			expect(Math.floor((b.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bu);
-			expect(Math.floor((b.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bv);
-			expect(Math.floor((c.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cu);
-			expect(Math.floor((c.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cv);
+            const b = {
+                materialIndex,
+                index: indexB,
+                u: bu * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+                v: bv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+            }
+            const c = {
+                materialIndex,
+                index: indexC,
+                u: cu * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+                v: cv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+            }
 
-			expect(indexA | (indexB << 7) | (indexC << 14) | (materialIndex << 28)).toEqual(dword);
-	    }
+            expect(Math.floor((a.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(au);
+            expect(Math.floor((a.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(av);
+            expect(Math.floor((b.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bu);
+            expect(Math.floor((b.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bv);
+            expect(Math.floor((c.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cu);
+            expect(Math.floor((c.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cv);
+            expect(indexA | (indexB << 7) | (indexC << 14) | (materialIndex << 28)).toEqual(dword);
+        }
 
-	});
+    });
+});
+
+
+test('Re-encoding the quad read from the body', () => {
+    const buffer = readFileSync(`./bin/PL00P000.BIN`);
+    const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
+    const reader = new ByteReader(dat.buffer as ArrayBuffer);
+
+    const FACE_MASK = 0x7f;
+    const PIXEL_TO_FLOAT_RATIO = 0.00390625;
+    const PIXEL_ADJUSTMEST = 0.001953125;
+
+    body.map((mesh) => {
+        const { quadOfs, quadCount } = mesh;
+        reader.seek(quadOfs)
+        for (let i = 0; i < quadCount; i++) {
+            const au = reader.readUInt8();
+            const av = reader.readUInt8();
+            const bu = reader.readUInt8();
+            const bv = reader.readUInt8();
+            const cu = reader.readUInt8();
+            const cv = reader.readUInt8();
+            const du = reader.readUInt8();
+            const dv = reader.readUInt8();
+            
+            const dword = reader.readUInt32();
+            const materialIndex = ((dword >> 28) & 0x3);
+
+            const indexA = dword & FACE_MASK;
+            const indexB = (dword >> 7) & FACE_MASK;
+            const indexC = (dword >> 14) & FACE_MASK;
+            const indexD = (dword >> 21) & FACE_MASK;
+
+            const a = {
+                materialIndex,
+                index: indexA,
+                u: au * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+                v: av * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+            }
+
+            const b = {
+                materialIndex,
+                index: indexB,
+                u: bu * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+                v: bv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+            }
+
+            const c = {
+                materialIndex,
+                index: indexC,
+                u: cu * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+                v: cv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+            }
+
+            const d = {
+                materialIndex,
+                index: indexC,
+                u: du * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+                v: dv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
+            }
+
+            expect(Math.floor((a.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(au);
+            expect(Math.floor((a.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(av);
+            expect(Math.floor((b.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bu);
+            expect(Math.floor((b.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bv);
+            expect(Math.floor((c.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cu);
+            expect(Math.floor((c.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cv);
+            expect(Math.floor((d.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(du);
+            expect(Math.floor((d.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(dv);
+
+            expect(indexA | (indexB << 7) | (indexC << 14) | (indexD << 21) | (materialIndex << 28)).toEqual(dword);
+        }
+
+    });
 });
