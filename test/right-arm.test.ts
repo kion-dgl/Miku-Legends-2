@@ -63,7 +63,7 @@ test("Reading the strip offsets for the right arm", () => {
 });
 
 
-test('Re-encoding the vertices read from the hair', () => {
+test('Re-encoding the vertices read from the right arm', () => {
     const file = readFileSync(`./bin/PL00P000.BIN`);
     const dat = file.subarray(0x30, 0x30 + 0x2b40);
     const { buffer } = Buffer.from(dat);
@@ -132,7 +132,7 @@ test('Re-encoding the vertices read from the hair', () => {
 
 });
 
-test('Re-encoding the tri read from the helmet', () => {
+test('Re-encoding the tri read from the right arm', () => {
     const file = readFileSync(`./bin/PL00P000.BIN`);
     const dat = file.subarray(0x30, 0x30 + 0x2b40);
     const { buffer } = Buffer.from(dat);
@@ -194,7 +194,7 @@ test('Re-encoding the tri read from the helmet', () => {
 });
 
 
-test('Re-encoding the quad read from the helmet', () => {
+test('Re-encoding the quad read from the right arm', () => {
     const file = readFileSync(`./bin/PL00P000.BIN`);
     const dat = file.subarray(0x30, 0x30 + 0x2b40);
     const { buffer } = Buffer.from(dat);

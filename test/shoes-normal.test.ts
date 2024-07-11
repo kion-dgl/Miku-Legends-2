@@ -2,6 +2,13 @@ import { test, expect } from "bun:test";
 import { readFileSync } from "fs";
 import ByteReader from '../src/ByteReader';
 import shoesNormal from '../fixtures/shoes-normal.json';
+import { Vector3, Matrix4 } from "three";
+import { dwordString } from "../src/MeshReader";
+import { encodeVertexBits } from "../src/MeshWriter";
+const SCALE = 0.00125;
+const RESTORE = 800;
+const ROT = new Matrix4();
+ROT.makeRotationX(Math.PI);
 
 type MeshHeader = {
     name: string;
