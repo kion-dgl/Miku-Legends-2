@@ -1,3 +1,4 @@
+import { write } from 'bun';
 import { readFileSync, writeFileSync } from 'fs'
 import { PNG } from 'pngjs';
 import {
@@ -1073,9 +1074,8 @@ const replaceModel = (
     return modded;
 }
 
-const doReplace = (
-    bodyTexture: string,
-    faceTexture: string,
+const encodeModel = (
+    filename: string,
     // Body Section
     bodyObject: string,
     hipsObject: string,
@@ -1100,32 +1100,30 @@ const doReplace = (
     mouthObject: string
 ) => {
 
-    // Read the source ROM file
-    const ROM = readFileSync('/home/kion/.pcsxr/roms/TRACK_01_READONLY.bin')
-
-    // Encode the body and face texture to write to ROM
-    const srcTexture = readFileSync('pl01t.bin')
-    const bodyBuffer = readFileSync(bodyTexture);
-    const faceBuffer = readFileSync(faceTexture);
-    const modTexture = replaceTexture(srcTexture, bodyBuffer, faceBuffer)
-    const PL01T_POS = 0x3ebbd8;
-    replaceInRom(modTexture, PL01T_POS, ROM);
-
     // Encode the body 
-    const srcModel = readFileSync('pl01p000.bin')
+    const srcModel = readFileSync(`bin/${filename}`)
     const body = encodeModelBody(bodyObject, hipsObject, rLegTopObject, rLegBtmObject, lLegTopObject, lLegBtmObject);
     const feet = encodeModelFeet(rightFootObject, leftFootObject);
     const lArm = encodeModelLeftArm(leftShoulder, leftArm, leftHand);
     const rArm = encodeModelRightArm(rightShoulder, rightArm, rightHand);
     const head = encodeModelHead(hairObject, eyesObject, mouthObject);
     const updatedModel = replaceModel(srcModel, body, feet, lArm, rArm, head);
-    writeFileSync('miku_test.bin', updatedModel.subarray(0x30, 0x1f00 + 0x30))
-
-    const PL01P000_POS = 0x3d4c58;
-    replaceInRom(updatedModel, PL01P000_POS, ROM);
-
-    // Write the updated ROM to be tested
-    writeFileSync('/home/kion/.pcsxr/roms/Mega Man Legends 2 (USA) (Track 1).bin', ROM)
+    writeFileSync(`mod/${filename}`, updatedModel.subarray(0x30, 0x1f00 + 0x30))
 }
 
-export { doReplace }
+const encodeTexture = (
+    bodyTexture: string,
+    faceTexture: string,
+) => {
+
+    // Encode the body and face texture to write to ROM
+    const srcTexture = readFileSync('bin/PL01T.BIN')
+    const bodyBuffer = readFileSync(bodyTexture);
+    const faceBuffer = readFileSync(faceTexture);
+    const modTexture = replaceTexture(srcTexture, bodyBuffer, faceBuffer)
+    writeFileSync('mod/PL01T.BIN', modTexture)
+}
+
+
+
+export { encodeModel, encodeTexture }

@@ -4,6 +4,7 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/pngjs": "^6.0.5",
     "@types/three": "^0.165.0"
   },
   "peerDependencies": {
@@ -11,6 +12,7 @@
   },
   "dependencies": {
     "bytereader": "^0.1.0",
+    "pngjs": "^7.0.0",
     "three": "^0.165.0"
   }
 }
