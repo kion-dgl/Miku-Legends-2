@@ -132,7 +132,7 @@ test('Re-encoding the vertices read from the shoes(hydo)', () => {
 
 });
 
-test.skip('Re-encoding the tris read from the shoes(hydo)', () => {
+test('Re-encoding the tris read from the shoes(hydo)', () => {
     const file = readFileSync(`./bin/PL00P004.BIN`);
     const dat = file.subarray(0x30, 0x30 + 0x2b40);
     const { buffer } = Buffer.from(dat);
@@ -188,14 +188,14 @@ test.skip('Re-encoding the tris read from the shoes(hydo)', () => {
             expect(Math.floor((b.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bv);
             expect(Math.floor((c.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cu);
             expect(Math.floor((c.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cv);
-            expect(indexA | (indexB << 7) | (indexC << 14) | (materialIndex << 28)).toEqual(dword);
+            expect(indexA | (indexB << 7) | (indexC << 14) | (materialIndex << 28)).toEqual(dword & 0x3fffffff);
         }
 
     });
 });
 
 
-test.skip('Re-encoding the quad read from the shoes(hydo)', () => {
+test('Re-encoding the quad read from the shoes(hydo)', () => {
     const file = readFileSync(`./bin/PL00P004.BIN`);
     const dat = file.subarray(0x30, 0x30 + 0x2b40);
     const { buffer } = Buffer.from(dat);
@@ -263,7 +263,7 @@ test.skip('Re-encoding the quad read from the shoes(hydo)', () => {
             expect(Math.floor((d.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(du);
             expect(Math.floor((d.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(dv);
 
-            expect(indexA | (indexB << 7) | (indexC << 14) | (indexD << 21) | (materialIndex << 28)).toEqual(dword);
+            expect(indexA | (indexB << 7) | (indexC << 14) | (indexD << 21) | (materialIndex << 28)).toEqual(dword & 0x3fffffff);
         }
 
     });

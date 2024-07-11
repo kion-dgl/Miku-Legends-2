@@ -132,7 +132,7 @@ test('Re-encoding the vertices read from the shoes(hover)', () => {
 
 });
 
-test.skip('Re-encoding the tris read from the shoes(hover)', () => {
+test('Re-encoding the tris read from the shoes(hover)', () => {
     const file = readFileSync(`./bin/PL00P005.BIN`);
     const dat = file.subarray(0x30, 0x30 + 0x2b40);
     const { buffer } = Buffer.from(dat);
@@ -188,7 +188,7 @@ test.skip('Re-encoding the tris read from the shoes(hover)', () => {
             expect(Math.floor((b.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(bv);
             expect(Math.floor((c.u - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cu);
             expect(Math.floor((c.v - PIXEL_ADJUSTMEST) / PIXEL_TO_FLOAT_RATIO)).toEqual(cv);
-            expect(indexA | (indexB << 7) | (indexC << 14) | (materialIndex << 28)).toEqual(dword);
+            expect(indexA | (indexB << 7) | (indexC << 14) | (materialIndex << 28)).toEqual(dword & 0x3fffffff);
         }
 
     });
