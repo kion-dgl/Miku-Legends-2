@@ -898,12 +898,6 @@ const replaceModel = (
       tri,
       quad,
     };
-
-    console.log(`{
-    vertices: Buffer.from('${vertices.toString("hex")}', 'hex'),
-    tri: Buffer.from('${tri.toString("hex")}', 'hex'),
-    quad: Buffer.from('${quad.toString("hex")}', 'hex'),
-}`);
   }
 
   // Zero out the entire model
@@ -943,30 +937,38 @@ const replaceModel = (
 };
 
 const encodeModel = (
+  // Filename to replace
   filename: string,
-  // Body Section
-  bodyObject: string,
-  hipsObject: string,
-  rLegTopObject: string,
-  rLegBtmObject: string,
-  lLegTopObject: string,
-  lLegBtmObject: string,
   // Feet
   rightFootObject: string,
   leftFootObject: string,
   // Left Arm
-  leftShoulder: string,
-  leftArm: string,
-  leftHand: string,
-  // Right Arm
-  rightShoulder: string,
-  rightArm: string,
-  rightHand: string,
+
   // Head
   hairObject: string,
-  eyesObject: string,
-  mouthObject: string,
 ) => {
+  // Body Section
+  const bodyObject = "obj/02_BODY.obj";
+  const hipsObject = "obj/03_HIPS.obj";
+  const rLegTopObject = "obj/10_LEG_RIGHT_TOP.obj";
+  const rLegBtmObject = "obj/11_LEG_RIGHT_BOTTOM.obj";
+  const lLegTopObject = "obj/13_LEG_LEFT_TOP.obj";
+  const lLegBtmObject = "obj/14_LEG_LEFT_BOTTOM.obj";
+
+  // Left Arm
+  const leftShoulder = "obj/07_LEFT_SHOULDER.obj";
+  const leftArm = "obj/08_LEFT_ARM.obj";
+  const leftHand = "obj/09_LEFT_HAND.obj";
+
+  // Right Arm
+  const rightShoulder = "obj/04_RIGHT_SHOULDER.obj";
+  const rightArm = "obj/05_RIGHT_ARM.obj";
+  const rightHand = "obj/06_RIGHT_HAND.obj";
+
+  // Eyes and mouth
+  const eyesObject = "obj/01_HEAD_FACE.obj";
+  const mouthObject = "obj/01_HEAD_MOUTH.obj";
+
   // Encode the body
   const srcModel = readFileSync(`bin/${filename}`);
   const body = encodeModelBody(
