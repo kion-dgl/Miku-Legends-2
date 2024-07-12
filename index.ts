@@ -3,7 +3,12 @@ import { encodeTexture } from "./src/EncodeTexture";
 import { encodeRom } from "./src/EncodeRom";
 
 // Encode the Texture
-encodeTexture("png/body-1.png", "png/face-1.png");
+encodeTexture(
+  // Body Texture
+  "png/body-1.png",
+  // Face Texture
+  "png/face-1.png",
+);
 
 // No helmet + Normal Shoes
 encodeModel(

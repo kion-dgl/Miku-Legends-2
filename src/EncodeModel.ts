@@ -822,36 +822,7 @@ const encodeModelHead = (
     headerOfs += 4;
   });
 
-  writeFileSync("head_debug.bin", mesh);
-  console.log("--- Head ----");
-  console.log("End Offset: 0x%s", contentOfs.toString(16));
-  console.log("Length: 0x%s", MESH_LEN.toString(16));
-
   return mesh;
-};
-
-// We should be modifying the instance of the ROM
-const replaceInRom = (file: Buffer, filepos: number, ROM: Buffer) => {
-  const len = Math.ceil(file.length / 0x800);
-  const segments: Buffer[] = [];
-
-  // First we split the file into segments
-  for (let i = 0; i < len; i++) {
-    const start = i * 0x800;
-    const end = (i + 1) * 0x800;
-    const stop = file.length < end ? file.length : end;
-    const segment = file.subarray(start, stop);
-    segments.push(segment);
-  }
-
-  // Then copy it over to the ROM
-  let ofs = filepos;
-  segments.forEach((segment) => {
-    for (let i = 0; i < 0x800; i++) {
-      ROM[ofs + i] = segment[i];
-    }
-    ofs += 0x930;
-  });
 };
 
 const replaceModel = (
