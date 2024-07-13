@@ -125,6 +125,7 @@ const readFace = (
   const PIXEL_ADJUSTMEST = 0.001953125;
 
   reader.seek(faceOfs);
+  const list = [];
   for (let i = 0; i < faceCount; i++) {
     const au = reader.readUInt8();
     const av = reader.readUInt8();
@@ -171,8 +172,14 @@ const readFace = (
       v: dv * PIXEL_TO_FLOAT_RATIO + PIXEL_ADJUSTMEST,
     };
 
-    return isQuad ? [a, b, c, d] : [a, b, c];
+    if (!isQuad) {
+      list.push([a, b, c]);
+    } else {
+      list.push([a, b, c, d]);
+    }
   }
+
+  return list;
 };
 
 export type { MeshHeader };

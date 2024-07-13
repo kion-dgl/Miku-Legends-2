@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import {
   type MeshHeader,
   readStrips,
@@ -52,6 +52,25 @@ test("It should encode an obj with helmet and normal shoes", () => {
       const vertices = readVertexList(reader, vertOfs, vertCount);
       const tris = readFace(reader, triOfs, triCount, false);
       const quads = readFace(reader, quadOfs, quadCount, true);
+
+      const obj: string[] = [];
+      vertices.forEach(({ x, y, z }) => {
+        obj.push(`v ${x.toFixed(3)} ${y.toFixed(3)} ${z.toFixed(3)}`);
+      });
+
+      tris.forEach((face) => {
+        const [a, b, c] = face;
+        obj.push(`f ${a.index + 1} ${b.index + 1} ${c.index + 1}`);
+      });
+
+      quads.forEach((face) => {
+        const [a, b, c, d] = face;
+        obj.push(
+          `f ${a.index + 1} ${d.index + 1} ${b.index + 1} ${c.index + 1}`,
+        );
+      });
+
+      writeFileSync(`./fixtures/${filename}/${name}.OBJ`, obj.join("\n"));
     },
   );
 });
