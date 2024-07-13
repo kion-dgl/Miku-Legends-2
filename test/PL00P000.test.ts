@@ -34,7 +34,26 @@ test("It should encode an obj with helmet and normal shoes", () => {
       offset: 0xb60,
       names: ["10_HELMET", "11_FACE", "12_MOUTH"],
     },
-
+    // Feet
+    {
+      offset: 0x1800,
+      names: ["20_NORM_RIGHT_FOOT", "21_NORM_LEFT_FOOT"],
+    },
+    // Left Arm
+    {
+      offset: 0x1dd0,
+      names: ["30_LEFT_SHOULDER", "31_LEFT_ARM", "32_LEFT_HAND"],
+    },
+    // Buster
+    {
+      offset: 0x2220,
+      names: ["40_LEFT_SHOULDER", "41_BUSTER", "42_BULLET_MAYBE"],
+    },
+    // Right Arm
+    {
+      offset: 0x26f0,
+      names: ["50_RIGHT_SHOULDER", "51_RIGHT_ARM", "52_RIGHT_HAND"],
+    },
     // End Limbs
   ];
 
