@@ -92,4 +92,16 @@ test("It should encode an obj with helmet and normal shoes", () => {
       writeFileSync(`./fixtures/${filename}/${name}.OBJ`, obj.join("\n"));
     },
   );
+
+  const shoulderA = readFileSync(
+    `./fixtures/${filename}/30_LEFT_SHOULDER.OBJ`,
+    "utf8",
+  );
+
+  const shoulderB = readFileSync(
+    `./fixtures/${filename}/40_LEFT_SHOULDER.OBJ`,
+    "utf8",
+  );
+
+  expect(shoulderA).toEqual(shoulderB);
 });
