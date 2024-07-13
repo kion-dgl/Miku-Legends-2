@@ -1,35 +1,35 @@
 [
-    {
-        "name": "40_LEFT_SHOULDER",
-        "triCount": 14,
-        "quadCount": 11,
-        "vertCount": 20,
-        "triOfs": 10040,
-        "quadOfs": 10232,
-        "vertOfs": 10568,
-        "triShadowOfs": 10736,
-        "quadShadowOfs": 10816
-    },
-    {
-        "name": "41_LEFT_ARM",
-        "triCount": 0,
-        "quadCount": 10,
-        "vertCount": 12,
-        "triOfs": 10208,
-        "quadOfs": 10364,
-        "vertOfs": 10648,
-        "triShadowOfs": 10896,
-        "quadShadowOfs": 10944
-    },
-    {
-        "name": "42_LEFT_HAND",
-        "triCount": 2,
-        "quadCount": 7,
-        "vertCount": 10,
-        "triOfs": 10208,
-        "quadOfs": 10484,
-        "vertOfs": 10696,
-        "triShadowOfs": 10992,
-        "quadShadowOfs": 11032
-    }
+  {
+    "name": "30_LEFT_SHOULDER",
+    "triCount": 14,
+    "quadCount": 11,
+    "vertCount": 20,
+    "triOfs": 7704,
+    "quadOfs": 7896,
+    "vertOfs": 8232,
+    "triShadowOfs": 8400,
+    "quadShadowOfs": 8480
+  },
+  {
+    "name": "31_LEFT_ARM",
+    "triCount": 0,
+    "quadCount": 10,
+    "vertCount": 12,
+    "triOfs": 7872,
+    "quadOfs": 8028,
+    "vertOfs": 8312,
+    "triShadowOfs": 8560,
+    "quadShadowOfs": 8608
+  },
+  {
+    "name": "32_LEFT_HAND",
+    "triCount": 2,
+    "quadCount": 7,
+    "vertCount": 10,
+    "triOfs": 7872,
+    "quadOfs": 8148,
+    "vertOfs": 8360,
+    "triShadowOfs": 8656,
+    "quadShadowOfs": 8696
+  }
 ]
