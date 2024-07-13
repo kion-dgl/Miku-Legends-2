@@ -66,7 +66,7 @@ test("It should encode an obj with helmet and normal shoes", () => {
       quads.forEach((face) => {
         const [a, b, c, d] = face;
         obj.push(
-          `f ${a.index + 1} ${d.index + 1} ${b.index + 1} ${c.index + 1}`,
+          `f ${a.index + 1} ${b.index + 1} ${d.index + 1} ${c.index + 1}`,
         );
       });
 
