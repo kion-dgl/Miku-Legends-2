@@ -1,3 +1,38 @@
+## How to Clone
+
+Note that this repository is written in Bun. Which is basically just using TypeScript and instead of messing around with `ts-node`, it "just works". 
+See install instructions over at [https://bun.sh/](https://bun.sh/). 
+
+```bash
+$ git clone https://github.com/kion-dgl/Miku-Legends-2.git
+$ cd Miku-Legends-2
+$ bun i
+$ bun test
+```
+
+### How to Patch
+
+Once you've confirmed you can clone and the tests work, the next step is to define the input and output for your ROM file.
+You will need to specificy this in a `.env` file.
+
+Note that the `SRC_ROM` is Track 1 of the `.BIN` for the `CUE/BIN` file for the CD image. This should be an unedited version
+of the game in order for the patcher to correctly search and replace files in the ROM. It will produce a new ROM file with
+the updated files with the replaced player character.
+
+```bash
+$ vim .env
+--- Start File ---
+SRC_ROM=/home/kion/Documents/MML2.BIN
+DST_ROM=/home/kion/Documents/MIKU2.BIN
+--- End File ---
+```
+
+Once that is in place, you can run the patcher with 
+
+```bash
+$ bun index.ts
+```
+
 ## MegaMan Model
 
 There is a separate model of MegaMan depending on the equipment. 
@@ -61,6 +96,14 @@ typedef struct {
 | 0x00 | 0x01 | 0x02 | 0x03 | 0x04 | 0x08 | 0x0c | 0x10 | 0x14 | 
 | --------| ----- | ---------------- | ----- | ---- | ----- | ---- | ----- | --- |
 | Tri Count | Quad Count  | Vertex Count | NOP | Tri Ofs | Quad Ofs | Vertex Ofs | Tri Shadow Ofs | Quad Shadow Ofs |
+
+### Vertex Format
+
+Issue: https://github.com/kion-dgl/Miku-Legends-2/issues/6
+
+### Face Format
+
+Issue: https://github.com/kion-dgl/Miku-Legends-2/issues/12
 
 ## Credits
 
