@@ -61,3 +61,8 @@ typedef struct {
 | 0x00 | 0x01 | 0x02 | 0x03 | 0x04 | 0x08 | 0x0c | 0x10 | 0x14 | 
 | --------| ----- | ---------------- | ----- | ---- | ----- | ---- | ----- | --- |
 | Tri Count | Quad Count  | Vertex Count | NOP | Tri Ofs | Quad Ofs | Vertex Ofs | Tri Shadow Ofs | Quad Shadow Ofs |
+
+## Credits
+
+- Miku Model by [Xinus22](https://x.com/xinus22)
+- Helmet, Buster and Special Weapons by [suitNtie22](https://x.com/suitNtie22)
