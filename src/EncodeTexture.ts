@@ -126,11 +126,11 @@ const replaceTexture = (
 
 const encodeTexture = (bodyTexture: string, faceTexture: string) => {
   // Encode the body and face texture to write to ROM
-  const srcTexture = readFileSync("bin/PL01T.BIN");
+  const srcTexture = readFileSync("bin/PL00T.BIN");
   const bodyBuffer = readFileSync(bodyTexture);
   const faceBuffer = readFileSync(faceTexture);
   const modTexture = replaceTexture(srcTexture, bodyBuffer, faceBuffer);
-  writeFileSync("mod/PL01T.BIN", modTexture);
+  writeFileSync("mod/PL00T.BIN", modTexture);
 };
 
 export { encodeTexture };

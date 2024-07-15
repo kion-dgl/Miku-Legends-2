@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, readdirSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { RGBA_ASTC_10x5_Format } from "three";
 const CHUNK_SIZE = 0x800;
 const STRIDE_SIZE = 0x930;
@@ -70,15 +70,17 @@ const encodeRom = () => {
   if (!romDst) {
     throw new Error("Need to set DST_ROM value in .env");
   }
+
   const rom = readFileSync(sourceRom);
 
-  const replaceFiles = readdirSync("./mod");
-  replaceFiles.forEach((filename) => {
-    const sourceFile = readFileSync(`./bin/${filename}`);
-    const moddedFile = readFileSync(`./mod/${filename}`);
-    replaceInRom(rom, sourceFile, moddedFile);
-  });
+  // Replace Textures
+  const mikuTexture = readFileSync("mod/PL00T.BIN");
+  const pl00t = readFileSync("bin/PL00T.BIN");
+  const pl00t2 = readFileSync("bin/PL00T2.BIN");
+  replaceInRom(rom, pl00t, mikuTexture);
+  replaceInRom(rom, pl00t, mikuTexture);
 
+  // Write the result
   writeFileSync(romDst, rom);
 };
 

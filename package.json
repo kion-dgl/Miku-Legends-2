@@ -11,7 +11,6 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "bytereader": "^0.1.0",
     "pngjs": "^7.0.0",
     "three": "^0.165.0"
   }
