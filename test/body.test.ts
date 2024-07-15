@@ -17,11 +17,12 @@ const ROT = new Matrix4();
 ROT.makeRotationX(Math.PI);
 
 test("Reading the strip offsets for the body", () => {
-  const buffer = readFileSync(`./bin/PL00P000.BIN`);
-  const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
-  const reader = new ByteReader(dat.buffer as ArrayBuffer);
+  const file = readFileSync(`./bin/PL00P000.BIN`);
+  const dat = file.subarray(0x30, 0x30 + 0x2b40);
+  const { buffer } = Buffer.from(dat);
+  const reader = new ByteReader(buffer as ArrayBuffer);
 
-  const BODY_OFS = 0xb0;
+  const BODY_OFS = 0x80;
   const names = [
     "00_BODY",
     "01_HIP",
@@ -35,9 +36,10 @@ test("Reading the strip offsets for the body", () => {
 });
 
 test.skip("Reading the vertex and face data for the body", () => {
-  const buffer = readFileSync(`./bin/PL00P000.BIN`);
-  const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
-  const reader = new ByteReader(dat.buffer as ArrayBuffer);
+  const file = readFileSync(`./bin/PL00P000.BIN`);
+  const dat = file.subarray(0x30, 0x30 + 0x2b40);
+  const { buffer } = Buffer.from(dat);
+  const reader = new ByteReader(buffer as ArrayBuffer);
 
   const geometry = body.map((mesh) => {
     const { name, vertOfs, vertCount, triOfs, triCount, quadOfs, quadCount } =
@@ -57,9 +59,10 @@ test.skip("Reading the vertex and face data for the body", () => {
 });
 
 test("Re-encoding the vertices read from the body", () => {
-  const buffer = readFileSync(`./bin/PL00P000.BIN`);
-  const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
-  const reader = new ByteReader(dat.buffer as ArrayBuffer);
+  const file = readFileSync(`./bin/PL00P000.BIN`);
+  const dat = file.subarray(0x30, 0x30 + 0x2b40);
+  const { buffer } = Buffer.from(dat);
+  const reader = new ByteReader(buffer as ArrayBuffer);
 
   body.map((mesh) => {
     const { vertOfs, vertCount } = mesh;
@@ -124,9 +127,10 @@ test("Re-encoding the vertices read from the body", () => {
 });
 
 test("Re-encoding the tris read from the body", () => {
-  const buffer = readFileSync(`./bin/PL00P000.BIN`);
-  const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
-  const reader = new ByteReader(dat.buffer as ArrayBuffer);
+  const file = readFileSync(`./bin/PL00P000.BIN`);
+  const dat = file.subarray(0x30, 0x30 + 0x2b40);
+  const { buffer } = Buffer.from(dat);
+  const reader = new ByteReader(buffer as ArrayBuffer);
 
   const FACE_MASK = 0x7f;
   const PIXEL_TO_FLOAT_RATIO = 0.00390625;
@@ -197,9 +201,10 @@ test("Re-encoding the tris read from the body", () => {
 });
 
 test("Re-encoding the quad read from the body", () => {
-  const buffer = readFileSync(`./bin/PL00P000.BIN`);
-  const dat = buffer.subarray(0x30, 0x30 + 0x2b40);
-  const reader = new ByteReader(dat.buffer as ArrayBuffer);
+  const file = readFileSync(`./bin/PL00P000.BIN`);
+  const dat = file.subarray(0x30, 0x30 + 0x2b40);
+  const { buffer } = Buffer.from(dat);
+  const reader = new ByteReader(buffer as ArrayBuffer);
 
   const FACE_MASK = 0x7f;
   const PIXEL_TO_FLOAT_RATIO = 0.00390625;
