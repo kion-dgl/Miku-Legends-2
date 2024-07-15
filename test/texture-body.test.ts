@@ -9,7 +9,7 @@ type Pixel = {
   a: number;
 };
 
-const wordToColor = (word: number) => {
+const wordToColor = (word: number): Pixel => {
   const r = ((word >> 0x00) & 0x1f) << 3;
   const g = ((word >> 0x05) & 0x1f) << 3;
   const b = ((word >> 0x0a) & 0x1f) << 3;
@@ -17,14 +17,8 @@ const wordToColor = (word: number) => {
   return { r, g, b, a };
 };
 
-test("Reading data from a png", () => {
-  var data = readFileSync("fixtures/body-0.png");
-  var png = PNG.sync.read(data);
-  console.log(png);
-});
-
-test("it should decode a texture into a png", () => {
-  const src = readFileSync("bin/PL00T.BIN");
+test("it should decode body texture into a png", () => {
+  const src = readFileSync("bin/PL00T.BIN").subarray(0x3800);
 
   const tim = {
     type: src.readUInt32LE(0x00),
@@ -61,12 +55,7 @@ test("it should decode a texture into a png", () => {
 
   // Read Bitfield
 
-  console.log("Reading bitfied");
-  console.log("Bitfield size 0x%s", bitfieldSize.toString(16));
-
   const bitfieldBuffer = src.subarray(0x30, 0x30 + bitfieldSize);
-  writeFileSync("bitfield.bin", bitfieldBuffer);
-
   let ofs = 0x30;
   for (let i = 0; i < bitfieldSize; i += 4) {
     const dword = src.readUInt32LE(ofs + i);
@@ -88,15 +77,8 @@ test("it should decode a texture into a png", () => {
   for (let i = 0; i < bitfield.length; i++) {
     const bit = bitfield[i];
     if (outOfs === fullSize) {
-      console.log("--- File Ended ---");
-      console.log("Command Count: ", cmdCount);
-      console.log("Bytes Copied: 0x%s", bytes.toString(16));
-      console.log("New window length: 0x%s", windowOfs.toString(16));
-      console.log("Compressed Offset: 0x%s", ofs.toString(16));
-      console.log("Decompressed Offset: 0x%s", outOfs.toString(16));
-
       const payload = src.subarray(0x30 + bitfieldSize, ofs);
-      writeFileSync("payload.bin", payload);
+      writeFileSync("fixtures/face-texture.bin", payload);
       break;
     }
 
@@ -111,12 +93,6 @@ test("it should decode a texture into a png", () => {
       case 1:
         if (word === 0xffff) {
           windowOfs += 0x2000;
-          console.log("--- Window Extended ---");
-          console.log("Command Count: ", cmdCount);
-          console.log("Bytes Copied: 0x%s", bytes.toString(16));
-          console.log("New window length: 0x%s", windowOfs.toString(16));
-          console.log("Compressed Offset: 0x%s", ofs.toString(16));
-          console.log("Decompressed Offset: 0x%s", outOfs.toString(16));
           cmdCount = 0;
           bytes = 0;
         } else {
@@ -172,9 +148,7 @@ test("it should decode a texture into a png", () => {
     }
   }
 
-  console.log("--- NEw Data ----");
-  console.log(png);
   // Export file
   const buffer = PNG.sync.write(png);
-  writeFileSync("fixtures/0-body.png", buffer);
+  writeFileSync("fixtures/0-face.png", buffer);
 });
