@@ -33,6 +33,19 @@ Once that is in place, you can run the patcher with
 $ bun index.ts
 ```
 
+### Repository Structure
+
+
+| Directory | Description | 
+| ---- | ------ | 
+| bin | Archives for MegaMan's Model Files |
+| fixtures | Files committed to source for checking tests |
+| mod | Exported modded files |
+| obj | `.obj` and `.png` files for modding into the game|
+| src | Modules and code for encdoing and decoding files from/to the game |
+| test | tests for encoding and decoding information into the game |
+
+
 ## MegaMan Model
 
 There is a separate model of MegaMan depending on the equipment. 
