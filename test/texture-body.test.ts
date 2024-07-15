@@ -18,7 +18,7 @@ const wordToColor = (word: number): Pixel => {
 };
 
 test("it should decode body texture into a png", () => {
-  const src = readFileSync("bin/PL00T.BIN").subarray(0x3800);
+  const src = readFileSync("bin/PL00T.BIN");
 
   const tim = {
     type: src.readUInt32LE(0x00),
@@ -78,7 +78,6 @@ test("it should decode body texture into a png", () => {
     const bit = bitfield[i];
     if (outOfs === fullSize) {
       const payload = src.subarray(0x30 + bitfieldSize, ofs);
-      writeFileSync("fixtures/face-texture.bin", payload);
       break;
     }
 
@@ -120,6 +119,8 @@ test("it should decode body texture into a png", () => {
     }
   }
 
+  writeFileSync("fixtures/body-texture.bin", target);
+
   // Read the image data
   const imageData: number[] = new Array();
   for (ofs; ofs < target.length; ofs++) {
@@ -150,5 +151,5 @@ test("it should decode body texture into a png", () => {
 
   // Export file
   const buffer = PNG.sync.write(png);
-  writeFileSync("fixtures/0-face.png", buffer);
+  writeFileSync("fixtures/0-body.png", buffer);
 });
