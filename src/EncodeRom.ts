@@ -80,6 +80,19 @@ const encodeRom = () => {
   replaceInRom(rom, pl00t, mikuTexture);
   replaceInRom(rom, pl00t2, mikuTexture);
 
+  // Encode Models
+  // const mikuHairNorm = readFileSync("out/PL00P010.BIN").subarray(
+  //   0x30,
+  //   0x30 + 0x2b40,
+  // );
+  // const megaHairNorm = readFileSync("bin/PL00P010.BIN").subarray(
+  //   0x30,
+  //   0x30 + 0x2b40,
+  // );
+
+  // // Replace Models
+  // replaceInRom(rom, megaHairNorm, mikuHairNorm);
+
   // Write the result
   writeFileSync(romDst, rom);
 };

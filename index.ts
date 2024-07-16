@@ -11,13 +11,13 @@ encodeTexture(
 );
 
 // No helmet + Normal Shoes
-// encodeModel(
-//   "PL00P010.BIN",
-//   // Feet
-//   "obj/12_RIGHT_FOOT.obj",
-//   "obj/15_LEFT_FOOT.obj",
-//   // Head
-//   "obj/01_HEAD_HELMET.obj",
-// );
+encodeModel(
+  "PL00P010.BIN",
+  // Feet
+  "obj/12_RIGHT_FOOT.obj",
+  "obj/15_LEFT_FOOT.obj",
+  // Head
+  "obj/01_HEAD_HELMET.obj",
+);
 
 encodeRom();
