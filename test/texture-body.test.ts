@@ -35,6 +35,15 @@ test("it should decode body texture into a png", () => {
     payloadSize: src.readUInt16LE(0x26),
   };
 
+  expect(tim.type).toEqual(3);
+  expect(tim.fullSize).toEqual(0x8080);
+  expect(tim.colorCount).toEqual(64);
+  expect(tim.paletteCount).toEqual(1);
+  expect(tim.paletteX).toEqual(0);
+  expect(tim.paletteY).toEqual(240);
+  expect(tim.imageX).toEqual(320);
+  expect(tim.imageY).toEqual(0);
+
   switch (tim.colorCount) {
     case 16:
       tim.width *= 4;
@@ -48,6 +57,9 @@ test("it should decode body texture into a png", () => {
       tim.width *= 4;
       break;
   }
+
+  expect(tim.width).toEqual(256);
+  expect(tim.height).toEqual(256);
 
   const { fullSize, bitfieldSize } = tim;
   const bitfield: number[] = new Array();
