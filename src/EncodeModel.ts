@@ -1,11 +1,22 @@
 import { readFileSync, writeFileSync } from "fs";
 import { Vector3, Matrix4 } from "three";
 
+type Block = {
+  start: number;
+  end: number;
+  used: number;
+};
+
 type PackBuffer = {
   dataOfs: number; // Where to write the offset
   data: Buffer; // The data to be packed
   blockIndex: number; // The block the data is packed
   offset: number; // The offset of the packed data
+};
+
+type Combination = {
+  buffers: PackBuffer[];
+  remainingSpace: number;
 };
 
 type Primitive = {
@@ -17,18 +28,15 @@ type Primitive = {
   vertices: Buffer;
 };
 
-type RawFace = {
-  au: number;
-  av: number;
-  bu: number;
-  bv: number;
-  cu: number;
-  cv: number;
-  du: number;
-  dv: number;
-  isQuad: boolean;
-  dword: number;
-};
+// Start Packing the blocks
+const blocks: Block[] = [
+  { start: 0x110, end: 0xb60, used: 0 },
+  { start: 0xba8, end: 0x1800, used: 0 },
+  { start: 0x1830, end: 0x1dd0, used: 0 },
+  { start: 0x1e18, end: 0x2220, used: 0 },
+  { start: 0x2268, end: 0x26f0, used: 0 },
+  { start: 0x2738, end: 0x2b40, used: 0 },
+];
 
 const encodeVertexBits = (num: number) => {
   if (num < 0) {
@@ -303,14 +311,78 @@ const encodeMesh = (obj: string, materialIndex: number): Primitive => {
   };
 };
 
-const encodeLimbs = (
-  pbd: Buffer,
-  pack: PackBuffer[],
-  filenames: string[],
-  offset: number,
-) => {
-  for (let i = 0; i < filenames.length; i++) {}
-};
+// Function to generate all combinations of buffers that can fit into a block
+function generateCombinations(
+  buffers: PackBuffer[],
+  remainingSpace: number,
+): Combination[] {
+  const combinations: Combination[] = [];
+
+  function recurse(
+    currentCombination: PackBuffer[],
+    startIndex: number,
+    spaceLeft: number,
+  ) {
+    combinations.push({
+      buffers: currentCombination,
+      remainingSpace: spaceLeft,
+    });
+
+    for (let i = startIndex; i < buffers.length; i++) {
+      const buffer = buffers[i];
+      if (buffer.data.length <= spaceLeft) {
+        recurse(
+          [...currentCombination, buffer],
+          i + 1,
+          spaceLeft - buffer.data.length,
+        );
+      }
+    }
+  }
+
+  recurse([], 0, remainingSpace);
+  return combinations;
+}
+
+// Function to pack buffers into blocks using the optimal combination strategy
+function packBuffers(buffers: PackBuffer[]): PackBuffer[] {
+  // Sort buffers by size in descending order
+  const sortedBuffers = [...buffers].sort(
+    (a, b) => b.data.length - a.data.length,
+  );
+  console.log(buffers);
+
+  for (const [blockIndex, block] of blocks.entries()) {
+    const blockSize = block.end - block.start + 1;
+    const combinations = generateCombinations(sortedBuffers, blockSize);
+
+    // Find the combination with the least remaining space
+    const bestCombination = combinations.reduce((best, current) => {
+      return current.remainingSpace < best.remainingSpace ? current : best;
+    });
+
+    // Allocate the buffers from the best combination
+    for (const buffer of bestCombination.buffers) {
+      const offset = block.start + block.used;
+      buffer.blockIndex = blockIndex;
+      buffer.offset = offset;
+      block.used += buffer.data.length;
+
+      // Remove the allocated buffer from the sorted list
+      const bufferIndex = sortedBuffers.findIndex(
+        (b) => b.dataOfs === buffer.dataOfs,
+      );
+      if (bufferIndex !== -1) {
+        sortedBuffers.splice(bufferIndex, 1);
+      }
+    }
+  }
+
+  console.log(buffers);
+  return buffers.sort(
+    (a, b) => a.blockIndex - b.blockIndex || a.offset - b.offset,
+  );
+}
 
 const encodeModel = (
   // Filename to replace
@@ -402,6 +474,9 @@ const encodeModel = (
     blockIndex: -1,
     offset: -1,
   });
+
+  const packingResult = packBuffers(pack);
+  console.log(packingResult);
 };
 
 export { encodeModel };
