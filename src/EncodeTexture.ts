@@ -6,7 +6,7 @@ const encodeTexel = (r: number, g: number, b: number, a: number) => {
   const gClr = Math.floor((g >> 3) & 0xff);
   const bClr = Math.floor((b >> 3) & 0xff);
   const aClr = a === 0 ? 0 : 0x8000;
-  const texel = rClr | (gClr << 5) | (bClr << 5) | aClr;
+  const texel = rClr | (gClr << 5) | (bClr << 10) | aClr;
   return texel;
 };
 
@@ -245,4 +245,4 @@ const encodeTexture = (bodyTexture: string) => {
   writeFileSync("out/PL00T.BIN", modTexture);
 };
 
-export { encodeTexture };
+export { encodeTexture, encodeImage };
