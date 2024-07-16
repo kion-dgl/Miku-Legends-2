@@ -266,35 +266,35 @@ const replaceTexture = (
     faceImg[0x4000 + i] = megamanFace[0x4080 + i];
   }
 
-  // // First we zero out the previous image
-  // for (let i = 0x3830; i < 0x6500; i++) {
-  //   modded[i] = 0;
-  // }
+  // First we zero out the previous image
+  for (let i = 0x3830; i < 0x6500; i++) {
+    modded[i] = 0;
+  }
 
-  // // Compress the face texture
-  // const [faceBitField, compressedFace] = compressTexture(
-  //   facePal,
-  //   faceImg,
-  //   9,
-  //   3,
-  // );
+  // Compress the face texture
+  const [faceBitField, compressedFace] = compressTexture(
+    facePal,
+    faceImg,
+    9,
+    2,
+  );
 
-  // // Update the bitfield length in header
-  // modded.writeInt16LE(faceBitField.length, 0x3824);
+  // Update the bitfield length in header
+  modded.writeInt16LE(faceBitField.length, 0x3824);
 
-  // let faceOfs = 0x3830;
+  let faceOfs = 0x3830;
 
-  // // Write the bitfield
-  // for (let i = 0; i < faceBitField.length; i++) {
-  //   modded[faceOfs++] = faceBitField[i];
-  // }
+  // Write the bitfield
+  for (let i = 0; i < faceBitField.length; i++) {
+    modded[faceOfs++] = faceBitField[i];
+  }
 
-  // // Write the compressed Texture
-  // for (let i = 0; i < compressedFace.length; i++) {
-  //   modded[faceOfs++] = compressedFace[i];
-  // }
+  // Write the compressed Texture
+  for (let i = 0; i < compressedFace.length; i++) {
+    modded[faceOfs++] = compressedFace[i];
+  }
 
-  // console.log("Face End Pos: 0x%s", faceOfs.toString(16));
+  console.log("Face End Pos: 0x%s", faceOfs.toString(16));
 
   return modded;
 };
