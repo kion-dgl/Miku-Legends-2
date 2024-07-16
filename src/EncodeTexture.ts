@@ -212,7 +212,7 @@ const replaceTexture = (gamefile: Buffer, bodyBuffer: Buffer) => {
   const [bodyBitField, compressedBody] = compressTexture(bodyPal, bodyImg);
 
   // First we zero out the previous image
-  for (let i = 0; i < 0x3000; i++) {
+  for (let i = 0x30; i < 0x3000; i++) {
     modded[i] = 0;
   }
 

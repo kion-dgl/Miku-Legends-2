@@ -18,4 +18,4 @@ encodeTexture(
 //   "obj/01_HEAD_HELMET.obj",
 // );
 
-// encodeRom();
+encodeRom();
