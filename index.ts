@@ -6,6 +6,8 @@ import { encodeRom } from "./src/EncodeRom";
 encodeTexture(
   // Body Texture
   "miku/body-1.png",
+  // Face Texture
+  "miku/face-1.png",
 );
 
 // No helmet + Normal Shoes

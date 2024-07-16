@@ -67,14 +67,18 @@ const encodeImage = (pngSrc: Buffer) => {
   return [pal, img];
 };
 
-const compressSegment = (segment: Buffer): [boolean[], Buffer] => {
+const compressSegment = (
+  segment: Buffer,
+  max: number,
+  min: number,
+): [boolean[], Buffer] => {
   // Create a boolean array and out buffer
   const bucket: boolean[] = [];
   const compressed = Buffer.alloc(segment.length);
 
   // Number of min and max number of words to match
-  const MAX_CAP = 9;
-  const MIN_CAP = 4;
+  const MAX_CAP = max;
+  const MIN_CAP = min;
 
   let inOfs = 0;
   let outOfs = 0;
@@ -181,7 +185,12 @@ const encodeBitfield = (bits: boolean[]): Buffer => {
   return buffer;
 };
 
-const compressTexture = (pal: Buffer, img: Buffer) => {
+const compressTexture = (
+  pal: Buffer,
+  img: Buffer,
+  max: number,
+  min: number,
+) => {
   const decompressed = Buffer.concat([pal, img]);
 
   const segments = [
@@ -195,7 +204,7 @@ const compressTexture = (pal: Buffer, img: Buffer) => {
   const bits: boolean[] = [];
   const loads: Buffer[] = [];
   segments.forEach((segment, index) => {
-    const [b, p] = compressSegment(segment);
+    const [b, p] = compressSegment(segment, max, min);
     b.forEach((bit) => bits.push(bit));
     loads.push(p);
   });
@@ -204,27 +213,43 @@ const compressTexture = (pal: Buffer, img: Buffer) => {
   return [bitfied, Buffer.concat(loads)];
 };
 
-const replaceTexture = (gamefile: Buffer, bodyBuffer: Buffer) => {
+const replaceTexture = (
+  gamefile: Buffer,
+  bodyBuffer: Buffer,
+  faceBuffer: Buffer,
+) => {
   const modded = Buffer.from(gamefile);
 
   // Replace Body
   const [bodyPal, bodyImg] = encodeImage(bodyBuffer);
-  const [bodyBitField, compressedBody] = compressTexture(bodyPal, bodyImg);
+  const [bodyBitField, compressedBody] = compressTexture(
+    bodyPal,
+    bodyImg,
+    9,
+    4,
+  );
 
   // First we zero out the previous image
   for (let i = 0x30; i < 0x3000; i++) {
     modded[i] = 0;
   }
 
+  // Update the bitfield length in header
   modded.writeInt16LE(bodyBitField.length, 0x24);
+
   let bodyOfs = 0x30;
+
+  // Write the bitfield
   for (let i = 0; i < bodyBitField.length; i++) {
     modded[bodyOfs++] = bodyBitField[i];
   }
 
+  // Write the compressed Texture
   for (let i = 0; i < compressedBody.length; i++) {
     modded[bodyOfs++] = compressedBody[i];
   }
+
+  console.log("Body End Pos: 0x%s", bodyOfs.toString(16));
 
   // Replace Body Alternate Palette
   const BODY_ALT_PAL_OFS = 0x3030;
@@ -232,16 +257,62 @@ const replaceTexture = (gamefile: Buffer, bodyBuffer: Buffer) => {
     modded[BODY_ALT_PAL_OFS + i] = bodyPal[i];
   }
 
+  // Replace the face texture
+  const [facePal, faceImg] = encodeImage(faceBuffer);
+  const megamanFace = readFileSync("fixtures/face-texture.bin");
+
+  // Replace the second hald of the image with special weapons
+  for (let i = 0; i < 0x4000; i++) {
+    faceImg[0x4000 + i] = megamanFace[0x4080 + i];
+  }
+
+  // // First we zero out the previous image
+  // for (let i = 0x3830; i < 0x6500; i++) {
+  //   modded[i] = 0;
+  // }
+
+  // // Compress the face texture
+  // const [faceBitField, compressedFace] = compressTexture(
+  //   facePal,
+  //   faceImg,
+  //   9,
+  //   3,
+  // );
+
+  // // Update the bitfield length in header
+  // modded.writeInt16LE(faceBitField.length, 0x3824);
+
+  // let faceOfs = 0x3830;
+
+  // // Write the bitfield
+  // for (let i = 0; i < faceBitField.length; i++) {
+  //   modded[faceOfs++] = faceBitField[i];
+  // }
+
+  // // Write the compressed Texture
+  // for (let i = 0; i < compressedFace.length; i++) {
+  //   modded[faceOfs++] = compressedFace[i];
+  // }
+
+  // console.log("Face End Pos: 0x%s", faceOfs.toString(16));
+
   return modded;
 };
 
-const encodeTexture = (bodyTexture: string) => {
+const encodeTexture = (bodyTexture: string, faceTexture: string) => {
   // Encode the body and face texture to write to ROM
   const srcTexture = readFileSync("bin/PL00T.BIN");
 
   // Read the body Image
   const bodyBuffer = readFileSync(bodyTexture);
-  const modTexture = replaceTexture(srcTexture, bodyBuffer);
+
+  // Read the face Image
+  const faceBuffer = readFileSync(bodyTexture);
+
+  // Modify the Game Texture
+  const modTexture = replaceTexture(srcTexture, bodyBuffer, faceBuffer);
+
+  // Write the updated game file
   writeFileSync("out/PL00T.BIN", modTexture);
 };
 
