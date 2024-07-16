@@ -74,11 +74,11 @@ const encodeRom = () => {
   const rom = readFileSync(sourceRom);
 
   // Replace Textures
-  const mikuTexture = readFileSync("mod/PL00T.BIN");
+  const mikuTexture = readFileSync("out/PL00T.BIN");
   const pl00t = readFileSync("bin/PL00T.BIN");
   const pl00t2 = readFileSync("bin/PL00T2.BIN");
   replaceInRom(rom, pl00t, mikuTexture);
-  replaceInRom(rom, pl00t, mikuTexture);
+  replaceInRom(rom, pl00t2, mikuTexture);
 
   // Write the result
   writeFileSync(romDst, rom);
