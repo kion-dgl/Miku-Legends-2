@@ -17,6 +17,8 @@ const replaceInRom = (
     chunkPos.push(sourceRom.indexOf(needle));
   }
 
+  console.log(chunkPos);
+
   // Find the largest continuous section with a difference of STRIDE_SIZE
   let longestSeqStart = 0;
   let longestSeqLength = 0;
@@ -50,6 +52,7 @@ const replaceInRom = (
   for (let i = longestSeqStart + 1; i < chunkPos.length; i++) {
     chunkPos[i] = chunkPos[i - 1] + STRIDE_SIZE;
   }
+  console.log("Found at: 0x%s", chunkPos[0].toString(16));
 
   let ofs = 0;
   chunkPos.forEach((pos) => {
@@ -81,17 +84,19 @@ const encodeRom = () => {
   replaceInRom(rom, pl00t2, mikuTexture);
 
   // Encode Models
-  // const mikuHairNorm = readFileSync("out/PL00P010.BIN").subarray(
-  //   0x30,
-  //   0x30 + 0x2b40,
-  // );
-  // const megaHairNorm = readFileSync("bin/PL00P010.BIN").subarray(
-  //   0x30,
-  //   0x30 + 0x2b40,
-  // );
+  const mikuHairNorm = readFileSync("out/PL00P010.BIN").subarray(
+    0x30,
+    0x30 + 0x2b40,
+  );
 
-  // // Replace Models
-  // replaceInRom(rom, megaHairNorm, mikuHairNorm);
+  const megaman = [
+    readFileSync("bin/PL00P010.BIN").subarray(0x30, 0x30 + 0x2b40),
+  ];
+
+  // Replace Models
+  megaman.forEach((file) => {
+    replaceInRom(rom, file, mikuHairNorm);
+  });
 
   // Write the result
   writeFileSync(romDst, rom);

@@ -470,13 +470,30 @@ const encodeModel = (
   // Create entry for face shadows
   pack.push({
     dataOfs: -1,
-    data: Buffer.alloc(maxFaces * 4, 0x80),
+    data: Buffer.alloc((maxFaces + 4) * 4, 0x80),
     blockIndex: -1,
     offset: -1,
   });
 
   const packingResult = packBuffers(pack);
-  console.log(packingResult);
+  packingResult.forEach((result) => {
+    const { dataOfs, data, offset } = result;
+    if (dataOfs === -1) {
+      shadowOfs.forEach((ofs) => mesh.writeUint32LE(offset, ofs));
+    } else {
+      mesh.writeUint32LE(offset, dataOfs);
+    }
+    for (let i = 0; i < data.length; i++) {
+      mesh[offset + i] = data[i];
+    }
+  });
+
+  // Replace in Game File
+  const src = readFileSync(`bin/${filename}`);
+  for (let i = 0x80; i < src.length; i++) {
+    src[i + 0x30] = mesh[i];
+  }
+  writeFileSync(`out/${filename}`, filename);
 };
 
 export { encodeModel };
