@@ -493,7 +493,7 @@ const encodeModel = (
   for (let i = 0x80; i < src.length; i++) {
     src[i + 0x30] = mesh[i];
   }
-  writeFileSync(`out/${filename}`, filename);
+  writeFileSync(`out/${filename}`, src);
 };
 
 export { encodeModel };

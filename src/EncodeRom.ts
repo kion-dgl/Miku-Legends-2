@@ -101,13 +101,20 @@ const encodeRom = () => {
   replaceInRom(rom, pl00t2, mikuTexture);
 
   // Encode Models
-  const mikuHairNorm = readFileSync("out/PL00P010.BIN").subarray(
-    0x30,
-    0x30 + 0x2b40,
-  );
-
+  const mikuHairNorm = readFileSync("out/PL00P010.BIN");
   const megaman = [
-    readFileSync("bin/PL00P010.BIN").subarray(0x30, 0x30 + 0x2b40),
+    readFileSync("bin/PL00P000.BIN"),
+    readFileSync("bin/PL00P001.BIN"),
+    readFileSync("bin/PL00P002.BIN"),
+    readFileSync("bin/PL00P003.BIN"),
+    readFileSync("bin/PL00P004.BIN"),
+    readFileSync("bin/PL00P005.BIN"),
+    readFileSync("bin/PL00P010.BIN"),
+    readFileSync("bin/PL00P011.BIN"),
+    readFileSync("bin/PL00P012.BIN"),
+    readFileSync("bin/PL00P013.BIN"),
+    readFileSync("bin/PL00P014.BIN"),
+    readFileSync("bin/PL00P015.BIN"),
   ];
 
   // Replace Models
