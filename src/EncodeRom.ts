@@ -9,20 +9,7 @@ interface FileEntry {
 }
 
 // Function to find file offset within the BIN file
-const findFileOffset = (rom: Buffer, fileName: string) => {
-  const pos = rom.indexOf(fileName);
-  const file = readFileSync(`bin/${fileName}`);
-  const { length } = file;
-  console.log(pos.toString(16));
-
-  for (let i = 0; i < 0x30; i++) {
-    const dword = rom.readUInt32LE(pos + i);
-    if (dword === length) {
-      console.log("found length: 0x%s", (pos + i).toString(16));
-      console.log("Distance: 0x%s", i.toString(16));
-    }
-  }
-
+const findFileOffset = (rom: Buffer, file: Buffer) => {
   const needle = file.subarray(0, 0x800);
   let whence = -1;
   const locations: number[] = [];
@@ -33,19 +20,12 @@ const findFileOffset = (rom: Buffer, fileName: string) => {
   } while (whence !== -1);
   locations.pop();
 
-  console.log("---- Locations ----");
-  locations.forEach((ofs, index) =>
-    console.log("%d) Offset: 0x%s", index, ofs.toString(16)),
-  );
-  locations.reverse();
-
   const segmentCount = Math.ceil(file.length / 0x800);
   const segments: Buffer[] = [];
   for (let i = 0; i < segmentCount; i++) {
     segments.push(file.subarray(i * 0x800, (i + 1) * 0x800));
   }
 
-  let found = false;
   for (let i = 0; i < locations.length; i++) {
     const whence = locations[i];
     const array = segments.map((segment, index) =>
@@ -54,14 +34,13 @@ const findFileOffset = (rom: Buffer, fileName: string) => {
     if (array.indexOf(-1) !== -1) {
       continue;
     }
-    found = array.reduce((acc, current, index, arr) => {
+    const found = array.reduce((acc, current, index, arr) => {
       // If the accumulator is already false, no need to continue
       if (!acc) return false;
       // Check if we are not at the first element
       if (index > 0) {
         // Calculate the difference between current and previous element
         const difference = current - arr[index - 1];
-        console.log(difference.toString(16));
         // If the difference is not 0x930, return false
         if (difference !== 0x930) return false;
       }
@@ -70,11 +49,11 @@ const findFileOffset = (rom: Buffer, fileName: string) => {
     }, true);
 
     if (found) {
-      console.log("Found at 0x%s", whence.toString(16));
+      return whence;
     }
   }
 
-  return pos;
+  return -1;
 };
 
 const replaceInRom = (
@@ -82,57 +61,21 @@ const replaceInRom = (
   sourceFile: Buffer,
   moddedFile: Buffer,
 ) => {
-  const totalChunks = Math.ceil(sourceFile.length / CHUNK_SIZE);
-  const chunkPos: number[] = [];
-  for (let i = 0; i < totalChunks; i++) {
-    const start = i * CHUNK_SIZE;
-    const end = start + CHUNK_SIZE;
-    const needle = sourceFile.subarray(start, end);
-    chunkPos.push(sourceRom.indexOf(needle));
+  let ofs = findFileOffset(sourceRom, sourceFile);
+  if (ofs === -1) {
+    throw new Error("Cannot mod file (not found!!!!!)");
+  }
+  const segmentCount = Math.ceil(moddedFile.length / 0x800);
+  const segments: Buffer[] = [];
+  for (let i = 0; i < segmentCount; i++) {
+    segments.push(moddedFile.subarray(i * 0x800, (i + 1) * 0x800));
   }
 
-  console.log(chunkPos);
-
-  // Find the largest continuous section with a difference of STRIDE_SIZE
-  let longestSeqStart = 0;
-  let longestSeqLength = 0;
-  let currentSeqStart = 0;
-  let currentSeqLength = 1;
-
-  for (let i = 0; i < chunkPos.length - 1; i++) {
-    const diff = chunkPos[i + 1] - chunkPos[i];
-    if (diff === STRIDE_SIZE) {
-      currentSeqLength++;
-    } else {
-      if (currentSeqLength > longestSeqLength) {
-        longestSeqStart = currentSeqStart;
-        longestSeqLength = currentSeqLength;
-      }
-      currentSeqStart = i + 1;
-      currentSeqLength = 1;
+  segments.forEach((segment) => {
+    for (let i = 0; i < segment.length; i++) {
+      sourceRom[ofs + i] = segment[i];
     }
-  }
-
-  // Check the last sequence
-  if (currentSeqLength > longestSeqLength) {
-    longestSeqStart = currentSeqStart;
-    longestSeqLength = currentSeqLength;
-  }
-
-  // Normalize positions
-  for (let i = longestSeqStart - 1; i >= 0; i--) {
-    chunkPos[i] = chunkPos[i + 1] - STRIDE_SIZE;
-  }
-  for (let i = longestSeqStart + 1; i < chunkPos.length; i++) {
-    chunkPos[i] = chunkPos[i - 1] + STRIDE_SIZE;
-  }
-  console.log("Found at: 0x%s", chunkPos[0].toString(16));
-
-  let ofs = 0;
-  chunkPos.forEach((pos) => {
-    for (let i = 0; i < CHUNK_SIZE; i++) {
-      sourceRom[pos + i] = moddedFile[ofs++];
-    }
+    ofs += 0x930;
   });
 };
 
