@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from "fs";
-import { Vector3, Matrix4 } from "three";
+import { Vector3, Matrix4, RGBA_ASTC_12x10_Format } from "three";
 
 type Block = {
   start: number;
@@ -20,9 +20,6 @@ type Combination = {
 };
 
 type Primitive = {
-  triCount: number;
-  quadCount: number;
-  vertCount: number;
   tri: Buffer;
   quad: Buffer;
   vertices: Buffer;
@@ -302,9 +299,6 @@ const encodeMesh = (obj: string, materialIndex: number): Primitive => {
   }
 
   return {
-    triCount: tri.length,
-    quadCount: quad.length,
-    vertCount: verts.length,
     tri,
     quad,
     vertices,
@@ -410,10 +404,11 @@ const encodeModel = (
     "miku/14_LEG_LEFT_BOTTOM.obj",
   ].forEach((filename, index) => {
     const obj = readFileSync(filename, "ascii");
-    const { triCount, quadCount, vertCount, tri, quad, vertices } = encodeMesh(
-      obj,
-      0,
-    );
+    const { tri, quad, vertices } = encodeMesh(obj, 0);
+
+    const triCount = Math.floor(tri.length / 12);
+    const quadCount = Math.floor(quad.length / 12);
+    const vertCount = Math.floor(vertices.length / 4);
     // Write the number of primites
     mesh.writeUInt8(triCount, BODY_OFS + index * STRIDE + 0); // tris
     mesh.writeUInt8(quadCount, BODY_OFS + index * STRIDE + 1); // quads
@@ -490,9 +485,21 @@ const encodeModel = (
 
   // Replace in Game File
   const src = readFileSync(`bin/${filename}`);
-  for (let i = 0x80; i < src.length; i++) {
+  for (let i = 0x80; i < mesh.length; i++) {
     src[i + 0x30] = mesh[i];
   }
+
+  // const HEADER_LEN = 0x30;
+  // // Zero out body
+  // for (let i = 0x98; i < 0x110; i++) {
+  //   src[HEADER_LEN + i] = 0;
+  // }
+  // // Zero out everything else
+  // for (let i = 0xb60; i < 0xba8; i++) {
+  //   src[HEADER_LEN + i] = 0;
+  // }
+
+  // writeFileSync(`out/debug_${filename}`, mesh);
   writeFileSync(`out/${filename}`, src);
 };
 
