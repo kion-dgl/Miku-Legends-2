@@ -521,24 +521,25 @@ const encodeModel = (
     offset: -1,
   });
 
-  const packingResult = packBuffers(pack);
-  packingResult.forEach((result) => {
-    const { dataOfs, data, offset } = result;
-    if (dataOfs === -1) {
-      shadowOfs.forEach((ofs) => mesh.writeUint32LE(offset, ofs));
-    } else {
-      mesh.writeUint32LE(offset, dataOfs);
-    }
-    for (let i = 0; i < data.length; i++) {
-      mesh[offset + i] = data[i];
-    }
-  });
+  // const packingResult = packBuffers(pack);
+  // packingResult.forEach((result) => {
+  //   const { dataOfs, data, offset } = result;
+  //   if (dataOfs === -1) {
+  //     shadowOfs.forEach((ofs) => mesh.writeUint32LE(offset, ofs));
+  //   } else {
+  //     mesh.writeUint32LE(offset, dataOfs);
+  //   }
+  //   for (let i = 0; i < data.length; i++) {
+  //     mesh[offset + i] = data[i];
+  //   }
+  // });
 
   // Replace in Game File
+
   const src = readFileSync(`bin/${filename}`);
-  for (let i = 0x80; i < mesh.length; i++) {
-    src[i + 0x30] = mesh[i];
-  }
+  // for (let i = 0x80; i < mesh.length; i++) {
+  //   src[i + 0x30] = mesh[i];
+  // }
 
   // const HEADER_LEN = 0x30;
   // // Zero out body
