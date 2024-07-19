@@ -59,7 +59,6 @@ const encodeImage = (pngSrc: Buffer) => {
   outOfs = 0;
   for (let i = 0; i < 16; i++) {
     const texel = palette[i] || 0x0000;
-    console.log(texel.toString(16));
     pal.writeUInt16LE(texel, outOfs);
     outOfs += 2;
   }
@@ -249,8 +248,6 @@ const replaceTexture = (
     modded[bodyOfs++] = compressedBody[i];
   }
 
-  console.log("Body End Pos: 0x%s", bodyOfs.toString(16));
-
   // Replace Body Alternate Palette
   const BODY_ALT_PAL_OFS = 0x3030;
   for (let i = 0; i < bodyPal.length; i++) {
@@ -293,8 +290,6 @@ const replaceTexture = (
   for (let i = 0; i < compressedFace.length; i++) {
     modded[faceOfs++] = compressedFace[i];
   }
-
-  console.log("Face End Pos: 0x%s", faceOfs.toString(16));
 
   return modded;
 };
