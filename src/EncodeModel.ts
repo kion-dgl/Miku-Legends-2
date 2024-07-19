@@ -447,6 +447,57 @@ const encodeModel = (
     shadowOfs.push(BODY_OFS + index * STRIDE + 0x10);
     shadowOfs.push(BODY_OFS + index * STRIDE + 0x14);
   });
+  // Head Section
+  const HEAD_OFS = 0xb60;
+  [
+    "miku/01_HEAD_HAIR.obj",
+    "miku/01_HEAD_FACE.obj",
+    "miku/01_HEAD_MOUTH.obj",
+  ].forEach((filename, index) => {
+    const obj = readFileSync(filename, "ascii");
+    const { tri, quad, vertices } = encodeMesh(obj, 2);
+
+    const triCount = Math.floor(tri.length / 12);
+    const quadCount = Math.floor(quad.length / 12);
+    const vertCount = Math.floor(vertices.length / 4);
+    // Write the number of primites
+    mesh.writeUInt8(triCount, HEAD_OFS + index * STRIDE + 0); // tris
+    mesh.writeUInt8(quadCount, HEAD_OFS + index * STRIDE + 1); // quads
+    mesh.writeUInt8(vertCount, HEAD_OFS + index * STRIDE + 2); // verts
+    // Update the max number of faces to add shadows
+    if (triCount > maxFaces) {
+      maxFaces = triCount;
+    }
+    // Update the max number of faces to add shadows
+    if (quadCount > maxFaces) {
+      maxFaces = quadCount;
+    }
+
+    // Push Tris
+    pack.push({
+      dataOfs: HEAD_OFS + index * STRIDE + 4,
+      data: tri,
+      blockIndex: -1,
+      offset: -1,
+    });
+    // Push Quads
+    pack.push({
+      dataOfs: HEAD_OFS + index * STRIDE + 8,
+      data: quad,
+      blockIndex: -1,
+      offset: -1,
+    });
+    // Push Verts
+    pack.push({
+      dataOfs: HEAD_OFS + index * STRIDE + 12,
+      data: vertices,
+      blockIndex: -1,
+      offset: -1,
+    });
+    // Push shadows
+    shadowOfs.push(HEAD_OFS + index * STRIDE + 0x10);
+    shadowOfs.push(HEAD_OFS + index * STRIDE + 0x14);
+  });
 
   // Left Arm
   const leftShoulder = "obj/07_LEFT_SHOULDER.obj";
