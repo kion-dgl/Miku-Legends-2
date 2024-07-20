@@ -160,8 +160,9 @@ const encodeRom = () => {
   const mikuTexture = readFileSync("out/PL00T.BIN");
   const pl00t = readFileSync("bin/PL00T.BIN");
   const pl00t2 = readFileSync("bin/PL00T2.BIN");
-  // replaceInRom(rom, pl00t, mikuTexture);
-  // replaceInRom(rom, pl00t2, mikuTexture);
+  console.log("--- Replaching Textures ---");
+  replaceInRom(rom, pl00t, mikuTexture);
+  replaceInRom(rom, pl00t2, mikuTexture);
 
   // Encode Models
   const mikuHairNorm = readFileSync("out/PL00P010.BIN");
@@ -181,6 +182,7 @@ const encodeRom = () => {
   ];
 
   // Replace Models
+  console.log("--- Replaching Models ---");
   megaman.forEach((file) => {
     replaceInRom(rom, file, mikuHairNorm);
   });
