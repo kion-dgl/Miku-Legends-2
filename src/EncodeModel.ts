@@ -326,6 +326,7 @@ const encodeModel = (
     }
 
     // Write Triangles
+    const triOfs = ptrOfs;
     mesh.writeUInt32LE(ptrOfs, headerOfs + 4);
     for (let i = 0; i < tri.length; i++) {
       mesh[ptrOfs + i] = tri[i];
@@ -333,6 +334,7 @@ const encodeModel = (
     ptrOfs += tri.length;
 
     // Write Quads
+    const quadOfs = ptrOfs;
     mesh.writeUInt32LE(ptrOfs, headerOfs + 8);
     for (let i = 0; i < quad.length; i++) {
       mesh[ptrOfs + i] = quad[i];
@@ -340,6 +342,7 @@ const encodeModel = (
     ptrOfs += quad.length;
 
     // Write Vertices
+    const vertOfs = ptrOfs;
     mesh.writeUInt32LE(ptrOfs, headerOfs + 12);
     for (let i = 0; i < vertices.length; i++) {
       mesh[ptrOfs + i] = vertices[i];
@@ -350,6 +353,7 @@ const encodeModel = (
     shadowOfs.push(headerOfs + 0x10);
     shadowOfs.push(headerOfs + 0x14);
     headerOfs += STRIDE;
+    return [triCount, quadCount, vertCount, triOfs, quadOfs, vertOfs];
   };
 
   const encodeFace = () => {
@@ -418,6 +422,87 @@ const encodeModel = (
     });
   };
 
+  const encodeBullet = () => {
+    const dat = src.subarray(0x30, 0x30 + 0x2b40);
+    const local = Buffer.from(dat);
+    const reader = new ByteReader(local.buffer as ArrayBuffer);
+
+    const BUSTER_OFS = 0x2220;
+    reader.seek(BUSTER_OFS + 2 * STRIDE);
+
+    const triCount = reader.readUInt8();
+    const quadCount = reader.readUInt8();
+    const vertCount = reader.readUInt8();
+    reader.seekRel(1);
+
+    const triOfs = reader.readUInt32();
+    const quadOfs = reader.readUInt32();
+    const vertOfs = reader.readUInt32();
+    reader.seekRel(0x08);
+
+    // Write the number of primites
+    mesh.writeUInt8(triCount, headerOfs + 0); // tris
+    mesh.writeUInt8(quadCount, headerOfs + 1); // quads
+    mesh.writeUInt8(vertCount, headerOfs + 2); // verts
+
+    const tri = local.subarray(triOfs, triOfs + triCount * 12);
+    const quad = local.subarray(quadOfs, quadOfs + quadCount * 12);
+    const vertices = local.subarray(vertOfs, vertOfs + vertCount * 4);
+
+    // Update the max number of faces to add shadows
+    if (triCount > maxFaces) {
+      maxFaces = triCount;
+    }
+    // Update the max number of faces to add shadows
+    if (quadCount > maxFaces) {
+      maxFaces = quadCount;
+    }
+
+    // Write Triangles
+    mesh.writeUInt32LE(ptrOfs, headerOfs + 4);
+    for (let i = 0; i < tri.length; i++) {
+      mesh[ptrOfs + i] = tri[i];
+    }
+    ptrOfs += tri.length;
+
+    // Write Quads
+    mesh.writeUInt32LE(ptrOfs, headerOfs + 8);
+    for (let i = 0; i < quad.length; i++) {
+      mesh[ptrOfs + i] = quad[i];
+    }
+    ptrOfs += quad.length;
+
+    // Write Vertices
+    mesh.writeUInt32LE(ptrOfs, headerOfs + 12);
+    for (let i = 0; i < vertices.length; i++) {
+      mesh[ptrOfs + i] = vertices[i];
+    }
+    ptrOfs += vertices.length;
+
+    // Push shadows
+    shadowOfs.push(headerOfs + 0x10);
+    shadowOfs.push(headerOfs + 0x14);
+    headerOfs += STRIDE;
+  };
+
+  const encodeShoulder = (shoulder: number[]) => {
+    // 1 Write data from shoulder
+    const [triCount, quadCount, vertCount, triOfs, quadOfs, vertOfs] = shoulder;
+    mesh.writeUInt8(triCount, headerOfs + 0); // tris
+    mesh.writeUInt8(quadCount, headerOfs + 1); // quads
+    mesh.writeUInt8(vertCount, headerOfs + 2); // verts
+
+    // Write Triangles, Quads, Verts
+    mesh.writeUInt32LE(triOfs, headerOfs + 4);
+    mesh.writeUInt32LE(quadOfs, headerOfs + 8);
+    mesh.writeUInt32LE(vertOfs, headerOfs + 12);
+
+    // Push shadows
+    shadowOfs.push(headerOfs + 0x10);
+    shadowOfs.push(headerOfs + 0x14);
+    headerOfs += STRIDE;
+  };
+
   // Body Section
   encodeBody("miku/02_BODY.obj");
   encodeBody("miku/03_HIPS.obj");
@@ -429,16 +514,24 @@ const encodeModel = (
   // Head Section
   encodeBody(hairObject);
   encodeFace();
+  // Encode Feet
+  encodeBody(rightFootObject);
+  encodeBody(leftFootObject);
 
   // Left Arm
-  const leftShoulder = "obj/07_LEFT_SHOULDER.obj";
-  const leftArm = "obj/08_LEFT_ARM.obj";
-  const leftHand = "obj/09_LEFT_HAND.obj";
+  const shoulder = encodeBody("miku/07_LEFT_SHOULDER.obj");
+  encodeBody("miku/08_LEFT_ARM.obj");
+  encodeBody("miku/09_LEFT_HAND.obj");
+
+  // Buster
+  encodeShoulder(shoulder);
+  encodeBody("miku/41_BUSTER.obj");
+  encodeBullet();
 
   // Right Arm
-  const rightShoulder = "obj/04_RIGHT_SHOULDER.obj";
-  const rightArm = "obj/05_RIGHT_ARM.obj";
-  const rightHand = "obj/06_RIGHT_HAND.obj";
+  encodeBody("miku/04_RIGHT_SHOULDER.obj");
+  encodeBody("miku/05_RIGHT_ARM.obj");
+  encodeBody("miku/06_RIGHT_HAND.obj");
 
   // Create entry for face shadows
   const shadows = Buffer.alloc((maxFaces + 4) * 4, 0x80);
