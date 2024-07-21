@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { findFileOffset } from "../src/EncodeRom";
+import { findFileOffset, findPointerTable } from "../src/EncodeRom";
 import { readFileSync } from "fs";
 
 test("ISO 9660 File Offset Finder", () => {
@@ -31,4 +31,16 @@ test("ISO 9660 File Offset Finder", () => {
     const fileOffset = findFileOffset(rom, file);
     expect(fileOffset).not.toEqual(-1);
   });
+});
+
+test("Megaman Model Offset Reference", () => {
+  const binFilePath = process.env.SRC_ROM;
+  if (!binFilePath) {
+    console.log("SRC_ROM environment variable not set. Skipping tests.");
+    return;
+  }
+
+  const rom = readFileSync(binFilePath);
+  const pointerOfs = findPointerTable(rom);
+  expect(pointerOfs).not.toEqual(-1);
 });

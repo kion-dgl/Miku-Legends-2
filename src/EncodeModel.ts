@@ -1,22 +1,10 @@
 import { readFileSync, writeFileSync } from "fs";
-import { Vector3, Matrix4, RGBA_ASTC_12x10_Format } from "three";
-
-type Block = {
-  start: number;
-  end: number;
-  used: number;
-};
+import { Vector3, Matrix4 } from "three";
+import ByteReader from "./ByteReader";
 
 type PackBuffer = {
   dataOfs: number; // Where to write the offset
   data: Buffer; // The data to be packed
-  blockIndex: number; // The block the data is packed
-  offset: number; // The offset of the packed data
-};
-
-type Combination = {
-  buffers: PackBuffer[];
-  remainingSpace: number;
 };
 
 type Primitive = {
@@ -24,16 +12,6 @@ type Primitive = {
   quad: Buffer;
   vertices: Buffer;
 };
-
-// Start Packing the blocks
-const blocks: Block[] = [
-  { start: 0x110, end: 0xb60, used: 0 },
-  { start: 0xba8, end: 0x1800, used: 0 },
-  { start: 0x1830, end: 0x1dd0, used: 0 },
-  { start: 0x1e18, end: 0x2220, used: 0 },
-  { start: 0x2268, end: 0x26f0, used: 0 },
-  { start: 0x2738, end: 0x2b40, used: 0 },
-];
 
 const encodeVertexBits = (num: number) => {
   if (num < 0) {
@@ -305,79 +283,6 @@ const encodeMesh = (obj: string, materialIndex: number): Primitive => {
   };
 };
 
-// Function to generate all combinations of buffers that can fit into a block
-function generateCombinations(
-  buffers: PackBuffer[],
-  remainingSpace: number,
-): Combination[] {
-  const combinations: Combination[] = [];
-
-  function recurse(
-    currentCombination: PackBuffer[],
-    startIndex: number,
-    spaceLeft: number,
-  ) {
-    combinations.push({
-      buffers: currentCombination,
-      remainingSpace: spaceLeft,
-    });
-
-    for (let i = startIndex; i < buffers.length; i++) {
-      const buffer = buffers[i];
-      if (buffer.data.length <= spaceLeft) {
-        recurse(
-          [...currentCombination, buffer],
-          i + 1,
-          spaceLeft - buffer.data.length,
-        );
-      }
-    }
-  }
-
-  recurse([], 0, remainingSpace);
-  return combinations;
-}
-
-// Function to pack buffers into blocks using the optimal combination strategy
-function packBuffers(buffers: PackBuffer[]): PackBuffer[] {
-  // Sort buffers by size in descending order
-  const sortedBuffers = [...buffers].sort(
-    (a, b) => b.data.length - a.data.length,
-  );
-  console.log(buffers);
-
-  for (const [blockIndex, block] of blocks.entries()) {
-    const blockSize = block.end - block.start + 1;
-    const combinations = generateCombinations(sortedBuffers, blockSize);
-
-    // Find the combination with the least remaining space
-    const bestCombination = combinations.reduce((best, current) => {
-      return current.remainingSpace < best.remainingSpace ? current : best;
-    });
-
-    // Allocate the buffers from the best combination
-    for (const buffer of bestCombination.buffers) {
-      const offset = block.start + block.used;
-      buffer.blockIndex = blockIndex;
-      buffer.offset = offset;
-      block.used += buffer.data.length;
-
-      // Remove the allocated buffer from the sorted list
-      const bufferIndex = sortedBuffers.findIndex(
-        (b) => b.dataOfs === buffer.dataOfs,
-      );
-      if (bufferIndex !== -1) {
-        sortedBuffers.splice(bufferIndex, 1);
-      }
-    }
-  }
-
-  console.log(buffers);
-  return buffers.sort(
-    (a, b) => a.blockIndex - b.blockIndex || a.offset - b.offset,
-  );
-}
-
 const encodeModel = (
   // Filename to replace
   filename: string,
@@ -387,22 +292,19 @@ const encodeModel = (
   // Head
   hairObject: string,
 ) => {
+  // Grab the Source
+  const src = readFileSync(`bin/${filename}`);
+
   // Initialize pack buffer
   const STRIDE = 0x18;
-  const pack: PackBuffer[] = [];
   const mesh = Buffer.alloc(0x2b40, 0);
   const shadowOfs: number[] = [];
   let maxFaces = -1;
-  // Body Section
-  const BODY_OFS = 0x80;
-  [
-    "miku/02_BODY.obj",
-    "miku/03_HIPS.obj",
-    "miku/10_LEG_RIGHT_TOP.obj",
-    "miku/11_LEG_RIGHT_BOTTOM.obj",
-    "miku/13_LEG_LEFT_TOP.obj",
-    "miku/14_LEG_LEFT_BOTTOM.obj",
-  ].forEach((filename, index) => {
+
+  let headerOfs = 0;
+  let ptrOfs = 0x2f0;
+
+  const encodeBody = (filename: string) => {
     const obj = readFileSync(filename, "ascii");
     const { tri, quad, vertices } = encodeMesh(obj, 0);
 
@@ -410,9 +312,10 @@ const encodeModel = (
     const quadCount = Math.floor(quad.length / 12);
     const vertCount = Math.floor(vertices.length / 4);
     // Write the number of primites
-    mesh.writeUInt8(triCount, BODY_OFS + index * STRIDE + 0); // tris
-    mesh.writeUInt8(quadCount, BODY_OFS + index * STRIDE + 1); // quads
-    mesh.writeUInt8(vertCount, BODY_OFS + index * STRIDE + 2); // verts
+    mesh.writeUInt8(triCount, headerOfs + 0); // tris
+    mesh.writeUInt8(quadCount, headerOfs + 1); // quads
+    mesh.writeUInt8(vertCount, headerOfs + 2); // verts
+
     // Update the max number of faces to add shadows
     if (triCount > maxFaces) {
       maxFaces = triCount;
@@ -422,48 +325,130 @@ const encodeModel = (
       maxFaces = quadCount;
     }
 
-    // Push Tris
-    pack.push({
-      dataOfs: BODY_OFS + index * STRIDE + 4,
-      data: tri,
-      blockIndex: -1,
-      offset: -1,
-    });
-    // Push Quads
-    pack.push({
-      dataOfs: BODY_OFS + index * STRIDE + 8,
-      data: quad,
-      blockIndex: -1,
-      offset: -1,
-    });
-    // Push Verts
-    pack.push({
-      dataOfs: BODY_OFS + index * STRIDE + 12,
-      data: vertices,
-      blockIndex: -1,
-      offset: -1,
-    });
-    // Push shadows
-    shadowOfs.push(BODY_OFS + index * STRIDE + 0x10);
-    shadowOfs.push(BODY_OFS + index * STRIDE + 0x14);
-  });
-  // Head Section
-  const HEAD_OFS = 0xb60;
-  [
-    "miku/01_HEAD_HAIR.obj",
-    "miku/01_HEAD_FACE.obj",
-    "miku/01_HEAD_MOUTH.obj",
-  ].forEach((filename, index) => {
-    const obj = readFileSync(filename, "ascii");
-    const { tri, quad, vertices } = encodeMesh(obj, 2);
+    // Write Triangles
+    const triOfs = ptrOfs;
+    mesh.writeUInt32LE(ptrOfs, headerOfs + 4);
+    for (let i = 0; i < tri.length; i++) {
+      mesh[ptrOfs + i] = tri[i];
+    }
+    ptrOfs += tri.length;
 
-    const triCount = Math.floor(tri.length / 12);
-    const quadCount = Math.floor(quad.length / 12);
-    const vertCount = Math.floor(vertices.length / 4);
+    // Write Quads
+    const quadOfs = ptrOfs;
+    mesh.writeUInt32LE(ptrOfs, headerOfs + 8);
+    for (let i = 0; i < quad.length; i++) {
+      mesh[ptrOfs + i] = quad[i];
+    }
+    ptrOfs += quad.length;
+
+    // Write Vertices
+    const vertOfs = ptrOfs;
+    mesh.writeUInt32LE(ptrOfs, headerOfs + 12);
+    for (let i = 0; i < vertices.length; i++) {
+      mesh[ptrOfs + i] = vertices[i];
+    }
+    ptrOfs += vertices.length;
+
+    // Push shadows
+    shadowOfs.push(headerOfs + 0x10);
+    shadowOfs.push(headerOfs + 0x14);
+    headerOfs += STRIDE;
+    return [triCount, quadCount, vertCount, triOfs, quadOfs, vertOfs];
+  };
+
+  const encodeFace = () => {
+    const dat = src.subarray(0x30, 0x30 + 0x2b40);
+    const local = Buffer.from(dat);
+    const reader = new ByteReader(local.buffer as ArrayBuffer);
+
+    const HEAD_OFS = 0xb60;
+    const names = ["11_FACE", "12_MOUTH"];
+    reader.seek(HEAD_OFS + STRIDE);
+
+    names.forEach((name) => {
+      const triCount = reader.readUInt8();
+      const quadCount = reader.readUInt8();
+      const vertCount = reader.readUInt8();
+      reader.seekRel(1);
+
+      const triOfs = reader.readUInt32();
+      const quadOfs = reader.readUInt32();
+      const vertOfs = reader.readUInt32();
+      reader.seekRel(0x08);
+
+      // Write the number of primites
+      mesh.writeUInt8(triCount, headerOfs + 0); // tris
+      mesh.writeUInt8(quadCount, headerOfs + 1); // quads
+      mesh.writeUInt8(vertCount, headerOfs + 2); // verts
+
+      const tri = local.subarray(triOfs, triOfs + triCount * 12);
+      const quad = local.subarray(quadOfs, quadOfs + quadCount * 12);
+      const vertices = local.subarray(vertOfs, vertOfs + vertCount * 4);
+
+      // Update the max number of faces to add shadows
+      if (triCount > maxFaces) {
+        maxFaces = triCount;
+      }
+      // Update the max number of faces to add shadows
+      if (quadCount > maxFaces) {
+        maxFaces = quadCount;
+      }
+
+      // Write Triangles
+      mesh.writeUInt32LE(ptrOfs, headerOfs + 4);
+      for (let i = 0; i < tri.length; i++) {
+        mesh[ptrOfs + i] = tri[i];
+      }
+      ptrOfs += tri.length;
+
+      // Write Quads
+      mesh.writeUInt32LE(ptrOfs, headerOfs + 8);
+      for (let i = 0; i < quad.length; i++) {
+        mesh[ptrOfs + i] = quad[i];
+      }
+      ptrOfs += quad.length;
+
+      // Write Vertices
+      mesh.writeUInt32LE(ptrOfs, headerOfs + 12);
+      for (let i = 0; i < vertices.length; i++) {
+        mesh[ptrOfs + i] = vertices[i];
+      }
+      ptrOfs += vertices.length;
+
+      // Push shadows
+      shadowOfs.push(headerOfs + 0x10);
+      shadowOfs.push(headerOfs + 0x14);
+      headerOfs += STRIDE;
+    });
+  };
+
+  const encodeBullet = () => {
+    const dat = src.subarray(0x30, 0x30 + 0x2b40);
+    const local = Buffer.from(dat);
+    const reader = new ByteReader(local.buffer as ArrayBuffer);
+
+    const BUSTER_OFS = 0x2220;
+    reader.seek(BUSTER_OFS + 2 * STRIDE);
+
+    const triCount = reader.readUInt8();
+    const quadCount = reader.readUInt8();
+    const vertCount = reader.readUInt8();
+    reader.seekRel(1);
+
+    const triOfs = reader.readUInt32();
+    const quadOfs = reader.readUInt32();
+    const vertOfs = reader.readUInt32();
+    reader.seekRel(0x08);
+
     // Write the number of primites
-    mesh.writeUInt8(triCount, HEAD_OFS + index * STRIDE + 0); // tris
-    mesh.writeUInt8(quadCount, HEAD_OFS + index * STRIDE + 1); // quads
-    mesh.writeUInt8(vertCount, HEAD_OFS + index * STRIDE + 2); // verts
+    mesh.writeUInt8(triCount, headerOfs + 0); // tris
+    mesh.writeUInt8(quadCount, headerOfs + 1); // quads
+    mesh.writeUInt8(vertCount, headerOfs + 2); // verts
+
+    const tri = local.subarray(triOfs, triOfs + triCount * 12);
+    const quad = local.subarray(quadOfs, quadOfs + quadCount * 12);
+    const vertices = local.subarray(vertOfs, vertOfs + vertCount * 4);
+
     // Update the max number of faces to add shadows
     if (triCount > maxFaces) {
       maxFaces = triCount;
@@ -473,84 +458,145 @@ const encodeModel = (
       maxFaces = quadCount;
     }
 
-    // Push Tris
-    pack.push({
-      dataOfs: HEAD_OFS + index * STRIDE + 4,
-      data: tri,
-      blockIndex: -1,
-      offset: -1,
-    });
-    // Push Quads
-    pack.push({
-      dataOfs: HEAD_OFS + index * STRIDE + 8,
-      data: quad,
-      blockIndex: -1,
-      offset: -1,
-    });
-    // Push Verts
-    pack.push({
-      dataOfs: HEAD_OFS + index * STRIDE + 12,
-      data: vertices,
-      blockIndex: -1,
-      offset: -1,
-    });
+    // Write Triangles
+    mesh.writeUInt32LE(ptrOfs, headerOfs + 4);
+    for (let i = 0; i < tri.length; i++) {
+      mesh[ptrOfs + i] = tri[i];
+    }
+    ptrOfs += tri.length;
+
+    // Write Quads
+    mesh.writeUInt32LE(ptrOfs, headerOfs + 8);
+    for (let i = 0; i < quad.length; i++) {
+      mesh[ptrOfs + i] = quad[i];
+    }
+    ptrOfs += quad.length;
+
+    // Write Vertices
+    mesh.writeUInt32LE(ptrOfs, headerOfs + 12);
+    for (let i = 0; i < vertices.length; i++) {
+      mesh[ptrOfs + i] = vertices[i];
+    }
+    ptrOfs += vertices.length;
+
     // Push shadows
-    shadowOfs.push(HEAD_OFS + index * STRIDE + 0x10);
-    shadowOfs.push(HEAD_OFS + index * STRIDE + 0x14);
-  });
+    shadowOfs.push(headerOfs + 0x10);
+    shadowOfs.push(headerOfs + 0x14);
+    headerOfs += STRIDE;
+  };
+
+  const encodeShoulder = (shoulder: number[]) => {
+    // 1 Write data from shoulder
+    const [triCount, quadCount, vertCount, triOfs, quadOfs, vertOfs] = shoulder;
+    mesh.writeUInt8(triCount, headerOfs + 0); // tris
+    mesh.writeUInt8(quadCount, headerOfs + 1); // quads
+    mesh.writeUInt8(vertCount, headerOfs + 2); // verts
+
+    // Write Triangles, Quads, Verts
+    mesh.writeUInt32LE(triOfs, headerOfs + 4);
+    mesh.writeUInt32LE(quadOfs, headerOfs + 8);
+    mesh.writeUInt32LE(vertOfs, headerOfs + 12);
+
+    // Push shadows
+    shadowOfs.push(headerOfs + 0x10);
+    shadowOfs.push(headerOfs + 0x14);
+    headerOfs += STRIDE;
+  };
+
+  // Body Section
+  let label = Buffer.from("----  BODY  ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x80 + i] = label[i];
+  }
+  headerOfs = 0x90;
+  encodeBody("miku/02_BODY.obj");
+  encodeBody("miku/03_HIPS.obj");
+  encodeBody("miku/10_LEG_RIGHT_TOP.obj");
+  encodeBody("miku/11_LEG_RIGHT_BOTTOM.obj");
+  encodeBody("miku/13_LEG_LEFT_TOP.obj");
+  encodeBody("miku/14_LEG_LEFT_BOTTOM.obj");
+
+  // Head Section
+  label = Buffer.from("----  HEAD  ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x120 + i] = label[i];
+  }
+  headerOfs = 0x130;
+  encodeBody(hairObject);
+  encodeFace();
+
+  // Encode Feet
+  label = Buffer.from("----  FEET  ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x180 + i] = label[i];
+  }
+  headerOfs = 0x190;
+  encodeBody(rightFootObject);
+  encodeBody(leftFootObject);
 
   // Left Arm
-  const leftShoulder = "obj/07_LEFT_SHOULDER.obj";
-  const leftArm = "obj/08_LEFT_ARM.obj";
-  const leftHand = "obj/09_LEFT_HAND.obj";
+  label = Buffer.from("--  LEFT-ARM  --", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x1c0 + i] = label[i];
+  }
+  headerOfs = 0x1d0;
+  const shoulder = encodeBody("miku/07_LEFT_SHOULDER.obj");
+  encodeBody("miku/08_LEFT_ARM.obj");
+  encodeBody("miku/09_LEFT_HAND.obj");
 
   // Right Arm
-  const rightShoulder = "obj/04_RIGHT_SHOULDER.obj";
-  const rightArm = "obj/05_RIGHT_ARM.obj";
-  const rightHand = "obj/06_RIGHT_HAND.obj";
+  label = Buffer.from("--  RIGHT-ARM --", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x220 + i] = label[i];
+  }
+  headerOfs = 0x230;
+  encodeBody("miku/04_RIGHT_SHOULDER.obj");
+  encodeBody("miku/05_RIGHT_ARM.obj");
+  encodeBody("miku/06_RIGHT_HAND.obj");
 
-  // Eyes and mouth
-  const eyesObject = "obj/01_HEAD_FACE.obj";
-  const mouthObject = "obj/01_HEAD_MOUTH.obj";
+  // Buster
+  label = Buffer.from("---  BUSTER  ---", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x280 + i] = label[i];
+  }
+  headerOfs = 0x290;
+  encodeShoulder(shoulder);
+  encodeBody("miku/41_BUSTER.obj");
+  encodeBullet();
+
+  label = Buffer.from("----  PRIM  ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x2e0 + i] = label[i];
+  }
 
   // Create entry for face shadows
-  pack.push({
-    dataOfs: -1,
-    data: Buffer.alloc((maxFaces + 4) * 4, 0x80),
-    blockIndex: -1,
-    offset: -1,
-  });
 
-  const packingResult = packBuffers(pack);
-  packingResult.forEach((result) => {
-    const { dataOfs, data, offset } = result;
-    if (dataOfs === -1) {
-      shadowOfs.forEach((ofs) => mesh.writeUint32LE(offset, ofs));
-    } else {
-      mesh.writeUint32LE(offset, dataOfs);
-    }
-    for (let i = 0; i < data.length; i++) {
-      mesh[offset + i] = data[i];
-    }
-  });
+  if (ptrOfs % 16) {
+    ptrOfs = Math.ceil(ptrOfs / 16) * 16;
+  }
 
-  // Replace in Game File
-  const src = readFileSync(`bin/${filename}`);
+  const shadows = Buffer.alloc((maxFaces + 4) * 4, 0x80);
+  label = Buffer.from("---- SHADOW ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[ptrOfs++] = label[i];
+  }
+  shadowOfs.forEach((ofs) => mesh.writeUint32LE(ptrOfs, ofs));
+  for (let i = 0; i < shadows.length; i++) {
+    mesh[ptrOfs + i] = shadows[i];
+  }
+  ptrOfs += shadows.length;
+  if (ptrOfs > 0x2b40) {
+    throw new Error("Model length too long " + filename);
+  }
+  const remaining = 0x2b40 - ptrOfs;
+  console.log("Bytes remaining: 0x%s", remaining.toString(16));
+
+  // Copy Over the Model After the Skeleton
   for (let i = 0x80; i < mesh.length; i++) {
     src[i + 0x30] = mesh[i];
   }
 
-  // const HEADER_LEN = 0x30;
-  // // Zero out body
-  // for (let i = 0x98; i < 0x110; i++) {
-  //   src[HEADER_LEN + i] = 0;
-  // }
-  // // Zero out everything else
-  // for (let i = 0xb60; i < 0xba8; i++) {
-  //   src[HEADER_LEN + i] = 0;
-  // }
-
-  // writeFileSync(`out/debug_${filename}`, mesh);
+  writeFileSync(`out/miku-${filename}`, mesh);
   writeFileSync(`out/${filename}`, src);
 };
 
