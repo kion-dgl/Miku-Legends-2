@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
-import { Vector3, Matrix4, RGBA_ASTC_12x10_Format } from "three";
+import { Vector3, Matrix4 } from "three";
+import ByteReader from "./ByteReader";
 
 type PackBuffer = {
   dataOfs: number; // Where to write the offset
@@ -291,6 +292,9 @@ const encodeModel = (
   // Head
   hairObject: string,
 ) => {
+  // Grab the Source
+  const src = readFileSync(`bin/${filename}`);
+
   // Initialize pack buffer
   const STRIDE = 0x18;
   const mesh = Buffer.alloc(0x2b40, 0);
@@ -300,15 +304,7 @@ const encodeModel = (
   let headerOfs = 0x80;
   let ptrOfs = 0x260;
 
-  // Body Section
-  [
-    "miku/02_BODY.obj",
-    "miku/03_HIPS.obj",
-    "miku/10_LEG_RIGHT_TOP.obj",
-    "miku/11_LEG_RIGHT_BOTTOM.obj",
-    "miku/13_LEG_LEFT_TOP.obj",
-    "miku/14_LEG_LEFT_BOTTOM.obj",
-  ].forEach((filename, index) => {
+  const encodeBody = (filename: string) => {
     const obj = readFileSync(filename, "ascii");
     const { tri, quad, vertices } = encodeMesh(obj, 0);
 
@@ -354,61 +350,85 @@ const encodeModel = (
     shadowOfs.push(headerOfs + 0x10);
     shadowOfs.push(headerOfs + 0x14);
     headerOfs += STRIDE;
-  });
+  };
+
+  const encodeFace = () => {
+    const dat = src.subarray(0x30, 0x30 + 0x2b40);
+    const local = Buffer.from(dat);
+    const reader = new ByteReader(local.buffer as ArrayBuffer);
+
+    const HEAD_OFS = 0xb60;
+    const names = ["11_FACE", "12_MOUTH"];
+    reader.seek(HEAD_OFS + STRIDE);
+
+    names.forEach((name) => {
+      const triCount = reader.readUInt8();
+      const quadCount = reader.readUInt8();
+      const vertCount = reader.readUInt8();
+      reader.seekRel(1);
+
+      const triOfs = reader.readUInt32();
+      const quadOfs = reader.readUInt32();
+      const vertOfs = reader.readUInt32();
+      reader.seekRel(0x08);
+
+      // Write the number of primites
+      mesh.writeUInt8(triCount, headerOfs + 0); // tris
+      mesh.writeUInt8(quadCount, headerOfs + 1); // quads
+      mesh.writeUInt8(vertCount, headerOfs + 2); // verts
+
+      const tri = local.subarray(triOfs, triOfs + triCount * 12);
+      const quad = local.subarray(quadOfs, quadOfs + quadCount * 12);
+      const vertices = local.subarray(vertOfs, vertOfs + vertCount * 4);
+
+      // Update the max number of faces to add shadows
+      if (triCount > maxFaces) {
+        maxFaces = triCount;
+      }
+      // Update the max number of faces to add shadows
+      if (quadCount > maxFaces) {
+        maxFaces = quadCount;
+      }
+
+      // Write Triangles
+      mesh.writeUInt32LE(ptrOfs, headerOfs + 4);
+      for (let i = 0; i < tri.length; i++) {
+        mesh[ptrOfs + i] = tri[i];
+      }
+      ptrOfs += tri.length;
+
+      // Write Quads
+      mesh.writeUInt32LE(ptrOfs, headerOfs + 8);
+      for (let i = 0; i < quad.length; i++) {
+        mesh[ptrOfs + i] = quad[i];
+      }
+      ptrOfs += quad.length;
+
+      // Write Vertices
+      mesh.writeUInt32LE(ptrOfs, headerOfs + 12);
+      for (let i = 0; i < vertices.length; i++) {
+        mesh[ptrOfs + i] = vertices[i];
+      }
+      ptrOfs += vertices.length;
+
+      // Push shadows
+      shadowOfs.push(headerOfs + 0x10);
+      shadowOfs.push(headerOfs + 0x14);
+      headerOfs += STRIDE;
+    });
+  };
+
+  // Body Section
+  encodeBody("miku/02_BODY.obj");
+  encodeBody("miku/03_HIPS.obj");
+  encodeBody("miku/10_LEG_RIGHT_TOP.obj");
+  encodeBody("miku/11_LEG_RIGHT_BOTTOM.obj");
+  encodeBody("miku/13_LEG_LEFT_TOP.obj");
+  encodeBody("miku/14_LEG_LEFT_BOTTOM.obj");
 
   // Head Section
-  const HEAD_OFS = 0xb60;
-  [
-    "miku/01_HEAD_HAIR.obj",
-    "miku/01_HEAD_FACE.obj",
-    "miku/01_HEAD_MOUTH.obj",
-  ].forEach((filename, index) => {
-    const obj = readFileSync(filename, "ascii");
-    const { tri, quad, vertices } = encodeMesh(obj, 0);
-
-    const triCount = Math.floor(tri.length / 12);
-    const quadCount = Math.floor(quad.length / 12);
-    const vertCount = Math.floor(vertices.length / 4);
-    // Write the number of primites
-    mesh.writeUInt8(triCount, headerOfs + 0); // tris
-    mesh.writeUInt8(quadCount, headerOfs + 1); // quads
-    mesh.writeUInt8(vertCount, headerOfs + 2); // verts
-
-    // Update the max number of faces to add shadows
-    if (triCount > maxFaces) {
-      maxFaces = triCount;
-    }
-    // Update the max number of faces to add shadows
-    if (quadCount > maxFaces) {
-      maxFaces = quadCount;
-    }
-
-    // Write Triangles
-    mesh.writeUInt32LE(ptrOfs, headerOfs + 4);
-    for (let i = 0; i < tri.length; i++) {
-      mesh[ptrOfs + i] = tri[i];
-    }
-    ptrOfs += tri.length;
-
-    // Write Quads
-    mesh.writeUInt32LE(ptrOfs, headerOfs + 8);
-    for (let i = 0; i < quad.length; i++) {
-      mesh[ptrOfs + i] = quad[i];
-    }
-    ptrOfs += quad.length;
-
-    // Write Vertices
-    mesh.writeUInt32LE(ptrOfs, headerOfs + 12);
-    for (let i = 0; i < vertices.length; i++) {
-      mesh[ptrOfs + i] = vertices[i];
-    }
-    ptrOfs += vertices.length;
-
-    // Push shadows
-    shadowOfs.push(headerOfs + 0x10);
-    shadowOfs.push(headerOfs + 0x14);
-    headerOfs += STRIDE;
-  });
+  encodeBody(hairObject);
+  encodeFace();
 
   // Left Arm
   const leftShoulder = "obj/07_LEFT_SHOULDER.obj";
@@ -430,8 +450,6 @@ const encodeModel = (
   if (ptrOfs > 0x2b40) {
     throw new Error("Model length too long " + filename);
   }
-
-  const src = readFileSync(`bin/${filename}`);
 
   // Copy Over the Model After the Skeleton
   for (let i = 0x80; i < mesh.length; i++) {

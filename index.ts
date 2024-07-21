@@ -14,10 +14,10 @@ encodeTexture(
 encodeModel(
   "PL00P010.BIN",
   // Feet
-  "obj/12_RIGHT_FOOT.obj",
-  "obj/15_LEFT_FOOT.obj",
+  "miku/12_RIGHT_FOOT.obj",
+  "miku/15_LEFT_FOOT.obj",
   // Head
-  "obj/01_HEAD_HELMET.obj",
+  "miku/01_HEAD_HAIR.obj",
 );
 
 encodeRom();
