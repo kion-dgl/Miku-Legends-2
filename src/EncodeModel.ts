@@ -301,8 +301,8 @@ const encodeModel = (
   const shadowOfs: number[] = [];
   let maxFaces = -1;
 
-  let headerOfs = 0x80;
-  let ptrOfs = 0x260;
+  let headerOfs = 0;
+  let ptrOfs = 0x2f0;
 
   const encodeBody = (filename: string) => {
     const obj = readFileSync(filename, "ascii");
@@ -504,6 +504,11 @@ const encodeModel = (
   };
 
   // Body Section
+  let label = Buffer.from("----  BODY  ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x80 + i] = label[i];
+  }
+  headerOfs = 0x90;
   encodeBody("miku/02_BODY.obj");
   encodeBody("miku/03_HIPS.obj");
   encodeBody("miku/10_LEG_RIGHT_TOP.obj");
@@ -512,29 +517,69 @@ const encodeModel = (
   encodeBody("miku/14_LEG_LEFT_BOTTOM.obj");
 
   // Head Section
+  label = Buffer.from("----  HEAD  ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x120 + i] = label[i];
+  }
+  headerOfs = 0x130;
   encodeBody(hairObject);
   encodeFace();
+
   // Encode Feet
+  label = Buffer.from("----  FEET  ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x180 + i] = label[i];
+  }
+  headerOfs = 0x190;
   encodeBody(rightFootObject);
   encodeBody(leftFootObject);
 
   // Left Arm
+  label = Buffer.from("--  LEFT-ARM  --", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x1c0 + i] = label[i];
+  }
+  headerOfs = 0x1d0;
   const shoulder = encodeBody("miku/07_LEFT_SHOULDER.obj");
   encodeBody("miku/08_LEFT_ARM.obj");
   encodeBody("miku/09_LEFT_HAND.obj");
 
-  // Buster
-  encodeShoulder(shoulder);
-  encodeBody("miku/41_BUSTER.obj");
-  encodeBullet();
-
   // Right Arm
+  label = Buffer.from("--  RIGHT-ARM --", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x220 + i] = label[i];
+  }
+  headerOfs = 0x230;
   encodeBody("miku/04_RIGHT_SHOULDER.obj");
   encodeBody("miku/05_RIGHT_ARM.obj");
   encodeBody("miku/06_RIGHT_HAND.obj");
 
+  // Buster
+  label = Buffer.from("---  BUSTER  ---", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x280 + i] = label[i];
+  }
+  headerOfs = 0x290;
+  encodeShoulder(shoulder);
+  encodeBody("miku/41_BUSTER.obj");
+  encodeBullet();
+
+  label = Buffer.from("----  PRIM  ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[0x2e0 + i] = label[i];
+  }
+
   // Create entry for face shadows
+
+  if (ptrOfs % 16) {
+    ptrOfs = Math.ceil(ptrOfs / 16) * 16;
+  }
+
   const shadows = Buffer.alloc((maxFaces + 4) * 4, 0x80);
+  label = Buffer.from("---- SHADOW ----", "ascii");
+  for (let i = 0; i < label.length; i++) {
+    mesh[ptrOfs++] = label[i];
+  }
   shadowOfs.forEach((ofs) => mesh.writeUint32LE(ptrOfs, ofs));
   for (let i = 0; i < shadows.length; i++) {
     mesh[ptrOfs + i] = shadows[i];
@@ -543,6 +588,8 @@ const encodeModel = (
   if (ptrOfs > 0x2b40) {
     throw new Error("Model length too long " + filename);
   }
+  const remaining = 0x2b40 - ptrOfs;
+  console.log("Bytes remaining: 0x%s", remaining.toString(16));
 
   // Copy Over the Model After the Skeleton
   for (let i = 0x80; i < mesh.length; i++) {

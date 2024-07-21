@@ -112,11 +112,12 @@ const findPointerTable = (rom: Buffer) => {
 const updatePointerTable = (rom: Buffer) => {
   const ofs = findPointerTable(rom);
   const PLAYER_OFFSET = 0x110800;
-  rom.writeUInt32LE(0x110 + PLAYER_OFFSET, ofs + 4); // Head
-  rom.writeUInt32LE(0x158 + PLAYER_OFFSET, ofs + 24); // Feet
-  rom.writeUInt32LE(0x188 + PLAYER_OFFSET, ofs + 16); // Left Arm
-  rom.writeUInt32LE(0x1d0 + PLAYER_OFFSET, ofs + 20); // Buster
-  rom.writeUInt32LE(0x218 + PLAYER_OFFSET, ofs + 12); // Right Arm
+  rom.writeUInt32LE(0x90 + PLAYER_OFFSET, ofs + 0); // Body
+  rom.writeUInt32LE(0x130 + PLAYER_OFFSET, ofs + 4); // Head
+  rom.writeUInt32LE(0x190 + PLAYER_OFFSET, ofs + 24); // Feet
+  rom.writeUInt32LE(0x1d0 + PLAYER_OFFSET, ofs + 16); // Left Arm
+  rom.writeUInt32LE(0x230 + PLAYER_OFFSET, ofs + 8); // Right Arm
+  rom.writeUInt32LE(0x290 + PLAYER_OFFSET, ofs + 20); // Buster
 };
 
 const replaceInRom = (
