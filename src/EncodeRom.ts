@@ -1,5 +1,5 @@
 /**
-  
+
   Miku-Legends-2
   Copyright (C) 2024, DashGL Project
   By Kion (kion@dashgl.com)
@@ -16,7 +16,7 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
 **/
 
 import { readFileSync, writeFileSync } from "fs";
@@ -188,6 +188,7 @@ const encodeRom = () => {
 
   // Encode Models
   const mikuHairNorm = readFileSync("out/PL00P010.BIN");
+  const mikuHelmetNorm = readFileSync("out/PL00P000.BIN");
   const megaman = [
     readFileSync("bin/PL00P000.BIN"),
     readFileSync("bin/PL00P001.BIN"),
@@ -203,11 +204,12 @@ const encodeRom = () => {
     readFileSync("bin/PL00P015.BIN"),
   ];
 
-  // Replace Models
-  console.log("--- Replaching Models ---");
-  megaman.forEach((file) => {
-    replaceInRom(rom, file, mikuHairNorm);
-  });
+  console.log("--- Replacing Models ---");
+  replaceInRom(rom, megaman[0], mikuHelmetNorm);
+  replaceInRom(rom, megaman[1], mikuHelmetNorm);
+
+  replaceInRom(rom, megaman[6], mikuHairNorm);
+  replaceInRom(rom, megaman[7], mikuHairNorm);
 
   // Update Pointer Table
   updatePointerTable(rom);
