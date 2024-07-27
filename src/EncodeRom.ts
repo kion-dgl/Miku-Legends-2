@@ -188,7 +188,10 @@ const encodeRom = () => {
 
   // Encode Models
   const mikuHairNorm = readFileSync("out/PL00P010.BIN");
+  const mikuHairJet = readFileSync("out/PL00P011.BIN");
   const mikuHelmetNorm = readFileSync("out/PL00P000.BIN");
+  const mikuHelmetJet = readFileSync("out/PL00P001.BIN");
+
   const megaman = [
     readFileSync("bin/PL00P000.BIN"),
     readFileSync("bin/PL00P001.BIN"),
@@ -206,10 +209,10 @@ const encodeRom = () => {
 
   console.log("--- Replacing Models ---");
   replaceInRom(rom, megaman[0], mikuHelmetNorm);
-  replaceInRom(rom, megaman[1], mikuHelmetNorm);
+  replaceInRom(rom, megaman[1], mikuHelmetJet);
 
   replaceInRom(rom, megaman[6], mikuHairNorm);
-  replaceInRom(rom, megaman[7], mikuHairNorm);
+  replaceInRom(rom, megaman[7], mikuHairJet);
 
   // Update Pointer Table
   updatePointerTable(rom);

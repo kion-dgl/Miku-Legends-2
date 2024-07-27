@@ -20,12 +20,32 @@ encodeModel(
   "miku/10_HELMET-tails.obj",
 );
 
+// Helmet + Jet Skates
+encodeModel(
+  "PL00P001.BIN",
+  // Feet
+  "miku/20_JET_RIGHT_FOOT.obj",
+  "miku/20_JET_LEFT_FOOT.obj",
+  // Head
+  "miku/10_HELMET-bun.obj",
+);
+
 // No helmet + Normal Shoes
 encodeModel(
   "PL00P010.BIN",
   // Feet
   "miku/12_RIGHT_FOOT.obj",
   "miku/15_LEFT_FOOT.obj",
+  // Head
+  "miku/01_HEAD_HAIR.obj",
+);
+
+// No helmet + Jet Skates
+encodeModel(
+  "PL00P011.BIN",
+  // Feet
+  "miku/20_JET_RIGHT_FOOT.obj",
+  "miku/20_JET_LEFT_FOOT.obj",
   // Head
   "miku/01_HEAD_HAIR.obj",
 );
