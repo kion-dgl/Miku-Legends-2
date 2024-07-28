@@ -61,6 +61,16 @@ encodeModel(
   "miku/10_HELMET.obj",
 );
 
+// Helmet + Cleated
+encodeModel(
+  "PL00P004.BIN",
+  // Feet
+  "miku/20_CLEATED_RIGHT_FOOT.obj",
+  "miku/20_CLEATED_LEFT_FOOT.obj",
+  // Head
+  "miku/10_HELMET.obj",
+);
+
 /**
     $$\   $$\                 $$\   $$\           $$\                          $$\
     $$$\  $$ |                $$ |  $$ |          $$ |                         $$ |
@@ -108,6 +118,16 @@ encodeModel(
   // Feet
   "miku/20_ASBESTOS_RIGHT_FOOT.obj",
   "miku/20_ASBESTOS_LEFT_FOOT.obj",
+  // Head
+  "miku/01_HEAD_HAIR.obj",
+);
+
+// No helmet + Cleated shoes
+encodeModel(
+  "PL00P014.BIN",
+  // Feet
+  "miku/20_CLEATED_RIGHT_FOOT.obj",
+  "miku/20_CLEATED_LEFT_FOOT.obj",
   // Head
   "miku/01_HEAD_HAIR.obj",
 );
