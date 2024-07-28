@@ -182,15 +182,23 @@ const encodeRom = () => {
   const mikuTexture = readFileSync("out/PL00T.BIN");
   const pl00t = readFileSync("bin/PL00T.BIN");
   const pl00t2 = readFileSync("bin/PL00T2.BIN");
-  console.log("--- Replaching Textures ---");
+
+  console.log("--- Replacing Textures ---");
   replaceInRom(rom, pl00t, mikuTexture);
+  console.log("  - Body Texture");
   replaceInRom(rom, pl00t2, mikuTexture);
+  console.log("  - Face Texture");
 
   // Encode Models
   const mikuHairNorm = readFileSync("out/PL00P010.BIN");
   const mikuHairJet = readFileSync("out/PL00P011.BIN");
+  const mikuHairHydro = readFileSync("out/PL00P012.BIN");
+  const mikuHairAsbestos = readFileSync("out/PL00P013.BIN");
+
   const mikuHelmetNorm = readFileSync("out/PL00P000.BIN");
   const mikuHelmetJet = readFileSync("out/PL00P001.BIN");
+  const mikuHelmetHydro = readFileSync("out/PL00P002.BIN");
+  const mikuHelmetAsbestos = readFileSync("out/PL00P003.BIN");
 
   const megaman = [
     readFileSync("bin/PL00P000.BIN"),
@@ -210,9 +218,13 @@ const encodeRom = () => {
   console.log("--- Replacing Models ---");
   replaceInRom(rom, megaman[0], mikuHelmetNorm);
   replaceInRom(rom, megaman[1], mikuHelmetJet);
+  replaceInRom(rom, megaman[2], mikuHelmetHydro);
+  replaceInRom(rom, megaman[3], mikuHelmetAsbestos);
 
   replaceInRom(rom, megaman[6], mikuHairNorm);
   replaceInRom(rom, megaman[7], mikuHairJet);
+  replaceInRom(rom, megaman[8], mikuHairHydro);
+  replaceInRom(rom, megaman[9], mikuHairAsbestos);
 
   // Update Pointer Table
   updatePointerTable(rom);
