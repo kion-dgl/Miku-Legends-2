@@ -195,12 +195,14 @@ const encodeRom = () => {
   const mikuHairHydro = readFileSync("out/PL00P012.BIN");
   const mikuHairAsbestos = readFileSync("out/PL00P013.BIN");
   const mikuHairCleated = readFileSync("out/PL00P014.BIN");
+  const mikuHairHover = readFileSync("out/PL00P015.BIN");
 
   const mikuHelmetNorm = readFileSync("out/PL00P000.BIN");
   const mikuHelmetJet = readFileSync("out/PL00P001.BIN");
   const mikuHelmetHydro = readFileSync("out/PL00P002.BIN");
   const mikuHelmetAsbestos = readFileSync("out/PL00P003.BIN");
   const mikuHelmetCleated = readFileSync("out/PL00P004.BIN");
+  const mikuHelmetHover = readFileSync("out/PL00P005.BIN");
 
   const megaman = [
     readFileSync("bin/PL00P000.BIN"),
@@ -229,6 +231,8 @@ const encodeRom = () => {
   replaceInRom(rom, megaman[3], mikuHelmetAsbestos);
   console.log("  - Helmet + Cleated");
   replaceInRom(rom, megaman[4], mikuHelmetCleated);
+  console.log("  - Helmet + Hover");
+  replaceInRom(rom, megaman[5], mikuHelmetHover);
 
   console.log("  - No Helmet + Normal Shoes");
   replaceInRom(rom, megaman[6], mikuHairNorm);
@@ -238,8 +242,10 @@ const encodeRom = () => {
   replaceInRom(rom, megaman[8], mikuHairHydro);
   console.log("  - No Helmet + Asbestos");
   replaceInRom(rom, megaman[9], mikuHairAsbestos);
-  console.log("  - Helmet + Cleated");
+  console.log("  - No Helmet + Cleated");
   replaceInRom(rom, megaman[10], mikuHairCleated);
+  console.log("  - No Helmet + Hover");
+  replaceInRom(rom, megaman[11], mikuHairHover);
 
   // Update Pointer Table
   updatePointerTable(rom);
