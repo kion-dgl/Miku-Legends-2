@@ -1,5 +1,5 @@
 /**
-  
+
   Miku-Legends-2
   Copyright (C) 2024, DashGL Project
   By Kion (kion@dashgl.com)
@@ -16,7 +16,7 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
 **/
 
 import { readFileSync, writeFileSync } from "fs";
@@ -182,12 +182,28 @@ const encodeRom = () => {
   const mikuTexture = readFileSync("out/PL00T.BIN");
   const pl00t = readFileSync("bin/PL00T.BIN");
   const pl00t2 = readFileSync("bin/PL00T2.BIN");
-  console.log("--- Replaching Textures ---");
+
+  console.log("--- Replacing Textures ---");
   replaceInRom(rom, pl00t, mikuTexture);
+  console.log("  - Body Texture");
   replaceInRom(rom, pl00t2, mikuTexture);
+  console.log("  - Face Texture");
 
   // Encode Models
   const mikuHairNorm = readFileSync("out/PL00P010.BIN");
+  const mikuHairJet = readFileSync("out/PL00P011.BIN");
+  const mikuHairHydro = readFileSync("out/PL00P012.BIN");
+  const mikuHairAsbestos = readFileSync("out/PL00P013.BIN");
+  const mikuHairCleated = readFileSync("out/PL00P014.BIN");
+  const mikuHairHover = readFileSync("out/PL00P015.BIN");
+
+  const mikuHelmetNorm = readFileSync("out/PL00P000.BIN");
+  const mikuHelmetJet = readFileSync("out/PL00P001.BIN");
+  const mikuHelmetHydro = readFileSync("out/PL00P002.BIN");
+  const mikuHelmetAsbestos = readFileSync("out/PL00P003.BIN");
+  const mikuHelmetCleated = readFileSync("out/PL00P004.BIN");
+  const mikuHelmetHover = readFileSync("out/PL00P005.BIN");
+
   const megaman = [
     readFileSync("bin/PL00P000.BIN"),
     readFileSync("bin/PL00P001.BIN"),
@@ -203,11 +219,33 @@ const encodeRom = () => {
     readFileSync("bin/PL00P015.BIN"),
   ];
 
-  // Replace Models
-  console.log("--- Replaching Models ---");
-  megaman.forEach((file) => {
-    replaceInRom(rom, file, mikuHairNorm);
-  });
+  console.log("--- Replacing Models ---");
+
+  console.log("  - Helmet + Normal Shoes");
+  replaceInRom(rom, megaman[0], mikuHelmetNorm);
+  console.log("  - Helmet + Jet Skates");
+  replaceInRom(rom, megaman[1], mikuHelmetJet);
+  console.log("  - Helmet + Hydro");
+  replaceInRom(rom, megaman[2], mikuHelmetHydro);
+  console.log("  - Helmet + Asbestos");
+  replaceInRom(rom, megaman[3], mikuHelmetAsbestos);
+  console.log("  - Helmet + Cleated");
+  replaceInRom(rom, megaman[4], mikuHelmetCleated);
+  console.log("  - Helmet + Hover");
+  replaceInRom(rom, megaman[5], mikuHelmetHover);
+
+  console.log("  - No Helmet + Normal Shoes");
+  replaceInRom(rom, megaman[6], mikuHairNorm);
+  console.log("  - No Helmet + Jet Skates");
+  replaceInRom(rom, megaman[7], mikuHairJet);
+  console.log("  - No Helmet + Hydro");
+  replaceInRom(rom, megaman[8], mikuHairHydro);
+  console.log("  - No Helmet + Asbestos");
+  replaceInRom(rom, megaman[9], mikuHairAsbestos);
+  console.log("  - No Helmet + Cleated");
+  replaceInRom(rom, megaman[10], mikuHairCleated);
+  console.log("  - No Helmet + Hover");
+  replaceInRom(rom, megaman[11], mikuHairHover);
 
   // Update Pointer Table
   updatePointerTable(rom);

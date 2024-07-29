@@ -1,5 +1,5 @@
 /**
-  
+
   Miku-Legends-2
   Copyright (C) 2024, DashGL Project
   By Kion (kion@dashgl.com)
@@ -16,7 +16,7 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
 **/
 
 import { test, expect } from "bun:test";
@@ -30,8 +30,8 @@ import {
 
 import ByteReader from "../src/ByteReader";
 
-test("It should encode an obj with helmet and normal shoes", () => {
-  const filename = "PL00P000";
+test("It should encode an obj with hair and normal shoes", () => {
+  const filename = "PL00P010";
   const file = readFileSync(`./bin/${filename}.BIN`);
   const dat = file.subarray(0x30, 0x30 + 0x2b40);
   const { buffer } = Buffer.from(dat);
