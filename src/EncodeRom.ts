@@ -251,6 +251,8 @@ const encodeRom = () => {
   updatePointerTable(rom);
 
   // Write the result
+  console.log("--- Wiritng ROM ---");
+  console.log("rom file: %s", romDst);
   writeFileSync(romDst, rom);
 };
 
