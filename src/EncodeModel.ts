@@ -1,5 +1,5 @@
 /**
-  
+
   Miku-Legends-2
   Copyright (C) 2024, DashGL Project
   By Kion (kion@dashgl.com)
@@ -16,10 +16,8 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
 **/
-
-
 
 import { readFileSync, writeFileSync } from "fs";
 import { Vector3, Matrix4 } from "three";
@@ -563,9 +561,9 @@ const encodeModel = (
     mesh[0x1c0 + i] = label[i];
   }
   headerOfs = 0x1d0;
-  const shoulder = encodeBody("miku/07_LEFT_SHOULDER.obj");
-  encodeBody("miku/08_LEFT_ARM.obj");
-  encodeBody("miku/09_LEFT_HAND.obj");
+  const shoulder = encodeBody("miku/04_RIGHT_SHOULDER.obj");
+  encodeBody("miku/05_RIGHT_ARM.obj");
+  encodeBody("miku/06_RIGHT_HAND.obj");
 
   // Right Arm
   label = Buffer.from("--  RIGHT-ARM --", "ascii");
@@ -573,9 +571,9 @@ const encodeModel = (
     mesh[0x220 + i] = label[i];
   }
   headerOfs = 0x230;
-  encodeBody("miku/04_RIGHT_SHOULDER.obj");
-  encodeBody("miku/05_RIGHT_ARM.obj");
-  encodeBody("miku/06_RIGHT_HAND.obj");
+  encodeBody("miku/07_LEFT_SHOULDER.obj");
+  encodeBody("miku/08_LEFT_ARM.obj");
+  encodeBody("miku/09_LEFT_HAND.obj");
 
   // Buster
   label = Buffer.from("---  BUSTER  ---", "ascii");
