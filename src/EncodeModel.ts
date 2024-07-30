@@ -163,7 +163,7 @@ const encodeMesh = (obj: string, materialIndex: number): Primitive => {
     const vAdjusted = vRaw / PIXEL_TO_FLOAT_RATIO - PIXEL_ADJUSTMEST;
 
     // // Eniminate rounding to make sure it's a pixel reference
-    const uFloor = Math.floor(uAdjusted);
+    const uFloor = Math.floor(uAdjusted) + 1;
     const vFloor = Math.floor(vAdjusted);
 
     // // Make sure it fits in one byte
