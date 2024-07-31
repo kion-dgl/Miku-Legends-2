@@ -182,12 +182,16 @@ const encodeRom = () => {
   const mikuTexture = readFileSync("out/PL00T.BIN");
   const pl00t = readFileSync("bin/PL00T.BIN");
   const pl00t2 = readFileSync("bin/PL00T2.BIN");
+  const st03a2 = readFileSync("./bin/ST3A02.BIN");
+  const st03a2Miku = readFileSync("./out/ST3A02.BIN");
 
   console.log("--- Replacing Textures ---");
-  replaceInRom(rom, pl00t, mikuTexture);
   console.log("  - Body Texture");
-  replaceInRom(rom, pl00t2, mikuTexture);
+  replaceInRom(rom, pl00t, mikuTexture);
   console.log("  - Face Texture");
+  replaceInRom(rom, pl00t2, mikuTexture);
+  console.log("  - First Cut Scene Patch");
+  replaceInRom(rom, st03a2, st03a2Miku);
 
   // Encode Models
   const mikuHairNorm = readFileSync("out/PL00P010.BIN");
