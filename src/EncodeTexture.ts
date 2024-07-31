@@ -242,6 +242,7 @@ const replaceTexture = (
 
   // Replace Body
   const [bodyPal, bodyImg] = encodeImage(bodyBuffer);
+  const pl00t2 = readFileSync("./bin/PL00T2.BIN");
 
   // Add patch for after the first cutscene
   const st03a2 = readFileSync("./bin/ST3A02.BIN");
@@ -249,10 +250,12 @@ const replaceTexture = (
   const ST03A2_IMG_OFS = 0x2d000;
   for (let i = 0; i < bodyPal.length; i++) {
     st03a2[ST03A2_PAL_OFS + i] = bodyPal[i];
+    pl00t2[0x30 + i] = bodyPal[i];
   }
 
   for (let i = 0; i < bodyImg.length; i++) {
     st03a2[ST03A2_IMG_OFS + i] = bodyImg[i];
+    pl00t2[0x800 + i] = bodyImg[i];
   }
   writeFileSync("./out/ST3A02.BIN", st03a2);
 
@@ -297,6 +300,17 @@ const replaceTexture = (
   for (let i = 0; i < 0x4000; i++) {
     faceImg[0x4000 + i] = megamanFace[0x4080 + i];
   }
+
+  for (let i = 0; i < facePal.length; i++) {
+    // st03a2[ST03A2_PAL_OFS + i] = bodyPal[i];
+    pl00t2[0x9030 + i] = facePal[i];
+  }
+
+  for (let i = 0; i < faceImg.length; i++) {
+    // st03a2[ST03A2_IMG_OFS + i] = bodyImg[i];
+    pl00t2[0x9800 + i] = faceImg[i];
+  }
+  writeFileSync("./out/PL00T2.BIN", pl00t2);
 
   // First we zero out the previous image
   for (let i = 0x3830; i < 0x6500; i++) {

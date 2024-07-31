@@ -181,15 +181,16 @@ const encodeRom = () => {
   // Replace Textures
   const mikuTexture = readFileSync("out/PL00T.BIN");
   const pl00t = readFileSync("bin/PL00T.BIN");
+  const mikuTexturePatch = readFileSync("out/PL00T2.BIN");
   const pl00t2 = readFileSync("bin/PL00T2.BIN");
   const st03a2 = readFileSync("./bin/ST3A02.BIN");
   const st03a2Miku = readFileSync("./out/ST3A02.BIN");
 
   console.log("--- Replacing Textures ---");
-  console.log("  - Body Texture");
+  console.log("  - Body + Face Texture (compressed)");
   replaceInRom(rom, pl00t, mikuTexture);
-  console.log("  - Face Texture");
-  replaceInRom(rom, pl00t2, mikuTexture);
+  console.log("  - Body + Face Texture (uncompressed)");
+  replaceInRom(rom, pl00t2, mikuTexturePatch);
   console.log("  - First Cut Scene Patch");
   replaceInRom(rom, st03a2, st03a2Miku);
 
