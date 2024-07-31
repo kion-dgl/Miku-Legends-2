@@ -1,3 +1,5 @@
+![Miku_Legends2_Logo](https://github.com/user-attachments/assets/8c32c8fc-444b-4f93-b298-6d3a05ea6d1c)
+
 ## How to Clone
 
 Note that this repository is written in Bun. Which is basically just using TypeScript and instead of messing around with `ts-node`, it "just works". 
@@ -122,3 +124,4 @@ Issue: https://github.com/kion-dgl/Miku-Legends-2/issues/12
 
 - Miku Model by [Xinus22](https://x.com/xinus22)
 - Helmet, Buster and Special Weapons by [suitNtie22](https://x.com/suitNtie22)
+- Logo by [Sumigummy](https://x.com/SumiGummy)
