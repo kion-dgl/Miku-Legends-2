@@ -1,5 +1,5 @@
 /**
-  
+
   Miku-Legends-2
   Copyright (C) 2024, DashGL Project
   By Kion (kion@dashgl.com)
@@ -16,7 +16,7 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
 **/
 
 import { readFileSync, writeFileSync } from "fs";
@@ -242,6 +242,20 @@ const replaceTexture = (
 
   // Replace Body
   const [bodyPal, bodyImg] = encodeImage(bodyBuffer);
+
+  // Add patch for after the first cutscene
+  const st03a2 = readFileSync("./bin/ST3A02.BIN");
+  const ST03A2_PAL_OFS = 0x2c830;
+  const ST03A2_IMG_OFS = 0x2d000;
+  for (let i = 0; i < bodyPal.length; i++) {
+    st03a2[ST03A2_PAL_OFS + i] = bodyPal[i];
+  }
+
+  for (let i = 0; i < bodyImg.length; i++) {
+    st03a2[ST03A2_IMG_OFS + i] = bodyImg[i];
+  }
+  writeFileSync("./out/ST3A02.BIN", st03a2);
+
   const [bodyBitField, compressedBody] = compressTexture(
     bodyPal,
     bodyImg,
