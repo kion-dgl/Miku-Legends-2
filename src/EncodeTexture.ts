@@ -301,12 +301,12 @@ const replaceTexture = (
   }
 
   for (let i = 0; i < facePal.length; i++) {
-    st03a2[0x35030 + i] = bodyPal[i];
+    st03a2[0x35030 + i] = facePal[i];
     pl00t2[0x9030 + i] = facePal[i];
   }
 
   for (let i = 0; i < faceImg.length; i++) {
-    st03a2[0x35800 + i] = bodyImg[i];
+    st03a2[0x35800 + i] = faceImg[i];
     pl00t2[0x9800 + i] = faceImg[i];
   }
   writeFileSync("./out/PL00T2.BIN", pl00t2);
