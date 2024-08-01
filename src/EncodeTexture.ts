@@ -257,7 +257,6 @@ const replaceTexture = (
     st03a2[ST03A2_IMG_OFS + i] = bodyImg[i];
     pl00t2[0x800 + i] = bodyImg[i];
   }
-  writeFileSync("./out/ST3A02.BIN", st03a2);
 
   const [bodyBitField, compressedBody] = compressTexture(
     bodyPal,
@@ -302,15 +301,16 @@ const replaceTexture = (
   }
 
   for (let i = 0; i < facePal.length; i++) {
-    // st03a2[ST03A2_PAL_OFS + i] = bodyPal[i];
+    st03a2[0x35030 + i] = bodyPal[i];
     pl00t2[0x9030 + i] = facePal[i];
   }
 
   for (let i = 0; i < faceImg.length; i++) {
-    // st03a2[ST03A2_IMG_OFS + i] = bodyImg[i];
+    st03a2[0x35800 + i] = bodyImg[i];
     pl00t2[0x9800 + i] = faceImg[i];
   }
   writeFileSync("./out/PL00T2.BIN", pl00t2);
+  writeFileSync("./out/ST3A02.BIN", st03a2);
 
   // First we zero out the previous image
   for (let i = 0x3830; i < 0x6500; i++) {
