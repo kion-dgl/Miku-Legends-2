@@ -304,6 +304,128 @@ const encodeMesh = (obj: string, materialIndex: number): Primitive => {
   };
 };
 
+const encodeBones = () => {
+  const SCALE = 1 / 0.00125;
+  const ROT_X = new Matrix4();
+  ROT_X.makeRotationX(Math.PI);
+
+  const rollSkeleton = [
+    // Root (body)
+    {
+      x: 0,
+      y: 0.953,
+      z: 0.014,
+    },
+    // Head
+    {
+      x: 0,
+      y: 0.345,
+      z: -0.021,
+    },
+    // Right arm - From the shoulder
+    {
+      x: -0.12,
+      y: 0.25,
+      z: -0.013,
+    },
+    // Right elbow
+    {
+      x: -0.064,
+      y: -0.2,
+      z: 0,
+    },
+    // Right hand
+    {
+      x: 0,
+      y: -0.169,
+      z: 0,
+    },
+    // Left arm - From the shoulder (needs adjusts)
+    {
+      x: 0.12,
+      y: 0.25,
+      z: -0.013,
+    },
+    // Left Elbow
+    {
+      x: 0.064,
+      y: -0.2,
+      z: 0,
+    },
+    // Left hand
+    {
+      x: 0,
+      y: -0.169,
+      z: 0,
+    },
+    // Hip Bone
+    {
+      x: 0,
+      y: 0,
+      z: 0.019,
+    },
+    // Right Leg
+    {
+      x: -0.066,
+      y: -0.084,
+      z: -0.029,
+    },
+    // Right Knee
+    {
+      x: 0,
+      y: -0.3, // -0.39
+      z: 0,
+    },
+    // Right Foot
+    {
+      x: 0,
+      y: -0.4, // -0.438
+      z: 0,
+    },
+    // Left Leg
+    {
+      x: 0.066,
+      y: -0.084,
+      z: -0.029,
+    },
+    // Left Knee
+    {
+      x: 0,
+      y: -0.3,
+      z: 0,
+    },
+    // Left Foot
+    {
+      x: 0,
+      y: -0.4,
+      z: 0,
+    },
+    // Zero - use unknown (if any)
+    {
+      x: 0,
+      y: 0,
+      z: 0,
+    },
+  ];
+
+  const vertexSize = 0x06;
+  const boneBuffer = Buffer.alloc(rollSkeleton.length * vertexSize);
+
+  let ofs = 0;
+  rollSkeleton.forEach((bone) => {
+    const vec3 = new Vector3(bone.x, bone.y, bone.z);
+    vec3.multiplyScalar(SCALE);
+    vec3.applyMatrix4(ROT_X);
+    const { x, y, z } = vec3;
+    boneBuffer.writeInt16LE(Math.ceil(x), ofs + 0);
+    boneBuffer.writeInt16LE(Math.ceil(y), ofs + 2);
+    boneBuffer.writeInt16LE(Math.ceil(z), ofs + 4);
+    ofs += vertexSize;
+  });
+
+  return boneBuffer;
+};
+
 const encodeModel = (
   // Filename to replace
   filename: string,
@@ -524,6 +646,16 @@ const encodeModel = (
     headerOfs += STRIDE;
   };
 
+  // Copy the source skeelton into the mesh
+  for (let i = 0; i < 0x80; i++) {
+    mesh[i] = src[0x30 + i];
+  }
+
+  const boneBuffer = encodeBones();
+  for (let i = 0; i < boneBuffer.length; i++) {
+    mesh[i] = boneBuffer[i];
+  }
+
   // Body Section
   let label = Buffer.from("----  BODY  ----", "ascii");
   for (let i = 0; i < label.length; i++) {
@@ -613,7 +745,7 @@ const encodeModel = (
   console.log("Bytes remaining: 0x%s", remaining.toString(16));
 
   // Copy Over the Model After the Skeleton
-  for (let i = 0x80; i < mesh.length; i++) {
+  for (let i = 0x0; i < mesh.length; i++) {
     src[i + 0x30] = mesh[i];
   }
 

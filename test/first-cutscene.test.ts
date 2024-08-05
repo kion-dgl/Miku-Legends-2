@@ -96,8 +96,6 @@ test("it should decode cutscene face texture into a png", () => {
     }
   }
 
-  console.log(palette);
-
   ofs = 0x800;
   // Read the image data
   const imageData: number[] = new Array();
