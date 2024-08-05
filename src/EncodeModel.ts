@@ -400,6 +400,7 @@ const encodeBones = () => {
       y: -0.438,
       z: 0,
     },
+    // Zero - use unknown (if any)
     {
       x: 0,
       y: 0,
