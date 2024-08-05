@@ -319,13 +319,13 @@ const encodeBones = () => {
     // Head
     {
       x: 0,
-      y: 0.345,
+      y: 1.345, // 0.345
       z: -0.021,
     },
-    // Right arm - From the shoulder (needs adjusts)
+    // Right arm - From the shoulder
     {
-      x: -0.081,
-      y: 0.205,
+      x: -0.12,
+      y: 0.25,
       z: -0.013,
     },
     // Right elbow
@@ -342,8 +342,8 @@ const encodeBones = () => {
     },
     // Left arm - From the shoulder (needs adjusts)
     {
-      x: 0.081,
-      y: 0.205,
+      x: 0.12,
+      y: 0.25,
       z: -0.013,
     },
     // Left Elbow
