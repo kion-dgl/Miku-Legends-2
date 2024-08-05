@@ -524,6 +524,27 @@ const encodeModel = (
     headerOfs += STRIDE;
   };
 
+  // Copy the source skeelton into the mesh
+  // for (let i = 0; i < 0x80; i++) {
+  //   mesh[i] = src[0x30 + i];
+  // }
+
+  const rollModel = readFileSync("bin/PL01P000.BIN").subarray(0x30);
+  const BONE_LENGTH = 6;
+  const BONE_COUNT = 17;
+
+  console.log(
+    "Not bone stuff starts at: 0x%s",
+    (BONE_LENGTH * (BONE_COUNT - 1)).toString(16),
+  );
+  for (
+    let i = BONE_LENGTH * (BONE_COUNT - 1);
+    i < BONE_LENGTH * BONE_COUNT;
+    i++
+  ) {
+    mesh[i] = rollModel[i];
+  }
+
   // Body Section
   let label = Buffer.from("----  BODY  ----", "ascii");
   for (let i = 0; i < label.length; i++) {
@@ -613,7 +634,7 @@ const encodeModel = (
   console.log("Bytes remaining: 0x%s", remaining.toString(16));
 
   // Copy Over the Model After the Skeleton
-  for (let i = 0x80; i < mesh.length; i++) {
+  for (let i = 0x0; i < mesh.length; i++) {
     src[i + 0x30] = mesh[i];
   }
 

@@ -36,6 +36,7 @@ test("reading the MegaMan skeleton", () => {
     bones.push({ x, y, z });
   }
 
+  console.log(reader.tellf());
   expect(bones).toEqual(megamanSkeleton);
 });
 
