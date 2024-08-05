@@ -304,6 +304,112 @@ const encodeMesh = (obj: string, materialIndex: number): Primitive => {
   };
 };
 
+const encodeBones = () => {
+  const SCALE = 1 / 0.00125;
+  const ROT_X = new Matrix4();
+  ROT_X.makeRotationX(Math.PI);
+
+  const rollSkeleton = [
+    {
+      x: 0,
+      y: 1.081,
+      z: 0.014,
+    },
+    {
+      x: 0,
+      y: 0.345,
+      z: -0.021,
+    },
+    {
+      x: -0.081,
+      y: 0.205,
+      z: -0.013,
+    },
+    {
+      x: -0.064,
+      y: -0.2,
+      z: 0,
+    },
+    {
+      x: 0,
+      y: -0.169,
+      z: 0,
+    },
+    {
+      x: 0.081,
+      y: 0.205,
+      z: -0.013,
+    },
+    {
+      x: 0.064,
+      y: -0.2,
+      z: 0,
+    },
+    {
+      x: 0,
+      y: -0.169,
+      z: 0,
+    },
+    {
+      x: 0,
+      y: 0,
+      z: 0.019,
+    },
+    {
+      x: -0.066,
+      y: -0.084,
+      z: -0.029,
+    },
+    {
+      x: 0,
+      y: -0.39,
+      z: 0,
+    },
+    {
+      x: 0,
+      y: -0.438,
+      z: 0,
+    },
+    {
+      x: 0.066,
+      y: -0.084,
+      z: -0.029,
+    },
+    {
+      x: 0,
+      y: -0.39,
+      z: 0,
+    },
+    {
+      x: 0,
+      y: -0.438,
+      z: 0,
+    },
+    {
+      x: 0,
+      y: 0,
+      z: 0,
+    },
+  ];
+
+  const vertexSize = 0x06;
+  const boneBuffer = Buffer.alloc(rollSkeleton.length * vertexSize);
+
+  let ofs = 0;
+  rollSkeleton.forEach((bone) => {
+    const vec3 = new Vector3(bone.x, bone.y, bone.z);
+    vec3.multiplyScalar(SCALE);
+    vec3.applyMatrix4(ROT_X);
+    const { x, y, z } = vec3;
+    boneBuffer.writeInt16LE(Math.ceil(x), ofs + 0);
+    boneBuffer.writeInt16LE(Math.ceil(y), ofs + 2);
+    boneBuffer.writeInt16LE(Math.ceil(z), ofs + 4);
+    ofs += vertexSize;
+  });
+
+  return boneBuffer;
+};
+
 const encodeModel = (
   // Filename to replace
   filename: string,
@@ -525,24 +631,13 @@ const encodeModel = (
   };
 
   // Copy the source skeelton into the mesh
-  // for (let i = 0; i < 0x80; i++) {
-  //   mesh[i] = src[0x30 + i];
-  // }
+  for (let i = 0; i < 0x80; i++) {
+    mesh[i] = src[0x30 + i];
+  }
 
-  const rollModel = readFileSync("bin/PL01P000.BIN").subarray(0x30);
-  const BONE_LENGTH = 6;
-  const BONE_COUNT = 17;
-
-  console.log(
-    "Not bone stuff starts at: 0x%s",
-    (BONE_LENGTH * (BONE_COUNT - 1)).toString(16),
-  );
-  for (
-    let i = BONE_LENGTH * (BONE_COUNT - 1);
-    i < BONE_LENGTH * BONE_COUNT;
-    i++
-  ) {
-    mesh[i] = rollModel[i];
+  const boneBuffer = encodeBones();
+  for (let i = 0; i < boneBuffer.length; i++) {
+    mesh[i] = boneBuffer[i];
   }
 
   // Body Section
