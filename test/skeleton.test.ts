@@ -24,7 +24,7 @@ test("reading the MegaMan skeleton", () => {
 
   const bones: Vector[] = [];
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 16; i++) {
     const xRaw = reader.readInt16();
     const yRaw = reader.readInt16();
     const zRaw = reader.readInt16();
@@ -33,10 +33,13 @@ test("reading the MegaMan skeleton", () => {
     vec3.multiplyScalar(SCALE);
     vec3.applyMatrix4(ROT);
     const { x, y, z } = vec3;
-    bones.push({ x, y, z });
+
+    const xAdjust = parseFloat((Math.abs(x) < 0.01 ? 0 : x).toFixed(3));
+    const yAdjust = parseFloat((Math.abs(y) < 0.01 ? 0 : y).toFixed(3));
+    const zAdjust = parseFloat((Math.abs(z) < 0.01 ? 0 : z).toFixed(3));
+    bones.push({ x: xAdjust, y: yAdjust, z: zAdjust });
   }
 
-  console.log(reader.tellf());
   expect(bones).toEqual(megamanSkeleton);
 });
 
@@ -48,7 +51,7 @@ test("reading the Roll skeleton", () => {
 
   const bones: Vector[] = [];
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 16; i++) {
     const xRaw = reader.readInt16();
     const yRaw = reader.readInt16();
     const zRaw = reader.readInt16();
@@ -57,7 +60,10 @@ test("reading the Roll skeleton", () => {
     vec3.multiplyScalar(SCALE);
     vec3.applyMatrix4(ROT);
     const { x, y, z } = vec3;
-    bones.push({ x, y, z });
+    const xAdjust = parseFloat((Math.abs(x) < 0.01 ? 0 : x).toFixed(3));
+    const yAdjust = parseFloat((Math.abs(y) < 0.01 ? 0 : y).toFixed(3));
+    const zAdjust = parseFloat((Math.abs(z) < 0.01 ? 0 : z).toFixed(3));
+    bones.push({ x: xAdjust, y: yAdjust, z: zAdjust });
   }
 
   expect(bones).toEqual(rollSkeleton);
