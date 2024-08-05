@@ -313,13 +313,13 @@ const encodeBones = () => {
     // Root (body)
     {
       x: 0,
-      y: 1.081,
+      y: 0.953,
       z: 0.014,
     },
     // Head
     {
       x: 0,
-      y: 1.345, // 0.345
+      y: 0.345,
       z: -0.021,
     },
     // Right arm - From the shoulder
@@ -364,40 +364,40 @@ const encodeBones = () => {
       y: 0,
       z: 0.019,
     },
-    // Left Leg
-    {
-      x: -0.066,
-      y: -0.084,
-      z: -0.029,
-    },
-    // Left Knee
-    {
-      x: 0,
-      y: -0.39,
-      z: 0,
-    },
-    // Left Foot
-    {
-      x: 0,
-      y: -0.438,
-      z: 0,
-    },
     // Right Leg
     {
-      x: 0.066,
+      x: -0.066,
       y: -0.084,
       z: -0.029,
     },
     // Right Knee
     {
       x: 0,
-      y: -0.39,
+      y: -0.3, // -0.39
       z: 0,
     },
     // Right Foot
     {
       x: 0,
-      y: -0.438,
+      y: -0.4, // -0.438
+      z: 0,
+    },
+    // Left Leg
+    {
+      x: 0.066,
+      y: -0.084,
+      z: -0.029,
+    },
+    // Left Knee
+    {
+      x: 0,
+      y: -0.3,
+      z: 0,
+    },
+    // Left Foot
+    {
+      x: 0,
+      y: -0.4,
       z: 0,
     },
     // Zero - use unknown (if any)
