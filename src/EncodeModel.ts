@@ -310,76 +310,91 @@ const encodeBones = () => {
   ROT_X.makeRotationX(Math.PI);
 
   const rollSkeleton = [
+    // Root (body)
     {
       x: 0,
       y: 1.081,
       z: 0.014,
     },
+    // Head
     {
       x: 0,
       y: 0.345,
       z: -0.021,
     },
+    // Right arm - From the shoulder (needs adjusts)
     {
       x: -0.081,
       y: 0.205,
       z: -0.013,
     },
+    // Right elbow
     {
       x: -0.064,
       y: -0.2,
       z: 0,
     },
+    // Right hand
     {
       x: 0,
       y: -0.169,
       z: 0,
     },
+    // Left arm - From the shoulder (needs adjusts)
     {
       x: 0.081,
       y: 0.205,
       z: -0.013,
     },
+    // Left Elbow
     {
       x: 0.064,
       y: -0.2,
       z: 0,
     },
+    // Left hand
     {
       x: 0,
       y: -0.169,
       z: 0,
     },
+    // Hip Bone
     {
       x: 0,
       y: 0,
       z: 0.019,
     },
+    // Left Leg
     {
       x: -0.066,
       y: -0.084,
       z: -0.029,
     },
+    // Left Knee
     {
       x: 0,
       y: -0.39,
       z: 0,
     },
+    // Left Foot
     {
       x: 0,
       y: -0.438,
       z: 0,
     },
+    // Right Leg
     {
       x: 0.066,
       y: -0.084,
       z: -0.029,
     },
+    // Right Knee
     {
       x: 0,
       y: -0.39,
       z: 0,
     },
+    // Right Foot
     {
       x: 0,
       y: -0.438,
