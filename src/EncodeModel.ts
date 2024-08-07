@@ -442,7 +442,8 @@ const encodeModel = (
   const STRIDE = 0x18;
   const mesh = Buffer.alloc(0x2b40, 0);
   const shadowOfs: number[] = [];
-  let maxFaces = -1;
+  const shadowOfsBk: number[] = [];
+  let maxVerts = -1;
 
   let headerOfs = 0;
   let ptrOfs = 0x2f0;
@@ -460,12 +461,8 @@ const encodeModel = (
     mesh.writeUInt8(vertCount, headerOfs + 2); // verts
 
     // Update the max number of faces to add shadows
-    if (triCount > maxFaces) {
-      maxFaces = triCount;
-    }
-    // Update the max number of faces to add shadows
-    if (quadCount > maxFaces) {
-      maxFaces = quadCount;
+    if (vertCount > maxVerts) {
+      maxVerts = vertCount;
     }
 
     // Write Triangles
@@ -494,7 +491,7 @@ const encodeModel = (
 
     // Push shadows
     shadowOfs.push(headerOfs + 0x10);
-    shadowOfs.push(headerOfs + 0x14);
+    shadowOfsBk.push(headerOfs + 0x14);
     headerOfs += STRIDE;
     return [triCount, quadCount, vertCount, triOfs, quadOfs, vertOfs];
   };
@@ -529,12 +526,8 @@ const encodeModel = (
       const vertices = local.subarray(vertOfs, vertOfs + vertCount * 4);
 
       // Update the max number of faces to add shadows
-      if (triCount > maxFaces) {
-        maxFaces = triCount;
-      }
-      // Update the max number of faces to add shadows
-      if (quadCount > maxFaces) {
-        maxFaces = quadCount;
+      if (vertCount > maxVerts) {
+        maxVerts = vertCount;
       }
 
       // Write Triangles
@@ -560,7 +553,7 @@ const encodeModel = (
 
       // Push shadows
       shadowOfs.push(headerOfs + 0x10);
-      shadowOfs.push(headerOfs + 0x14);
+      shadowOfsBk.push(headerOfs + 0x14);
       headerOfs += STRIDE;
     });
   };
@@ -593,12 +586,8 @@ const encodeModel = (
     const vertices = local.subarray(vertOfs, vertOfs + vertCount * 4);
 
     // Update the max number of faces to add shadows
-    if (triCount > maxFaces) {
-      maxFaces = triCount;
-    }
-    // Update the max number of faces to add shadows
-    if (quadCount > maxFaces) {
-      maxFaces = quadCount;
+    if (vertCount > maxVerts) {
+      maxVerts = vertCount;
     }
 
     // Write Triangles
@@ -624,7 +613,7 @@ const encodeModel = (
 
     // Push shadows
     shadowOfs.push(headerOfs + 0x10);
-    shadowOfs.push(headerOfs + 0x14);
+    shadowOfsBk.push(headerOfs + 0x14);
     headerOfs += STRIDE;
   };
 
@@ -642,7 +631,7 @@ const encodeModel = (
 
     // Push shadows
     shadowOfs.push(headerOfs + 0x10);
-    shadowOfs.push(headerOfs + 0x14);
+    shadowOfsBk.push(headerOfs + 0x14);
     headerOfs += STRIDE;
   };
 
@@ -723,21 +712,34 @@ const encodeModel = (
   }
 
   // Create entry for face shadows
-
   if (ptrOfs % 16) {
     ptrOfs = Math.ceil(ptrOfs / 16) * 16;
   }
 
-  const shadows = Buffer.alloc((maxFaces + 4) * 4, 0x80);
-  label = Buffer.from("---- SHADOW ----", "ascii");
+  // Encode the Vertex Colors
+  label = Buffer.from("----  VCLR  ----", "ascii");
   for (let i = 0; i < label.length; i++) {
     mesh[ptrOfs++] = label[i];
   }
+
+  const shadows = Buffer.alloc(maxVerts * 4, 0);
+  for (let i = 0; i < shadows.length; i += 4) {
+    shadows[i + 0] = 0x7c;
+    shadows[i + 1] = 0x7c;
+    shadows[i + 2] = 0x7c;
+    shadows[i + 3] = 0;
+  }
+
   shadowOfs.forEach((ofs) => mesh.writeUint32LE(ptrOfs, ofs));
   for (let i = 0; i < shadows.length; i++) {
-    mesh[ptrOfs + i] = shadows[i];
+    mesh[ptrOfs++] = shadows[i];
   }
-  ptrOfs += shadows.length;
+
+  shadowOfsBk.forEach((ofs) => mesh.writeUint32LE(ptrOfs, ofs));
+  for (let i = 0; i < shadows.length; i++) {
+    mesh[ptrOfs++] = shadows[i];
+  }
+
   if (ptrOfs > 0x2b40) {
     throw new Error("Model length too long " + filename);
   }
