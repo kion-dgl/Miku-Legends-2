@@ -301,13 +301,15 @@ const compressTexture = (
   return [bitfied, Buffer.concat(loads)];
 };
 
-const replaceBodyTexture = (modded: Buffer, bodyBuffer: Buffer) => {
+const replaceBodyTexture = (
+  modded: Buffer,
+  bodyBuffer: Buffer,
+  pl00t2: Buffer,
+  st03a2: Buffer,
+) => {
   // Replace Body
   const [bodyPal, bodyImg] = encodeImage(bodyBuffer);
-  const pl00t2 = readFileSync("./bin/PL00T2.BIN");
 
-  // Add patch for after the first cutscene
-  const st03a2 = readFileSync("./bin/ST3A02.BIN");
   const ST03A2_PAL_OFS = 0x2c830;
   const ST03A2_IMG_OFS = 0x2d000;
   for (let i = 0; i < bodyPal.length; i++) {
@@ -360,6 +362,8 @@ const replaceFaceTexture = (
   facePallette: number[],
   weaponBuffer: Buffer,
   weaponPalette: number[],
+  pl00t2: Buffer,
+  st03a2: Buffer,
 ) => {
   // Encode the Face Image
   const faceImg = encodeFace(
@@ -375,10 +379,6 @@ const replaceFaceTexture = (
     facePal.writeUInt16LE(texel, outOfs);
     outOfs += 2;
   }
-  const pl00t2 = readFileSync("./bin/PL00T2.BIN");
-  const st03a2 = readFileSync("./bin/ST3A02.BIN");
-  const ST03A2_PAL_OFS = 0x2c830;
-  const ST03A2_IMG_OFS = 0x2d000;
 
   // Replace the second hald of the image with special weapons
   for (let i = 0; i < facePal.length; i++) {
@@ -390,8 +390,6 @@ const replaceFaceTexture = (
     st03a2[0x35800 + i] = faceImg[i];
     pl00t2[0x9800 + i] = faceImg[i];
   }
-  writeFileSync("./out/PL00T2.BIN", pl00t2);
-  writeFileSync("./out/ST3A02.BIN", st03a2);
 
   // First we zero out the previous image
   for (let i = 0x3830; i < 0x6500; i++) {
@@ -451,22 +449,27 @@ const encodeTexture = (
     throw new Error("Too many colors for weapon texture");
   }
 
-  console.log(facePalette.length);
-  console.log(weaponPalette.length);
+  // Files that need to be replaced with the uncompressed versions
+  const pl00t2 = readFileSync("./bin/PL00T2.BIN");
+  const st03a2 = readFileSync("./bin/ST3A02.BIN");
 
   // Modify the Game Texture
   const modTexture = Buffer.from(srcTexture);
-  replaceBodyTexture(modTexture, bodyBuffer);
+  replaceBodyTexture(modTexture, bodyBuffer, pl00t2, st03a2);
   replaceFaceTexture(
     modTexture,
     faceBuffer,
     facePalette,
     weaponBuffer,
     weaponPalette,
+    pl00t2,
+    st03a2,
   );
 
-  // Write the updated game file
-  writeFileSync("out/PL00T.BIN", modTexture);
+  // Write the updated game files
+  writeFileSync("./out/PL00T.BIN", modTexture);
+  writeFileSync("./out/PL00T2.BIN", pl00t2);
+  writeFileSync("./out/ST3A02.BIN", st03a2);
 };
 
 export { encodeTexture, encodeImage };
