@@ -2,6 +2,9 @@
   "name": "miku-legends-2",
   "module": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "patch": "bun index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/pngjs": "^6.0.5",
