@@ -380,11 +380,17 @@ const replaceFaceTexture = (
     outOfs += 2;
   }
 
-  // Replace the second hald of the image with special weapons
+  // Special Weapons
+  const shieldArm = readFileSync("./bin/PL00R0A.BIN");
+
+  // Update the palette in the
   for (let i = 0; i < facePal.length; i++) {
     st03a2[0x35030 + i] = facePal[i];
     pl00t2[0x9030 + i] = facePal[i];
+    shieldArm[0x3830 + i] = facePal[i];
   }
+
+  writeFileSync("./bin/PL00R0A.BIN", shieldArm);
 
   for (let i = 0; i < faceImg.length; i++) {
     st03a2[0x35800 + i] = faceImg[i];
