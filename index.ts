@@ -1,6 +1,7 @@
 import { encodeModel } from "./src/EncodeModel";
 import { encodeTexture } from "./src/EncodeTexture";
 import { encodeRom } from "./src/EncodeRom";
+import { replaceShieldArm } from "./src/EncodeWeapon";
 
 // Encode the Texture
 encodeTexture(
@@ -153,5 +154,20 @@ encodeModel(
   // Head
   "miku/01_HEAD_HAIR.obj",
 );
+
+/**
+    __                 _       _   __    __
+    / _\_ __   ___  ___(_) __ _| | / / /\ \ \___  __ _ _ __   ___  _ __  ___
+    \ \| '_ \ / _ \/ __| |/ _` | | \ \/  \/ / _ \/ _` | '_ \ / _ \| '_ \/ __|
+    _\ \ |_) |  __/ (__| | (_| | |  \  /\  /  __/ (_| | |_) | (_) | | | \__ \
+    \__/ .__/ \___|\___|_|\__,_|_|   \/  \/ \___|\__,_| .__/ \___/|_| |_|___/
+    |_|                                            |_|
+**/
+
+replaceShieldArm("miku/weapons/PL00R0A_001.obj");
+
+/**
+ Encode Rom
+**/
 
 encodeRom();

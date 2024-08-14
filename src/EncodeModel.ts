@@ -755,4 +755,4 @@ const encodeModel = (
   writeFileSync(`out/${filename}`, src);
 };
 
-export { encodeModel };
+export { encodeModel, encodeMesh };
