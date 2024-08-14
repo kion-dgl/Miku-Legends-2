@@ -37,7 +37,7 @@ type MeshHeader = {
 
 test("it should export an obj of the shield arm", () => {
   const filename = "PL00R0A";
-  const file = readFileSync("./bin/PL00R0A.BIN").subarray(0x1800);
+  const file = readFileSync("./bin/wpn_PL00R0A.BIN").subarray(0x1800);
 
   const type = file.readUInt32LE(0x00);
   const length = file.readUInt32LE(0x04);

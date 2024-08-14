@@ -29,11 +29,43 @@ interface FileEntry {
   size: number;
 }
 
+const replaceSegment = (rom: Buffer, needles: Buffer[], contents: Buffer[]) => {
+  let whence = -1;
+  needles.forEach((needle, index) => {
+    const locations: number[] = [];
+
+    if (index === 0) {
+      do {
+        whence += 1;
+        whence = rom.indexOf(needle, whence);
+        if (whence !== -1) {
+          locations.push(whence);
+        }
+      } while (whence !== -1);
+
+      if (locations.length !== 1) {
+        throw new Error("Only one match expected for segment");
+      }
+    } else {
+      whence = rom.indexOf(needle, whence);
+      if (whence === -1) {
+        throw new Error("Next segment expected after last");
+      }
+    }
+
+    const content = contents[index];
+    for (let i = 0; i < content.length; i++) {
+      rom[whence++] = content[i];
+    }
+  });
+};
+
 // Function to find file offset within the BIN file
 const findFileOffset = (rom: Buffer, file: Buffer) => {
   const needle = file.subarray(0, 0x800);
   let whence = -1;
   const locations: number[] = [];
+
   do {
     whence += 1;
     whence = rom.indexOf(needle, whence);
@@ -253,7 +285,26 @@ const encodeRom = () => {
   replaceInRom(rom, megaman[11], mikuHairHover);
 
   // Update Pointer Table
+  console.log("- Updating Pointer table -");
   updatePointerTable(rom);
+
+  // Update Specual weapons
+  const wpn_0A = readFileSync("bin/wpn_PL00R0A.BIN");
+  const miku_0A = readFileSync("out/PL00R0A.BIN");
+  console.log("--- Replacing Weapons ---");
+
+  console.log("  - 0x0A Shield Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0A.subarray(0x1800, 0x2000)),
+      Buffer.from(wpn_0A.subarray(0x3800, 0x4000)),
+    ],
+    [
+      Buffer.from(miku_0A.subarray(0x1800, 0x2000)),
+      Buffer.from(miku_0A.subarray(0x3800, 0x4000)),
+    ],
+  );
 
   // Write the result
   console.log("--- Wiritng ROM ---");
