@@ -46,13 +46,16 @@ const replaceSegment = (rom: Buffer, needles: Buffer[], contents: Buffer[]) => {
       if (locations.length !== 1) {
         throw new Error("Only one match expected for segment");
       }
+
+      whence = locations[0];
     } else {
       whence = rom.indexOf(needle, whence);
-      if (whence === -1) {
-        throw new Error("Next segment expected after last");
-      }
+    }
+    if (whence === -1) {
+      throw new Error("Next segment expected after last");
     }
 
+    console.log("Replacing: ", index);
     const content = contents[index];
     for (let i = 0; i < content.length; i++) {
       rom[whence++] = content[i];

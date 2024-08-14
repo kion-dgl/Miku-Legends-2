@@ -136,43 +136,50 @@ const replaceShieldArm = (objFile: string) => {
   }
 
   let headerOfs = 0x1830;
-  let contentOfs = 0x1878;
+  let contentOfs = 0x1880;
   let pointerOfs = 0x2b88;
+
+  const DEBUG_MEM = Buffer.from("-- SPWPN 0x0A --", "ascii");
+  for (let i = 0; i < DEBUG_MEM.length; i++) {
+    file[contentOfs++] = DEBUG_MEM[i];
+  }
   meshes.forEach((mesh) => {
-    file.writeUInt8(headerOfs + 0, mesh.triCount);
-    file.writeUInt8(headerOfs + 1, mesh.quadCount);
-    file.writeUInt8(headerOfs + 2, mesh.vertexCount);
+    console.log("header Offset: 0x%s", headerOfs.toString(16));
+    console.log("Counts: ", mesh.triCount, mesh.quadCount, mesh.vertexCount);
+    file.writeUInt8(mesh.triCount, headerOfs + 0);
+    file.writeUInt8(mesh.quadCount, headerOfs + 1);
+    file.writeUInt8(mesh.vertexCount, headerOfs + 2);
 
     // Triangles
-    file.writeUInt32LE(headerOfs + 4, pointerOfs);
+    file.writeUInt32LE(pointerOfs, headerOfs + 4);
     for (let i = 0; i < mesh.triList.length; i++) {
       file[contentOfs++] = mesh.triList[i];
     }
     pointerOfs += mesh.triList.length;
 
     // Quads
-    file.writeUInt32LE(headerOfs + 8, pointerOfs);
+    file.writeUInt32LE(pointerOfs, headerOfs + 8);
     for (let i = 0; i < mesh.quadList.length; i++) {
       file[contentOfs++] = mesh.quadList[i];
     }
     pointerOfs += mesh.quadList.length;
 
     // vertices
-    file.writeUInt32LE(headerOfs + 0x0c, pointerOfs);
+    file.writeUInt32LE(pointerOfs, headerOfs + 0x0c);
     for (let i = 0; i < mesh.vertexList.length; i++) {
       file[contentOfs++] = mesh.vertexList[i];
     }
     pointerOfs += mesh.vertexList.length;
 
     // Vertex Color
-    file.writeUInt32LE(headerOfs + 0x10, pointerOfs);
+    file.writeUInt32LE(pointerOfs, headerOfs + 0x10);
     for (let i = 0; i < mesh.vertexColors.length; i++) {
       file[contentOfs++] = mesh.vertexColors[i];
     }
     pointerOfs += mesh.vertexColors.length;
 
     // Vertex Color
-    file.writeUInt32LE(headerOfs + 0x14, pointerOfs);
+    file.writeUInt32LE(pointerOfs, headerOfs + 0x14);
     for (let i = 0; i < mesh.vertexColors.length; i++) {
       file[contentOfs++] = mesh.vertexColors[i];
     }

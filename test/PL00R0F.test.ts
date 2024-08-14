@@ -35,10 +35,9 @@ type MeshHeader = {
   vertexColorBkOfs: number;
 };
 
-// Looks like this is actually the blade arm?
-test("it should export an obj of the shield arm", () => {
-  const filename = "PL00R0A";
-  const file = readFileSync("./bin/wpn_PL00R0A.BIN").subarray(0x1800);
+test("it should export an obj of the aqua blaster", () => {
+  const filename = "PL00R0F";
+  const file = readFileSync("./bin/wpn_PL00R0F.BIN").subarray(0x1800);
 
   const type = file.readUInt32LE(0x00);
   const length = file.readUInt32LE(0x04);
@@ -46,7 +45,7 @@ test("it should export an obj of the shield arm", () => {
   const memory = file.readUInt32LE(0x0c);
 
   expect(type).toEqual(1);
-  expect(length).toEqual(0x069c);
+  expect(length).toEqual(1524);
   expect(something).toEqual(1);
   expect(memory).toEqual(0x80113340);
 
