@@ -373,10 +373,11 @@ const replaceFaceTexture = (
     weaponPalette,
   );
   const facePal = Buffer.alloc(0x80);
+  const wpnPal = Buffer.alloc(0x80);
   let outOfs = 0;
   for (let i = 0; i < 16; i++) {
-    const texel = facePalette[i] || 0x0000;
-    facePal.writeUInt16LE(texel, outOfs);
+    facePal.writeUInt16LE(facePalette[i] || 0x0000, outOfs);
+    wpnPal.writeUInt16LE(weaponPalette[i] || 0x0000, outOfs);
     outOfs += 2;
   }
 
@@ -387,7 +388,7 @@ const replaceFaceTexture = (
   for (let i = 0; i < facePal.length; i++) {
     st03a2[0x35030 + i] = facePal[i];
     pl00t2[0x9030 + i] = facePal[i];
-    shieldArm[0x3830 + i] = facePal[i];
+    shieldArm[0x3830 + i] = wpnPal[i];
   }
 
   writeFileSync("./out/PL00R0A.BIN", shieldArm);

@@ -304,7 +304,7 @@ const encodeRom = () => {
       Buffer.from(wpn_0A.subarray(0x3800, 0x4000)),
     ],
     [
-      Buffer.from(miku_0A.subarray(0x1800, 0x2000)),
+      Buffer.from(miku_0A.subarray(0x1800, 0x2000)), // Replace with same thing
       Buffer.from(miku_0A.subarray(0x3800, 0x4000)),
     ],
   );
