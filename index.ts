@@ -11,6 +11,7 @@ encodeTexture(
   "miku/face-1.png",
   // Special Weapon
   "miku/megaman_img_002.png",
+  // "miku/debug.png",
 );
 
 /**

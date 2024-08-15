@@ -86,6 +86,7 @@ test("it should export an obj of the shield arm", () => {
     const triList = readFace(reader, triOfs, triCount, false);
     const { quadOfs, quadCount } = strip;
     const quadList = readFace(reader, quadOfs, quadCount, true);
+    console.log(quadList);
 
     const obj: string[] = [];
     vertexList.forEach(({ x, y, z }) => {

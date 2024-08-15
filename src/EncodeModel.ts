@@ -294,7 +294,7 @@ const encodeMesh = (
     const indexC = c & FACE_MASK;
     const indexD = d & FACE_MASK;
 
-    const materialIndex = 0;
+    // const materialIndex = 0;
 
     // Material Index 0 = Img 0 - Palette 0
     // Material Index 1 = Img 0 - Palette 1

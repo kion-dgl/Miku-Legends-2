@@ -54,7 +54,6 @@ type DrawCall = {
 // the vertices, triangles, quads and vertex colors, and we return an object
 // with the counts and
 const encodeObj = (obj: string, matIndex: number): DrawCall => {
-  const MATERIAL_INDEX = 3;
   console.log("encoding mesh");
   const { tri, quad, vertices } = encodeMesh(obj, matIndex, true);
   const triCount = tri.length / 12;
