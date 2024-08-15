@@ -359,7 +359,7 @@ const replaceBodyTexture = (
 const replaceFaceTexture = (
   modded: Buffer,
   faceBuffer: Buffer,
-  facePallette: number[],
+  facePalette: number[],
   weaponBuffer: Buffer,
   weaponPalette: number[],
   pl00t2: Buffer,
@@ -369,13 +369,13 @@ const replaceFaceTexture = (
   const faceImg = encodeFace(
     faceBuffer,
     weaponBuffer,
-    facePallette,
+    facePalette,
     weaponPalette,
   );
   const facePal = Buffer.alloc(0x80);
   let outOfs = 0;
   for (let i = 0; i < 16; i++) {
-    const texel = facePallette[i] || 0x0000;
+    const texel = facePalette[i] || 0x0000;
     facePal.writeUInt16LE(texel, outOfs);
     outOfs += 2;
   }
@@ -478,4 +478,4 @@ const encodeTexture = (
   writeFileSync("./out/ST3A02.BIN", st03a2);
 };
 
-export { encodeTexture, encodeImage };
+export { encodePalette, encodeTexture, encodeImage, encodeFace };

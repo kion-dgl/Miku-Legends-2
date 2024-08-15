@@ -53,9 +53,10 @@ type DrawCall = {
 // For encode object, we want to take an object file and then encode
 // the vertices, triangles, quads and vertex colors, and we return an object
 // with the counts and
-const encodeObj = (obj: string): DrawCall => {
+const encodeObj = (obj: string, matIndex: number): DrawCall => {
   const MATERIAL_INDEX = 3;
-  const { tri, quad, vertices } = encodeMesh(obj, 3);
+  console.log("encoding mesh");
+  const { tri, quad, vertices } = encodeMesh(obj, matIndex, true);
   const triCount = tri.length / 12;
   const quadCount = quad.length / 12;
   const vertexCount = vertices.length / 4;
@@ -125,8 +126,8 @@ const replaceShieldArm = (objFile: string) => {
   );
   const weapon = readFileSync(objFile).toString("ascii");
 
-  const mesh0 = encodeObj(shoulder);
-  const mesh1 = encodeObj(weapon);
+  const mesh0 = encodeObj(shoulder, 0); // Body Mesh
+  const mesh1 = encodeObj(weapon, 3); // Special Weapon
   const mesh2 = extractBullet(file, SHIELD_ARM_OFFSET);
   const meshes = [mesh0, mesh1, mesh2];
 
@@ -137,7 +138,7 @@ const replaceShieldArm = (objFile: string) => {
 
   let headerOfs = 0x1830;
   let contentOfs = 0x1880;
-  let pointerOfs = 0x2b88;
+  let pointerOfs = 0x2b88 + 0x18;
 
   const DEBUG_MEM = Buffer.from("-- SPWPN 0x0A --", "ascii");
   for (let i = 0; i < DEBUG_MEM.length; i++) {
