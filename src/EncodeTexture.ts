@@ -382,6 +382,7 @@ const replaceFaceTexture = (
   }
 
   // Special Weapons
+  const reflectArm = readFileSync("./bin/wpn_PL00R08.BIN");
   const shieldArm = readFileSync("./bin/wpn_PL00R09.BIN");
   const bladeArm = readFileSync("./bin/wpn_PL00R0A.BIN");
 
@@ -391,10 +392,12 @@ const replaceFaceTexture = (
     st03a2[0x35030 + i] = facePal[i];
     pl00t2[0x9030 + i] = facePal[i];
     // Weapon
+    reflectArm[0x3030 + i] = wpnPal[i];
     shieldArm[0x2830 + i] = wpnPal[i];
     bladeArm[0x3830 + i] = wpnPal[i];
   }
 
+  writeFileSync("./out/PL00R08.BIN", reflectArm);
   writeFileSync("./out/PL00R09.BIN", shieldArm);
   writeFileSync("./out/PL00R0A.BIN", bladeArm);
 

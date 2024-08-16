@@ -294,6 +294,22 @@ const encodeRom = () => {
   // Update Specual weapons
   console.log("--- Replacing Weapons ---");
 
+  const wpn_08 = readFileSync("bin/wpn_PL00R08.BIN");
+  const miku_08 = readFileSync("out/PL00R08.BIN");
+
+  console.log("  - 0x08 Reflector Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_08.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_08.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_08.subarray(0x1000, 0x1000 + 0x800)), // Replace with same thing
+      Buffer.from(miku_08.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
+
   const wpn_09 = readFileSync("bin/wpn_PL00R09.BIN");
   const miku_09 = readFileSync("out/PL00R09.BIN");
 
@@ -305,7 +321,7 @@ const encodeRom = () => {
       Buffer.from(wpn_09.subarray(0x2800, 0x2800 + 0x800)),
     ],
     [
-      Buffer.from(miku_09.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_09.subarray(0x2000, 0x2000 + 0x800)), // Replace with same thing
       Buffer.from(miku_09.subarray(0x2800, 0x2800 + 0x800)),
     ],
   );
@@ -321,7 +337,7 @@ const encodeRom = () => {
       Buffer.from(wpn_0A.subarray(0x3800, 0x4000)),
     ],
     [
-      Buffer.from(miku_0A.subarray(0x1800, 0x2000)),
+      Buffer.from(miku_0A.subarray(0x1800, 0x2000)), // Replace with same thing
       Buffer.from(miku_0A.subarray(0x3800, 0x4000)),
     ],
   );

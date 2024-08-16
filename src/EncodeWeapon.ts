@@ -21,25 +21,6 @@
 import { encodeMesh } from "./EncodeModel";
 import { readFileSync, writeFileSync } from "fs";
 
-// 00 - Lifter
-// 01 - Kick
-// 02 - Mega Buster
-// 03 - Crusher
-// 04 - Buster Cannon
-// 05 - Hyper Shell
-// 06 - Homing Missile
-// 07 - Ground Crawler
-// 08 - Vacuum Arm
-// 09 - Reflector Arm
-// 0A - Shield Arm
-// 0B - Blade Arm
-// 0C - Shining Laser
-// 0D - Machinegun Arm
-// 0E - Spread Buster
-// 0F - Aqua Blaster
-// 10 - Hunter Seeker
-// 11 - Drill Arm
-
 type DrawCall = {
   vertexCount: number;
   triCount: number;
@@ -111,12 +92,10 @@ const extractBullet = (src: Buffer, offset: number): DrawCall => {
   };
 };
 
-const replaceShieldArm = (objFile: string) => {
+const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
   const MEM_OFFSET = 0x2b88;
-  // Load the weapon with updated palette
-  const SHIELD_ARM_PATH = "./out/PL00R09.BIN";
-  const SHIELD_ARM_OFFSET = 0x2000;
-  const file = readFileSync(SHIELD_ARM_PATH);
+  // Load the weapon with updated
+  const file = readFileSync(srcFile);
 
   // First we read the right shoulder
   const shoulder = readFileSync("./miku/04_RIGHT_SHOULDER.obj").toString(
@@ -126,19 +105,27 @@ const replaceShieldArm = (objFile: string) => {
 
   const mesh0 = encodeObj(shoulder, 0); // Body Mesh
   const mesh1 = encodeObj(weapon, 3); // Special Weapon
-  const mesh2 = extractBullet(file, SHIELD_ARM_OFFSET);
+  const mesh2 = extractBullet(file, srcOffset);
   const meshes = [mesh0, mesh1, mesh2];
 
   // Zero out the prior mesh
-  for (let i = 0x2030; i < 0x2800; i++) {
+  for (let i = srcOffset + 0x30; i < srcOffset + 0x800; i++) {
     file[i] = 0;
   }
 
-  let headerOfs = 0x2030;
-  let contentOfs = 0x2080;
+  let headerOfs = srcOffset + 0x30;
+  let contentOfs = srcOffset + 0x80;
   let pointerOfs = 0x2b88 + 0x18;
 
-  const DEBUG_MEM = Buffer.from("-- SPWPN 0x09 --", "ascii");
+  const dot = srcFile.indexOf(".BIN");
+  const char = srcFile.substring(dot - 2, dot);
+  console.log(srcFile.substring(dot));
+  const DEBUG_MEM = Buffer.from(`-- SPWPN 0x${char} --`, "ascii");
+  console.log(DEBUG_MEM.toString("ascii"));
+  if (DEBUG_MEM.length !== 16) {
+    throw new Error("Invalid debug string length");
+  }
+
   for (let i = 0; i < DEBUG_MEM.length; i++) {
     file[contentOfs++] = DEBUG_MEM[i];
   }
@@ -188,98 +175,34 @@ const replaceShieldArm = (objFile: string) => {
     headerOfs += 0x18;
   });
 
-  if (contentOfs > 0x2800) {
-    throw new Error("Shield Arm is too long!!!!");
+  if (contentOfs > srcOffset + 0x800) {
+    throw new Error("Weapon is too long!!!!");
   }
-  const len = contentOfs - 0x2030;
-  file.writeUInt32LE(0x2004, len);
-  writeFileSync("./out/PL00R09.BIN", file);
+
+  const len = contentOfs - (srcOffset + 0x30);
+  file.writeUInt32LE(srcOffset + 0x4, len);
+  writeFileSync(srcFile, file);
+};
+
+// 0x08
+const replaceReflectorArm = (objFile: string) => {
+  const filename = "./out/PL00R08.BIN";
+  const MEM_START = 0x1000;
+  replaceWeapon(filename, MEM_START, objFile);
+};
+
+// 0x09
+const replaceShieldArm = (objFile: string) => {
+  const filename = "./out/PL00R09.BIN";
+  const MEM_START = 0x2000;
+  replaceWeapon(filename, MEM_START, objFile);
 };
 
 // 0x0A
 const replaceBladeArm = (objFile: string) => {
-  const MEM_OFFSET = 0x2b88;
-  // Load the weapon with updated palette
-  const SHIELD_ARM_PATH = "./out/PL00R0A.BIN";
-  const SHIELD_ARM_OFFSET = 0x1800;
-  const file = readFileSync(SHIELD_ARM_PATH);
-
-  // First we read the right shoulder
-  const shoulder = readFileSync("./miku/04_RIGHT_SHOULDER.obj").toString(
-    "ascii",
-  );
-  const weapon = readFileSync(objFile).toString("ascii");
-
-  const mesh0 = encodeObj(shoulder, 0); // Body Mesh
-  const mesh1 = encodeObj(weapon, 3); // Special Weapon
-  const mesh2 = extractBullet(file, SHIELD_ARM_OFFSET);
-  const meshes = [mesh0, mesh1, mesh2];
-
-  // Zero out the prior mesh
-  for (let i = 0x1830; i < 0x2000; i++) {
-    file[i] = 0;
-  }
-
-  let headerOfs = 0x1830;
-  let contentOfs = 0x1880;
-  let pointerOfs = 0x2b88 + 0x18;
-
-  const DEBUG_MEM = Buffer.from("-- SPWPN 0x0A --", "ascii");
-  for (let i = 0; i < DEBUG_MEM.length; i++) {
-    file[contentOfs++] = DEBUG_MEM[i];
-  }
-  meshes.forEach((mesh) => {
-    console.log("header Offset: 0x%s", headerOfs.toString(16));
-    console.log("Counts: ", mesh.triCount, mesh.quadCount, mesh.vertexCount);
-    file.writeUInt8(mesh.triCount, headerOfs + 0);
-    file.writeUInt8(mesh.quadCount, headerOfs + 1);
-    file.writeUInt8(mesh.vertexCount, headerOfs + 2);
-
-    // Triangles
-    file.writeUInt32LE(pointerOfs, headerOfs + 4);
-    for (let i = 0; i < mesh.triList.length; i++) {
-      file[contentOfs++] = mesh.triList[i];
-    }
-    pointerOfs += mesh.triList.length;
-
-    // Quads
-    file.writeUInt32LE(pointerOfs, headerOfs + 8);
-    for (let i = 0; i < mesh.quadList.length; i++) {
-      file[contentOfs++] = mesh.quadList[i];
-    }
-    pointerOfs += mesh.quadList.length;
-
-    // vertices
-    file.writeUInt32LE(pointerOfs, headerOfs + 0x0c);
-    for (let i = 0; i < mesh.vertexList.length; i++) {
-      file[contentOfs++] = mesh.vertexList[i];
-    }
-    pointerOfs += mesh.vertexList.length;
-
-    // Vertex Color
-    file.writeUInt32LE(pointerOfs, headerOfs + 0x10);
-    for (let i = 0; i < mesh.vertexColors.length; i++) {
-      file[contentOfs++] = mesh.vertexColors[i];
-    }
-    pointerOfs += mesh.vertexColors.length;
-
-    // Vertex Color
-    file.writeUInt32LE(pointerOfs, headerOfs + 0x14);
-    for (let i = 0; i < mesh.vertexColors.length; i++) {
-      file[contentOfs++] = mesh.vertexColors[i];
-    }
-    pointerOfs += mesh.vertexColors.length;
-
-    // Update Header
-    headerOfs += 0x18;
-  });
-
-  if (contentOfs > 0x2000) {
-    throw new Error("Shield Arm is too long!!!!");
-  }
-  const len = contentOfs - 0x1830;
-  file.writeUInt32LE(0x1804, len);
-  writeFileSync("./out/PL00R0A.BIN", file);
+  const filename = "./out/PL00R0A.BIN";
+  const MEM_START = 0x1800;
+  replaceWeapon(filename, MEM_START, objFile);
 };
 
-export { replaceBladeArm, replaceShieldArm };
+export { replaceReflectorArm, replaceBladeArm, replaceShieldArm };
