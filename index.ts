@@ -1,7 +1,7 @@
 import { encodeModel } from "./src/EncodeModel";
 import { encodeTexture } from "./src/EncodeTexture";
 import { encodeRom } from "./src/EncodeRom";
-import { replaceShieldArm } from "./src/EncodeWeapon";
+import { replaceBladeArm, replaceShieldArm } from "./src/EncodeWeapon";
 
 // Encode the Texture
 encodeTexture(
@@ -165,7 +165,8 @@ encodeModel(
     |_|                                            |_|
 **/
 
-replaceShieldArm("miku/weapons/PL00R0A_001.obj");
+replaceShieldArm("miku/weapons/PL00R09_001.obj");
+replaceBladeArm("miku/weapons/PL00R0A_001.obj");
 
 /**
  Encode Rom

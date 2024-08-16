@@ -54,7 +54,6 @@ type DrawCall = {
 // the vertices, triangles, quads and vertex colors, and we return an object
 // with the counts and
 const encodeObj = (obj: string, matIndex: number): DrawCall => {
-  console.log("encoding mesh");
   const { tri, quad, vertices } = encodeMesh(obj, matIndex, true);
   const triCount = tri.length / 12;
   const quadCount = quad.length / 12;
@@ -113,6 +112,92 @@ const extractBullet = (src: Buffer, offset: number): DrawCall => {
 };
 
 const replaceShieldArm = (objFile: string) => {
+  const MEM_OFFSET = 0x2b88;
+  // Load the weapon with updated palette
+  const SHIELD_ARM_PATH = "./out/PL00R09.BIN";
+  const SHIELD_ARM_OFFSET = 0x2000;
+  const file = readFileSync(SHIELD_ARM_PATH);
+
+  // First we read the right shoulder
+  const shoulder = readFileSync("./miku/04_RIGHT_SHOULDER.obj").toString(
+    "ascii",
+  );
+  const weapon = readFileSync(objFile).toString("ascii");
+
+  const mesh0 = encodeObj(shoulder, 0); // Body Mesh
+  const mesh1 = encodeObj(weapon, 3); // Special Weapon
+  const mesh2 = extractBullet(file, SHIELD_ARM_OFFSET);
+  const meshes = [mesh0, mesh1, mesh2];
+
+  // Zero out the prior mesh
+  for (let i = 0x2030; i < 0x2800; i++) {
+    file[i] = 0;
+  }
+
+  let headerOfs = 0x2030;
+  let contentOfs = 0x2080;
+  let pointerOfs = 0x2b88 + 0x18;
+
+  const DEBUG_MEM = Buffer.from("-- SPWPN 0x09 --", "ascii");
+  for (let i = 0; i < DEBUG_MEM.length; i++) {
+    file[contentOfs++] = DEBUG_MEM[i];
+  }
+  meshes.forEach((mesh) => {
+    console.log("header Offset: 0x%s", headerOfs.toString(16));
+    console.log("Counts: ", mesh.triCount, mesh.quadCount, mesh.vertexCount);
+    file.writeUInt8(mesh.triCount, headerOfs + 0);
+    file.writeUInt8(mesh.quadCount, headerOfs + 1);
+    file.writeUInt8(mesh.vertexCount, headerOfs + 2);
+
+    // Triangles
+    file.writeUInt32LE(pointerOfs, headerOfs + 4);
+    for (let i = 0; i < mesh.triList.length; i++) {
+      file[contentOfs++] = mesh.triList[i];
+    }
+    pointerOfs += mesh.triList.length;
+
+    // Quads
+    file.writeUInt32LE(pointerOfs, headerOfs + 8);
+    for (let i = 0; i < mesh.quadList.length; i++) {
+      file[contentOfs++] = mesh.quadList[i];
+    }
+    pointerOfs += mesh.quadList.length;
+
+    // vertices
+    file.writeUInt32LE(pointerOfs, headerOfs + 0x0c);
+    for (let i = 0; i < mesh.vertexList.length; i++) {
+      file[contentOfs++] = mesh.vertexList[i];
+    }
+    pointerOfs += mesh.vertexList.length;
+
+    // Vertex Color
+    file.writeUInt32LE(pointerOfs, headerOfs + 0x10);
+    for (let i = 0; i < mesh.vertexColors.length; i++) {
+      file[contentOfs++] = mesh.vertexColors[i];
+    }
+    pointerOfs += mesh.vertexColors.length;
+
+    // Vertex Color
+    file.writeUInt32LE(pointerOfs, headerOfs + 0x14);
+    for (let i = 0; i < mesh.vertexColors.length; i++) {
+      file[contentOfs++] = mesh.vertexColors[i];
+    }
+    pointerOfs += mesh.vertexColors.length;
+
+    // Update Header
+    headerOfs += 0x18;
+  });
+
+  if (contentOfs > 0x2800) {
+    throw new Error("Shield Arm is too long!!!!");
+  }
+  const len = contentOfs - 0x2030;
+  file.writeUInt32LE(0x2004, len);
+  writeFileSync("./out/PL00R09.BIN", file);
+};
+
+// 0x0A
+const replaceBladeArm = (objFile: string) => {
   const MEM_OFFSET = 0x2b88;
   // Load the weapon with updated palette
   const SHIELD_ARM_PATH = "./out/PL00R0A.BIN";
@@ -197,4 +282,4 @@ const replaceShieldArm = (objFile: string) => {
   writeFileSync("./out/PL00R0A.BIN", file);
 };
 
-export { replaceShieldArm };
+export { replaceBladeArm, replaceShieldArm };

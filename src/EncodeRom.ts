@@ -292,11 +292,28 @@ const encodeRom = () => {
   updatePointerTable(rom);
 
   // Update Specual weapons
-  const wpn_0A = readFileSync("bin/wpn_PL00R0A.BIN");
-  const miku_0A = readFileSync("out/PL00R0A.BIN");
   console.log("--- Replacing Weapons ---");
 
-  console.log("  - 0x0A Shield Arm");
+  const wpn_09 = readFileSync("bin/wpn_PL00R09.BIN");
+  const miku_09 = readFileSync("out/PL00R09.BIN");
+
+  console.log("  - 0x09 Shield Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_09.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_09.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_09.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_09.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
+
+  const wpn_0A = readFileSync("bin/wpn_PL00R0A.BIN");
+  const miku_0A = readFileSync("out/PL00R0A.BIN");
+
+  console.log("  - 0x0A Blade Arm");
   replaceSegment(
     rom,
     [
@@ -304,7 +321,7 @@ const encodeRom = () => {
       Buffer.from(wpn_0A.subarray(0x3800, 0x4000)),
     ],
     [
-      Buffer.from(miku_0A.subarray(0x1800, 0x2000)), // Replace with same thing
+      Buffer.from(miku_0A.subarray(0x1800, 0x2000)),
       Buffer.from(miku_0A.subarray(0x3800, 0x4000)),
     ],
   );
