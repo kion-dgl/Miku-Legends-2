@@ -184,6 +184,13 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
   writeFileSync(srcFile, file);
 };
 
+// 0x07
+const replaceVacuumArm = (objFile: string) => {
+  const filename = "./out/PL00R07.BIN";
+  const MEM_START = 0x1000;
+  replaceWeapon(filename, MEM_START, objFile);
+};
+
 // 0x08
 const replaceReflectorArm = (objFile: string) => {
   const filename = "./out/PL00R08.BIN";
@@ -205,4 +212,9 @@ const replaceBladeArm = (objFile: string) => {
   replaceWeapon(filename, MEM_START, objFile);
 };
 
-export { replaceReflectorArm, replaceBladeArm, replaceShieldArm };
+export {
+  replaceVacuumArm,
+  replaceReflectorArm,
+  replaceBladeArm,
+  replaceShieldArm,
+};

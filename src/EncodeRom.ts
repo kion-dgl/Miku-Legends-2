@@ -294,6 +294,22 @@ const encodeRom = () => {
   // Update Specual weapons
   console.log("--- Replacing Weapons ---");
 
+  const wpn_07 = readFileSync("bin/wpn_PL00R07.BIN");
+  const miku_07 = readFileSync("out/PL00R07.BIN");
+
+  console.log("  - 0x07 Vacuum Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_07.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_07.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_07.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_07.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
+
   const wpn_08 = readFileSync("bin/wpn_PL00R08.BIN");
   const miku_08 = readFileSync("out/PL00R08.BIN");
 
