@@ -294,6 +294,22 @@ const encodeRom = () => {
   // Update Specual weapons
   console.log("--- Replacing Weapons ---");
 
+  const wpn_06 = readFileSync("bin/wpn_PL00R06.BIN");
+  const miku_06 = readFileSync("out/PL00R06.BIN");
+
+  console.log("  - 0x06 Ground Crawler");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_06.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_06.subarray(0x3000, 0x3000 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_06.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_06.subarray(0x3000, 0x3000 + 0x800)),
+    ],
+  );
+
   const wpn_07 = readFileSync("bin/wpn_PL00R07.BIN");
   const miku_07 = readFileSync("out/PL00R07.BIN");
 
