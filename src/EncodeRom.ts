@@ -294,6 +294,22 @@ const encodeRom = () => {
   // Update Specual weapons
   console.log("--- Replacing Weapons ---");
 
+  const wpn_05 = readFileSync("bin/wpn_PL00R05.BIN");
+  const miku_05 = readFileSync("out/PL00R05.BIN");
+
+  console.log("  - 0x05 Homing Missle");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_05.subarray(0x800, 0x800 + 0x800)),
+      Buffer.from(wpn_05.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_05.subarray(0x800, 0x800 + 0x800)),
+      Buffer.from(miku_05.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
+
   const wpn_06 = readFileSync("bin/wpn_PL00R06.BIN");
   const miku_06 = readFileSync("out/PL00R06.BIN");
 

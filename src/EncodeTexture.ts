@@ -382,6 +382,7 @@ const replaceFaceTexture = (
   }
 
   // Special Weapons
+  const homingMissle = readFileSync("./bin/wpn_PL00R05.BIN");
   const groundCrawler = readFileSync("./bin/wpn_PL00R06.BIN");
   const vacuumArm = readFileSync("./bin/wpn_PL00R07.BIN");
   const reflectArm = readFileSync("./bin/wpn_PL00R08.BIN");
@@ -394,6 +395,7 @@ const replaceFaceTexture = (
     st03a2[0x35030 + i] = facePal[i];
     pl00t2[0x9030 + i] = facePal[i];
     // Weapon
+    homingMissle[0x2830 + i] = wpnPal[i];
     groundCrawler[0x3030 + i] = wpnPal[i];
     vacuumArm[0x2830 + i] = wpnPal[i];
     reflectArm[0x3030 + i] = wpnPal[i];
@@ -401,6 +403,7 @@ const replaceFaceTexture = (
     bladeArm[0x3830 + i] = wpnPal[i];
   }
 
+  writeFileSync("./out/PL00R05.BIN", homingMissle);
   writeFileSync("./out/PL00R06.BIN", groundCrawler);
   writeFileSync("./out/PL00R07.BIN", vacuumArm);
   writeFileSync("./out/PL00R08.BIN", reflectArm);

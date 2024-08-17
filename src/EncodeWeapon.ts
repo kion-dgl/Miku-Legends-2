@@ -184,6 +184,13 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
   writeFileSync(srcFile, file);
 };
 
+// 0x05
+const replaceHomingMissle = (objFile: string) => {
+  const filename = "./out/PL00R05.BIN";
+  const MEM_START = 0x800;
+  replaceWeapon(filename, MEM_START, objFile);
+};
+
 // 0x06
 const replaceGroundCrawler = (objFile: string) => {
   const filename = "./out/PL00R06.BIN";
@@ -220,6 +227,7 @@ const replaceBladeArm = (objFile: string) => {
 };
 
 export {
+  replaceHomingMissle,
   replaceGroundCrawler,
   replaceVacuumArm,
   replaceReflectorArm,
