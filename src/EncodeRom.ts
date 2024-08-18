@@ -487,6 +487,22 @@ const encodeRom = () => {
     ],
   );
 
+  const wpn_0E = readFileSync("bin/wpn_PL00R0E.BIN");
+  const miku_0E = readFileSync("out/PL00R0E.BIN");
+
+  console.log("  - 0x0E Aqua Blaster");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0E.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(wpn_0E.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0E.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(miku_0E.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
   // Write the result
   console.log("--- Wiritng ROM ---");
   console.log("rom file: %s", romDst);
