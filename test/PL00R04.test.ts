@@ -36,7 +36,7 @@ type MeshHeader = {
 };
 
 // Looks like this is actually the blade arm?
-test("it should export an obj of the hyper shell", () => {
+test("it should export an obj of the Hyper Shell", () => {
   const filename = "PL00R04";
   const file = readFileSync(`./bin/wpn_${filename}.BIN`).subarray(0x1000);
 

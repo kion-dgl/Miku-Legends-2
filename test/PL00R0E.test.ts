@@ -36,7 +36,7 @@ type MeshHeader = {
 };
 
 // Looks like this is actually the blade arm?
-test("it should export an obj of the shield arm", () => {
+test("it should export an obj of the Aqua Blaster", () => {
   const filename = "PL00R0E";
   const file = readFileSync(`./bin/wpn_${filename}.BIN`).subarray(0x1800);
 

@@ -35,7 +35,7 @@ type MeshHeader = {
   vertexColorBkOfs: number;
 };
 
-test("it should export an obj of the aqua blaster", () => {
+test("it should export an obj of the Hunter Seeker", () => {
   const filename = "PL00R0F";
   const file = readFileSync("./bin/wpn_PL00R0F.BIN").subarray(0x1800);
 
