@@ -255,6 +255,13 @@ const replaceShiningLaser = (objFile: string) => {
   replaceWeapon(filename, MEM_START, objFile);
 };
 
+// 0x0C
+const replaceMachineGunArm = (objFile: string) => {
+  const filename = "./out/PL00R0C.BIN";
+  const MEM_START = 0x2000;
+  replaceWeapon(filename, MEM_START, objFile);
+};
+
 export {
   replaceCrusher, // 0x02
   replaceHyperShell, // 0x04
@@ -266,4 +273,5 @@ export {
   replaceBladeArm,
   replaceShieldArm,
   replaceShiningLaser, // 0x0B
+  replaceMachineGunArm, // 0x0C
 };

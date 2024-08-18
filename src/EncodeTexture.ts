@@ -393,6 +393,7 @@ const replaceFaceTexture = (
   const shieldArm = readFileSync("./bin/wpn_PL00R09.BIN");
   const bladeArm = readFileSync("./bin/wpn_PL00R0A.BIN");
   const shiningLaser = readFileSync("./bin/wpn_PL00R0B.BIN");
+  const machineGun = readFileSync("./bin/wpn_PL00R0C.BIN");
 
   // Update the palette in the
   for (let i = 0; i < facePal.length; i++) {
@@ -410,6 +411,7 @@ const replaceFaceTexture = (
     shieldArm[0x2830 + i] = wpnPal[i];
     bladeArm[0x3830 + i] = wpnPal[i];
     shiningLaser[0x3830 + i] = wpnPal[i];
+    machineGun[0x4030 + i] = wpnPal[i];
   }
 
   writeFileSync("./out/PL00R02.BIN", crusher);
@@ -422,6 +424,7 @@ const replaceFaceTexture = (
   writeFileSync("./out/PL00R09.BIN", shieldArm);
   writeFileSync("./out/PL00R0A.BIN", bladeArm);
   writeFileSync("./out/PL00R0B.BIN", shiningLaser);
+  writeFileSync("./out/PL00R0C.BIN", machineGun);
 
   for (let i = 0; i < faceImg.length; i++) {
     st03a2[0x35800 + i] = faceImg[i];

@@ -402,7 +402,7 @@ const encodeRom = () => {
       Buffer.from(wpn_08.subarray(0x2800, 0x2800 + 0x800)),
     ],
     [
-      Buffer.from(miku_08.subarray(0x1000, 0x1000 + 0x800)), // Replace with same thing
+      Buffer.from(miku_08.subarray(0x1000, 0x1000 + 0x800)),
       Buffer.from(miku_08.subarray(0x2800, 0x2800 + 0x800)),
     ],
   );
@@ -418,7 +418,7 @@ const encodeRom = () => {
       Buffer.from(wpn_09.subarray(0x2800, 0x2800 + 0x800)),
     ],
     [
-      Buffer.from(miku_09.subarray(0x2000, 0x2000 + 0x800)), // Replace with same thing
+      Buffer.from(miku_09.subarray(0x2000, 0x2000 + 0x800)),
       Buffer.from(miku_09.subarray(0x2800, 0x2800 + 0x800)),
     ],
   );
@@ -452,6 +452,22 @@ const encodeRom = () => {
     [
       Buffer.from(miku_0B.subarray(0x2000, 0x2000 + 0x800)),
       Buffer.from(miku_0B.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
+  const wpn_0C = readFileSync("bin/wpn_PL00R0C.BIN");
+  const miku_0C = readFileSync("out/PL00R0C.BIN");
+
+  console.log("  - 0x0C Machine Gun Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0C.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_0C.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0C.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_0C.subarray(0x3800, 0x3800 + 0x800)),
     ],
   );
 
