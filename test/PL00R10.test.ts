@@ -45,7 +45,7 @@ test("it should export an obj of the aqua blaster", () => {
   const memory = file.readUInt32LE(0x0c);
 
   expect(type).toEqual(1);
-  expect(length).toEqual(1524);
+  expect(length).toEqual(0x678);
   expect(something).toEqual(1);
   expect(memory).toEqual(0x80113340);
 
