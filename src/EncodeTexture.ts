@@ -383,6 +383,7 @@ const replaceFaceTexture = (
 
   // Special Weapons
 
+  const crusher = readFileSync("./bin/wpn_PL00R02.BIN");
   const busterCannon = readFileSync("./bin/wpn_PL00R03.BIN");
 
   const homingMissle = readFileSync("./bin/wpn_PL00R05.BIN");
@@ -398,6 +399,7 @@ const replaceFaceTexture = (
     st03a2[0x35030 + i] = facePal[i];
     pl00t2[0x9030 + i] = facePal[i];
     // Weapon
+    crusher[0x4030 + i] = wpnPal[i];
     busterCannon[0x4030 + i] = wpnPal[i];
 
     homingMissle[0x2830 + i] = wpnPal[i];
@@ -408,6 +410,7 @@ const replaceFaceTexture = (
     bladeArm[0x3830 + i] = wpnPal[i];
   }
 
+  writeFileSync("./out/PL00R02.BIN", crusher);
   writeFileSync("./out/PL00R03.BIN", busterCannon);
 
   writeFileSync("./out/PL00R05.BIN", homingMissle);

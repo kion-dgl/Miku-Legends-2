@@ -186,6 +186,11 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
 };
 
 // 0x02
+const replaceCrusher = (objFile: string) => {
+  const filename = "./out/PL00R02.BIN";
+  const MEM_START = 0x2000;
+  replaceWeapon(filename, MEM_START, objFile);
+};
 
 // 0x03
 const replaceBusterCannon = (objFile: string) => {
@@ -237,6 +242,7 @@ const replaceBladeArm = (objFile: string) => {
 };
 
 export {
+  replaceCrusher, // 0x02
   replaceBusterCannon, // 0x03
   replaceHomingMissle, // 0x05
   replaceGroundCrawler,

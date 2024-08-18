@@ -294,6 +294,22 @@ const encodeRom = () => {
   // Update Specual weapons
   console.log("--- Replacing Weapons ---");
 
+  const wpn_02 = readFileSync("bin/wpn_PL00R02.BIN");
+  const miku_02 = readFileSync("out/PL00R02.BIN");
+
+  console.log("  - 0x02 Crusher");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_02.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_02.subarray(0x4000, 0x4000 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_02.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_02.subarray(0x4000, 0x4000 + 0x800)),
+    ],
+  );
+
   const wpn_03 = readFileSync("bin/wpn_PL00R03.BIN");
   const miku_03 = readFileSync("out/PL00R03.BIN");
 
