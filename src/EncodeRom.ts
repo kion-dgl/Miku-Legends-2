@@ -327,6 +327,22 @@ const encodeRom = () => {
     ],
   );
 
+  const wpn_04 = readFileSync("bin/wpn_PL00R04.BIN");
+  const miku_04 = readFileSync("out/PL00R04.BIN");
+
+  console.log("  - 0x04 Hyper Shell");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_04.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_04.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_04.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_04.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
   const wpn_05 = readFileSync("bin/wpn_PL00R05.BIN");
   const miku_05 = readFileSync("out/PL00R05.BIN");
 

@@ -199,6 +199,13 @@ const replaceBusterCannon = (objFile: string) => {
   replaceWeapon(filename, MEM_START, objFile);
 };
 
+// 0x04
+const replaceHyperShell = (objFile: string) => {
+  const filename = "./out/PL00R04.BIN";
+  const MEM_START = 0x1000;
+  replaceWeapon(filename, MEM_START, objFile);
+};
+
 // 0x05
 const replaceHomingMissle = (objFile: string) => {
   const filename = "./out/PL00R05.BIN";
@@ -250,6 +257,7 @@ const replaceShiningLaser = (objFile: string) => {
 
 export {
   replaceCrusher, // 0x02
+  replaceHyperShell, // 0x04
   replaceBusterCannon, // 0x03
   replaceHomingMissle, // 0x05
   replaceGroundCrawler,

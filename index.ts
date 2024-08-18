@@ -4,6 +4,7 @@ import { encodeRom } from "./src/EncodeRom";
 import {
   replaceCrusher,
   replaceBusterCannon,
+  replaceHyperShell,
   replaceHomingMissle,
   replaceGroundCrawler,
   replaceVacuumArm,
@@ -177,7 +178,7 @@ encodeModel(
 
 replaceCrusher("miku/weapons/PL00R02_001.obj");
 replaceBusterCannon("miku/weapons/PL00R03_001.obj");
-
+replaceHyperShell("miku/weapons/PL00R04_001.obj");
 replaceHomingMissle("miku/weapons/PL00R05_001.obj");
 replaceGroundCrawler("miku/weapons/PL00R06_001.obj");
 replaceVacuumArm("miku/weapons/PL00R07_001.obj");
