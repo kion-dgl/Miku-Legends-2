@@ -471,6 +471,22 @@ const encodeRom = () => {
     ],
   );
 
+  const wpn_0D = readFileSync("bin/wpn_PL00R0D.BIN");
+  const miku_0D = readFileSync("out/PL00R0D.BIN");
+
+  console.log("  - 0x0D Spread Buster");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0D.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_0D.subarray(0x3000, 0x3000 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0D.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_0D.subarray(0x3000, 0x3000 + 0x800)),
+    ],
+  );
+
   // Write the result
   console.log("--- Wiritng ROM ---");
   console.log("rom file: %s", romDst);

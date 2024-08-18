@@ -116,6 +116,7 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
   let headerOfs = srcOffset + 0x30;
   let contentOfs = srcOffset + 0x80;
   let pointerOfs = 0x2b88 + 0x18;
+  let len = 0x48;
 
   const dot = srcFile.indexOf(".BIN");
   const char = srcFile.substring(dot - 2, dot);
@@ -140,6 +141,7 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
     file.writeUInt32LE(pointerOfs, headerOfs + 4);
     for (let i = 0; i < mesh.triList.length; i++) {
       file[contentOfs++] = mesh.triList[i];
+      len++;
     }
     pointerOfs += mesh.triList.length;
 
@@ -147,6 +149,7 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
     file.writeUInt32LE(pointerOfs, headerOfs + 8);
     for (let i = 0; i < mesh.quadList.length; i++) {
       file[contentOfs++] = mesh.quadList[i];
+      len++;
     }
     pointerOfs += mesh.quadList.length;
 
@@ -154,6 +157,7 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
     file.writeUInt32LE(pointerOfs, headerOfs + 0x0c);
     for (let i = 0; i < mesh.vertexList.length; i++) {
       file[contentOfs++] = mesh.vertexList[i];
+      len++;
     }
     pointerOfs += mesh.vertexList.length;
 
@@ -161,6 +165,7 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
     file.writeUInt32LE(pointerOfs, headerOfs + 0x10);
     for (let i = 0; i < mesh.vertexColors.length; i++) {
       file[contentOfs++] = mesh.vertexColors[i];
+      len++;
     }
     pointerOfs += mesh.vertexColors.length;
 
@@ -168,6 +173,7 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
     file.writeUInt32LE(pointerOfs, headerOfs + 0x14);
     for (let i = 0; i < mesh.vertexColors.length; i++) {
       file[contentOfs++] = mesh.vertexColors[i];
+      len++;
     }
     pointerOfs += mesh.vertexColors.length;
 
@@ -175,12 +181,15 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
     headerOfs += 0x18;
   });
 
+  if (contentOfs > srcOffset + 0x700) {
+    console.warn("Warning: This might be too long");
+  }
+
   if (contentOfs > srcOffset + 0x800) {
     throw new Error("Weapon is too long!!!!");
   }
 
-  const len = contentOfs - (srcOffset + 0x30);
-  console.log("Length: 0x%s", len);
+  console.log("Length: 0x%s", len.toString(16));
   file.writeUInt32LE(len, srcOffset + 0x4);
   writeFileSync(srcFile, file);
 };
@@ -262,6 +271,13 @@ const replaceMachineGunArm = (objFile: string) => {
   replaceWeapon(filename, MEM_START, objFile);
 };
 
+// 0x0D
+const replaceSpreadBuster = (objFile: string) => {
+  const filename = "./out/PL00R0D.BIN";
+  const MEM_START = 0x1000;
+  replaceWeapon(filename, MEM_START, objFile);
+};
+
 export {
   replaceCrusher, // 0x02
   replaceHyperShell, // 0x04
@@ -274,4 +290,5 @@ export {
   replaceShieldArm,
   replaceShiningLaser, // 0x0B
   replaceMachineGunArm, // 0x0C
+  replaceSpreadBuster, // 0x0D
 };
