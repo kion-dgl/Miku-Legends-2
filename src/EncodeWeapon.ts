@@ -180,8 +180,18 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
   }
 
   const len = contentOfs - (srcOffset + 0x30);
-  file.writeUInt32LE(srcOffset + 0x4, len);
+  console.log("Length: 0x%s", len);
+  file.writeUInt32LE(len, srcOffset + 0x4);
   writeFileSync(srcFile, file);
+};
+
+// 0x02
+
+// 0x03
+const replaceBusterCannon = (objFile: string) => {
+  const filename = "./out/PL00R03.BIN";
+  const MEM_START = 0x2000;
+  replaceWeapon(filename, MEM_START, objFile);
 };
 
 // 0x05
@@ -227,7 +237,8 @@ const replaceBladeArm = (objFile: string) => {
 };
 
 export {
-  replaceHomingMissle,
+  replaceBusterCannon, // 0x03
+  replaceHomingMissle, // 0x05
   replaceGroundCrawler,
   replaceVacuumArm,
   replaceReflectorArm,

@@ -2,6 +2,7 @@ import { encodeModel } from "./src/EncodeModel";
 import { encodeTexture } from "./src/EncodeTexture";
 import { encodeRom } from "./src/EncodeRom";
 import {
+  replaceBusterCannon,
   replaceHomingMissle,
   replaceGroundCrawler,
   replaceVacuumArm,
@@ -171,6 +172,8 @@ encodeModel(
     \__/ .__/ \___|\___|_|\__,_|_|   \/  \/ \___|\__,_| .__/ \___/|_| |_|___/
     |_|                                            |_|
 **/
+
+replaceBusterCannon("miku/weapons/PL00R03_001.obj");
 
 replaceHomingMissle("miku/weapons/PL00R05_001.obj");
 replaceGroundCrawler("miku/weapons/PL00R06_001.obj");

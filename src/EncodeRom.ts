@@ -294,6 +294,22 @@ const encodeRom = () => {
   // Update Specual weapons
   console.log("--- Replacing Weapons ---");
 
+  const wpn_03 = readFileSync("bin/wpn_PL00R03.BIN");
+  const miku_03 = readFileSync("out/PL00R03.BIN");
+
+  console.log("  - 0x03 Buster Cannon");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_03.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_03.subarray(0x4000, 0x4000 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_03.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_03.subarray(0x4000, 0x4000 + 0x800)),
+    ],
+  );
+
   const wpn_05 = readFileSync("bin/wpn_PL00R05.BIN");
   const miku_05 = readFileSync("out/PL00R05.BIN");
 
