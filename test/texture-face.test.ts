@@ -74,7 +74,6 @@ test("it should decode face texture into a png", () => {
   const { fullSize, bitfieldSize } = tim;
   const bitfield: number[] = new Array();
   const target = Buffer.alloc(fullSize);
-  console.log(fullSize.toString(16));
 
   // Read Bitfield
 
@@ -199,8 +198,6 @@ test("it should write a sliced texture with face and weapons", () => {
     facePalette,
     weaponPalette,
   );
-  console.log(faceImg);
-
   expect(faceImg.length).toEqual(0x8000);
 
   const imageData: number[] = new Array();
@@ -216,7 +213,6 @@ test("it should write a sliced texture with face and weapons", () => {
   // Write with special weapon palette
   const png = new PNG({ width, height });
   const palette = weaponPalette.map((word) => wordToColor(word));
-  console.log(palette);
 
   let index = 0;
   let dst = 0;
@@ -230,8 +226,6 @@ test("it should write a sliced texture with face and weapons", () => {
       png.data[dst++] = a;
     }
   }
-
-  console.log(png.data);
 
   // Export file
   const buffer = PNG.sync.write(png);
