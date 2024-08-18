@@ -36,7 +36,7 @@ type MeshHeader = {
 };
 
 // Looks like this is actually the blade arm?
-test("it should export an obj of the shield arm", () => {
+test("it should export an obj of the Vaccum Arm", () => {
   const filename = "PL00R07";
   const file = readFileSync(`./bin/wpn_${filename}.BIN`).subarray(0x1000);
 

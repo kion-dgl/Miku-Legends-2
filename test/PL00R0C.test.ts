@@ -37,7 +37,7 @@ type MeshHeader = {
 
 // Looks like this is actually the blade arm?
 test("it should export an obj of the shield arm", () => {
-  const filename = "PL00R0B";
+  const filename = "PL00R0C";
   const file = readFileSync(`./bin/wpn_${filename}.BIN`).subarray(0x2000);
 
   const type = file.readUInt32LE(0x00);
@@ -46,7 +46,7 @@ test("it should export an obj of the shield arm", () => {
   const memory = file.readUInt32LE(0x0c);
 
   expect(type).toEqual(1);
-  expect(length).toEqual(0x06b4);
+  expect(length).toEqual(0x0654);
   expect(something).toEqual(1);
   expect(memory).toEqual(0x80113340);
 
