@@ -10,6 +10,7 @@ import {
   replaceReflectorArm,
   replaceBladeArm,
   replaceShieldArm,
+  replaceShiningLaser,
 } from "./src/EncodeWeapon";
 
 // Encode the Texture
@@ -183,6 +184,7 @@ replaceVacuumArm("miku/weapons/PL00R07_001.obj");
 replaceReflectorArm("miku/weapons/PL00R08_001.obj");
 replaceShieldArm("miku/weapons/PL00R09_001.obj");
 replaceBladeArm("miku/weapons/PL00R0A_001.obj");
+replaceShiningLaser("miku/weapons/PL00R0B_001.obj");
 
 /**
  Encode Rom

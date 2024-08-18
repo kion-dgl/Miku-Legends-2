@@ -35,7 +35,6 @@ type MeshHeader = {
   vertexColorBkOfs: number;
 };
 
-// Looks like this is actually the blade arm?
 test("it should export an obj of the Shining Laser", () => {
   const filename = "PL00R0B";
   const file = readFileSync(`./bin/wpn_${filename}.BIN`).subarray(0x2000);

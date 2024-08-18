@@ -241,6 +241,13 @@ const replaceBladeArm = (objFile: string) => {
   replaceWeapon(filename, MEM_START, objFile);
 };
 
+// 0x0B
+const replaceShiningLaser = (objFile: string) => {
+  const filename = "./out/PL00R0B.BIN";
+  const MEM_START = 0x2000;
+  replaceWeapon(filename, MEM_START, objFile);
+};
+
 export {
   replaceCrusher, // 0x02
   replaceBusterCannon, // 0x03
@@ -250,4 +257,5 @@ export {
   replaceReflectorArm,
   replaceBladeArm,
   replaceShieldArm,
+  replaceShiningLaser, // 0x0B
 };

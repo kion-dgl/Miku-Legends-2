@@ -51,8 +51,9 @@ const replaceSegment = (rom: Buffer, needles: Buffer[], contents: Buffer[]) => {
     } else {
       whence = rom.indexOf(needle, whence);
     }
+
     if (whence === -1) {
-      throw new Error("Next segment expected after last");
+      throw new Error("Unable to Find Needle");
     }
 
     console.log("Replacing: ", index);
@@ -413,12 +414,28 @@ const encodeRom = () => {
   replaceSegment(
     rom,
     [
-      Buffer.from(wpn_0A.subarray(0x1800, 0x2000)),
-      Buffer.from(wpn_0A.subarray(0x3800, 0x4000)),
+      Buffer.from(wpn_0A.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(wpn_0A.subarray(0x3800, 0x3800 + 0x800)),
     ],
     [
-      Buffer.from(miku_0A.subarray(0x1800, 0x2000)), // Replace with same thing
-      Buffer.from(miku_0A.subarray(0x3800, 0x4000)),
+      Buffer.from(miku_0A.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(miku_0A.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
+  const wpn_0B = readFileSync("bin/wpn_PL00R0B.BIN");
+  const miku_0B = readFileSync("out/PL00R0B.BIN");
+
+  console.log("  - 0x0B Shining Laser");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0B.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_0B.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0B.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_0B.subarray(0x3800, 0x3800 + 0x800)),
     ],
   );
 
