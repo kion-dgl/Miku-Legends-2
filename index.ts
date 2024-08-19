@@ -16,6 +16,7 @@ import {
   replaceSpreadBuster,
   replaceAquaBlaster,
   replaceHunterSeeker,
+  replaceDrillArm,
 } from "./src/EncodeWeapon";
 
 // Encode the Texture
@@ -194,6 +195,7 @@ replaceMachineGunArm("miku/weapons/PL00R0C_001.obj");
 replaceSpreadBuster("miku/weapons/PL00R0D_001.obj");
 replaceAquaBlaster("miku/weapons/PL00R0E_001.obj");
 replaceHunterSeeker("miku/weapons/PL00R0F_001.obj");
+replaceDrillArm("miku/weapons/PL00R10_001.obj");
 
 /**
  Encode Rom

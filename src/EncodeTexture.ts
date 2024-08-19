@@ -397,6 +397,7 @@ const replaceFaceTexture = (
   const spreadBuster = readFileSync("./bin/wpn_PL00R0D.BIN");
   const aqauBlaster = readFileSync("./bin/wpn_PL00R0E.BIN");
   const hunterSeeker = readFileSync("./bin/wpn_PL00R0F.BIN");
+  const drillArm = readFileSync("./bin/wpn_PL00R10.BIN");
 
   // Update the palette in the
   for (let i = 0; i < facePal.length; i++) {
@@ -418,6 +419,7 @@ const replaceFaceTexture = (
     spreadBuster[0x3030 + i] = wpnPal[i];
     aqauBlaster[0x3830 + i] = wpnPal[i];
     hunterSeeker[0x3830 + i] = wpnPal[i];
+    drillArm[0x2830 + i] = wpnPal[i];
   }
 
   writeFileSync("./out/PL00R02.BIN", crusher);
@@ -434,6 +436,7 @@ const replaceFaceTexture = (
   writeFileSync("./out/PL00R0D.BIN", spreadBuster);
   writeFileSync("./out/PL00R0E.BIN", aqauBlaster);
   writeFileSync("./out/PL00R0F.BIN", hunterSeeker);
+  writeFileSync("./out/PL00R10.BIN", drillArm);
 
   for (let i = 0; i < faceImg.length; i++) {
     st03a2[0x35800 + i] = faceImg[i];

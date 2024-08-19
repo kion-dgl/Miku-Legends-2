@@ -519,6 +519,22 @@ const encodeRom = () => {
     ],
   );
 
+  const wpn_10 = readFileSync("bin/wpn_PL00R10.BIN");
+  const miku_10 = readFileSync("out/PL00R10.BIN");
+
+  console.log("  - 0x10 Drill Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_10.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_10.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_10.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_10.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
+
   // Write the result
   console.log("--- Wiritng ROM ---");
   console.log("rom file: %s", romDst);
