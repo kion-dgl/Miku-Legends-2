@@ -114,23 +114,30 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
   }
 
   let headerOfs = srcOffset + 0x30;
-  let contentOfs = srcOffset + 0x80;
-  let pointerOfs = 0x2b88 + 0x18;
+  let contentOfs = srcOffset + 0x78;
+  let pointerOfs = 0x2b88;
   let len = 0x48;
 
-  const dot = srcFile.indexOf(".BIN");
-  const char = srcFile.substring(dot - 2, dot);
-  console.log(srcFile.substring(dot));
-  const DEBUG_MEM = Buffer.from(`-- SPWPN 0x${char} --`, "ascii");
-  console.log(DEBUG_MEM.toString("ascii"));
-  if (DEBUG_MEM.length !== 16) {
-    throw new Error("Invalid debug string length");
-  }
+  const colors =
+    mesh0.vertexCount > mesh1.vertexCount
+      ? mesh0.vertexColors
+      : mesh1.vertexColors;
 
-  for (let i = 0; i < DEBUG_MEM.length; i++) {
-    file[contentOfs++] = DEBUG_MEM[i];
+  const vertexColorOfs = pointerOfs;
+  for (let i = 0; i < colors.length; i++) {
+    file[contentOfs++] = colors[i];
+    len++;
   }
-  meshes.forEach((mesh) => {
+  pointerOfs += colors.length;
+
+  const vertexColorBkOfs = pointerOfs;
+  for (let i = 0; i < colors.length; i++) {
+    file[contentOfs++] = colors[i];
+    len++;
+  }
+  pointerOfs += colors.length;
+
+  meshes.forEach((mesh, index) => {
     console.log("header Offset: 0x%s", headerOfs.toString(16));
     console.log("Counts: ", mesh.triCount, mesh.quadCount, mesh.vertexCount);
     file.writeUInt8(mesh.triCount, headerOfs + 0);
@@ -161,21 +168,26 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
     }
     pointerOfs += mesh.vertexList.length;
 
-    // Vertex Color
-    file.writeUInt32LE(pointerOfs, headerOfs + 0x10);
-    for (let i = 0; i < mesh.vertexColors.length; i++) {
-      file[contentOfs++] = mesh.vertexColors[i];
-      len++;
-    }
-    pointerOfs += mesh.vertexColors.length;
+    if (index < 2) {
+      file.writeUInt32LE(vertexColorOfs, headerOfs + 0x10);
+      file.writeUInt32LE(vertexColorBkOfs, headerOfs + 0x14);
+    } else {
+      // Vertex Color
+      file.writeUInt32LE(pointerOfs, headerOfs + 0x10);
+      for (let i = 0; i < mesh.vertexColors.length; i++) {
+        file[contentOfs++] = mesh.vertexColors[i];
+        len++;
+      }
+      pointerOfs += mesh.vertexColors.length;
 
-    // Vertex Color
-    file.writeUInt32LE(pointerOfs, headerOfs + 0x14);
-    for (let i = 0; i < mesh.vertexColors.length; i++) {
-      file[contentOfs++] = mesh.vertexColors[i];
-      len++;
+      // Vertex Color
+      file.writeUInt32LE(pointerOfs, headerOfs + 0x14);
+      for (let i = 0; i < mesh.vertexColors.length; i++) {
+        file[contentOfs++] = mesh.vertexColors[i];
+        len++;
+      }
+      pointerOfs += mesh.vertexColors.length;
     }
-    pointerOfs += mesh.vertexColors.length;
 
     // Update Header
     headerOfs += 0x18;
@@ -301,14 +313,14 @@ const replaceDrillArm = (objFile: string) => {
 
 export {
   replaceCrusher, // 0x02
-  replaceHyperShell, // 0x04
   replaceBusterCannon, // 0x03
+  replaceHyperShell, // 0x04
   replaceHomingMissle, // 0x05
-  replaceGroundCrawler,
-  replaceVacuumArm,
-  replaceReflectorArm,
-  replaceBladeArm,
-  replaceShieldArm,
+  replaceGroundCrawler, // 0x06
+  replaceVacuumArm, // 0x07
+  replaceReflectorArm, // 0x08
+  replaceBladeArm, // 0x09
+  replaceShieldArm, //0x0A
   replaceShiningLaser, // 0x0B
   replaceMachineGunArm, // 0x0C
   replaceSpreadBuster, // 0x0D
