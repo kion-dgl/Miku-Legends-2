@@ -503,6 +503,22 @@ const encodeRom = () => {
     ],
   );
 
+  const wpn_0F = readFileSync("bin/wpn_PL00R0F.BIN");
+  const miku_0F = readFileSync("out/PL00R0F.BIN");
+
+  console.log("  - 0x0F Hunter Seeker");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0F.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(wpn_0F.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0F.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(miku_0F.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
   // Write the result
   console.log("--- Wiritng ROM ---");
   console.log("rom file: %s", romDst);

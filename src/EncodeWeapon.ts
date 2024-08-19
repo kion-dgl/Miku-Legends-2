@@ -285,6 +285,13 @@ const replaceAquaBlaster = (objFile: string) => {
   replaceWeapon(filename, MEM_START, objFile);
 };
 
+// 0x0F
+const replaceHunterSeeker = (objFile: string) => {
+  const filename = "./out/PL00R0F.BIN";
+  const MEM_START = 0x1800;
+  replaceWeapon(filename, MEM_START, objFile);
+};
+
 export {
   replaceCrusher, // 0x02
   replaceHyperShell, // 0x04
@@ -299,4 +306,5 @@ export {
   replaceMachineGunArm, // 0x0C
   replaceSpreadBuster, // 0x0D
   replaceAquaBlaster, // 0x0E
+  replaceHunterSeeker, // 0x0F
 };
