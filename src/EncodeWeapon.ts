@@ -140,17 +140,23 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
   meshes.forEach((mesh, index) => {
     console.log("header Offset: 0x%s", headerOfs.toString(16));
     console.log("Counts: ", mesh.triCount, mesh.quadCount, mesh.vertexCount);
-    file.writeUInt8(mesh.triCount, headerOfs + 0);
+
+    const reduceBy = 0;
+    const triCount =
+      mesh.triCount - reduceBy > 0 ? mesh.triCount - reduceBy : 0;
+
+    file.writeUInt8(triCount, headerOfs + 0);
     file.writeUInt8(mesh.quadCount, headerOfs + 1);
     file.writeUInt8(mesh.vertexCount, headerOfs + 2);
 
     // Triangles
+
     file.writeUInt32LE(pointerOfs, headerOfs + 4);
-    for (let i = 0; i < mesh.triList.length; i++) {
+    for (let i = 0; i < triCount * 0x0c; i++) {
       file[contentOfs++] = mesh.triList[i];
       len++;
     }
-    pointerOfs += mesh.triList.length;
+    pointerOfs += triCount * 0x0c;
 
     // Quads
     file.writeUInt32LE(pointerOfs, headerOfs + 8);
@@ -178,6 +184,7 @@ const replaceWeapon = (srcFile: string, srcOffset: number, objFile: string) => {
         file[contentOfs++] = mesh.vertexColors[i];
         len++;
       }
+      console.log(mesh.vertexColors);
       pointerOfs += mesh.vertexColors.length;
 
       // Vertex Color
@@ -222,6 +229,7 @@ const replaceBusterCannon = (objFile: string) => {
 
 // 0x04
 const replaceHyperShell = (objFile: string) => {
+  console.log("Encoding Hyper Shell");
   const filename = "./out/PL00R04.BIN";
   const MEM_START = 0x1000;
   replaceWeapon(filename, MEM_START, objFile);
@@ -285,6 +293,7 @@ const replaceMachineGunArm = (objFile: string) => {
 
 // 0x0D
 const replaceSpreadBuster = (objFile: string) => {
+  console.log("Spread Buster");
   const filename = "./out/PL00R0D.BIN";
   const MEM_START = 0x1000;
   replaceWeapon(filename, MEM_START, objFile);
