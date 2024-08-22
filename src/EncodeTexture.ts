@@ -51,6 +51,74 @@ const readPixel = (data: Buffer, inOfs: number, pal: number[]) => {
   return index;
 };
 
+const encodePalette = (pngSrc: Buffer, palette: number[]) => {
+  const pngInfo = PNG.sync.read(pngSrc);
+  const { width, height, data } = pngInfo;
+
+  if (width !== 256 || height !== 256) {
+    throw new Error("Encoder expects a 256x256 image");
+  }
+
+  let inOfs = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      readPixel(data, inOfs, palette);
+      inOfs += 4;
+    }
+  }
+
+  return palette;
+};
+
+const encodeFace = (
+  faceSrc: Buffer,
+  wpnSrc: Buffer,
+  facePal: number[],
+  wpnPal: number[],
+) => {
+  const faceData = PNG.sync.read(faceSrc).data;
+  const wpnData = PNG.sync.read(wpnSrc).data;
+
+  let inOfs = 0;
+  let outOfs = 0;
+  const img = Buffer.alloc(0x8000, 0);
+
+  for (let y = 0; y < 256; y++) {
+    for (let x = 0; x < 256; x += 2) {
+      if (y < 52) {
+        // If y is less than 52 read from the face
+        const lowByte = readPixel(faceData, inOfs, facePal);
+        inOfs += 4;
+        const highByte = readPixel(faceData, inOfs, facePal);
+        inOfs += 4;
+        const byte = ((highByte << 4) | lowByte) & 0xff;
+        img[outOfs] = byte;
+        outOfs++;
+      } else if (y < 103 && x < 193) {
+        // otherwise for the second row, read from the face
+        const lowByte = readPixel(faceData, inOfs, facePal);
+        inOfs += 4;
+        const highByte = readPixel(faceData, inOfs, facePal);
+        inOfs += 4;
+        const byte = ((highByte << 4) | lowByte) & 0xff;
+        img[outOfs] = byte;
+        outOfs++;
+      } else {
+        // Otherwise read from the weapon
+        const lowByte = readPixel(wpnData, inOfs, wpnPal);
+        inOfs += 4;
+        const highByte = readPixel(wpnData, inOfs, wpnPal);
+        inOfs += 4;
+        const byte = ((highByte << 4) | lowByte) & 0xff;
+        img[outOfs] = byte;
+        outOfs++;
+      }
+    }
+  }
+
+  return img;
+};
+
 const encodeImage = (pngSrc: Buffer) => {
   const pngInfo = PNG.sync.read(pngSrc);
   const { width, height, data } = pngInfo;
@@ -233,19 +301,15 @@ const compressTexture = (
   return [bitfied, Buffer.concat(loads)];
 };
 
-const replaceTexture = (
-  gamefile: Buffer,
+const replaceBodyTexture = (
+  modded: Buffer,
   bodyBuffer: Buffer,
-  faceBuffer: Buffer,
+  pl00t2: Buffer,
+  st03a2: Buffer,
 ) => {
-  const modded = Buffer.from(gamefile);
-
   // Replace Body
   const [bodyPal, bodyImg] = encodeImage(bodyBuffer);
-  const pl00t2 = readFileSync("./bin/PL00T2.BIN");
 
-  // Add patch for after the first cutscene
-  const st03a2 = readFileSync("./bin/ST3A02.BIN");
   const ST03A2_PAL_OFS = 0x2c830;
   const ST03A2_IMG_OFS = 0x2d000;
   for (let i = 0; i < bodyPal.length; i++) {
@@ -290,27 +354,94 @@ const replaceTexture = (
   for (let i = 0; i < bodyPal.length; i++) {
     modded[BODY_ALT_PAL_OFS + i] = bodyPal[i];
   }
+};
 
-  // Replace the face texture
-  const [facePal, faceImg] = encodeImage(faceBuffer);
-  const megamanFace = readFileSync("fixtures/face-texture.bin");
-
-  // Replace the second hald of the image with special weapons
-  for (let i = 0; i < 0x4000; i++) {
-    faceImg[0x4000 + i] = megamanFace[0x4080 + i];
+const replaceFaceTexture = (
+  modded: Buffer,
+  faceBuffer: Buffer,
+  facePalette: number[],
+  weaponBuffer: Buffer,
+  weaponPalette: number[],
+  pl00t2: Buffer,
+  st03a2: Buffer,
+) => {
+  // Encode the Face Image
+  const faceImg = encodeFace(
+    faceBuffer,
+    weaponBuffer,
+    facePalette,
+    weaponPalette,
+  );
+  const facePal = Buffer.alloc(0x80);
+  const wpnPal = Buffer.alloc(0x80);
+  let outOfs = 0;
+  for (let i = 0; i < 16; i++) {
+    facePal.writeUInt16LE(facePalette[i] || 0x0000, outOfs);
+    wpnPal.writeUInt16LE(weaponPalette[i] || 0x0000, outOfs);
+    outOfs += 2;
   }
 
+  // Special Weapons
+
+  const crusher = readFileSync("./bin/wpn_PL00R02.BIN");
+  const busterCannon = readFileSync("./bin/wpn_PL00R03.BIN");
+  const hyperShell = readFileSync("./bin/wpn_PL00R04.BIN");
+  const homingMissle = readFileSync("./bin/wpn_PL00R05.BIN");
+  const groundCrawler = readFileSync("./bin/wpn_PL00R06.BIN");
+  const vacuumArm = readFileSync("./bin/wpn_PL00R07.BIN");
+  const reflectArm = readFileSync("./bin/wpn_PL00R08.BIN");
+  const shieldArm = readFileSync("./bin/wpn_PL00R09.BIN");
+  const bladeArm = readFileSync("./bin/wpn_PL00R0A.BIN");
+  const shiningLaser = readFileSync("./bin/wpn_PL00R0B.BIN");
+  const machineGun = readFileSync("./bin/wpn_PL00R0C.BIN");
+  const spreadBuster = readFileSync("./bin/wpn_PL00R0D.BIN");
+  const aqauBlaster = readFileSync("./bin/wpn_PL00R0E.BIN");
+  const hunterSeeker = readFileSync("./bin/wpn_PL00R0F.BIN");
+  const drillArm = readFileSync("./bin/wpn_PL00R10.BIN");
+
+  // Update the palette in the
   for (let i = 0; i < facePal.length; i++) {
+    // Face
     st03a2[0x35030 + i] = facePal[i];
     pl00t2[0x9030 + i] = facePal[i];
+    // Weapon
+    crusher[0x4030 + i] = wpnPal[i];
+    busterCannon[0x4030 + i] = wpnPal[i];
+    hyperShell[0x3830 + i] = wpnPal[i];
+    homingMissle[0x2830 + i] = wpnPal[i];
+    groundCrawler[0x3030 + i] = wpnPal[i];
+    vacuumArm[0x2830 + i] = wpnPal[i];
+    reflectArm[0x3030 + i] = wpnPal[i];
+    shieldArm[0x2830 + i] = wpnPal[i];
+    bladeArm[0x3830 + i] = wpnPal[i];
+    shiningLaser[0x3830 + i] = wpnPal[i];
+    machineGun[0x4030 + i] = wpnPal[i];
+    spreadBuster[0x3030 + i] = wpnPal[i];
+    aqauBlaster[0x3830 + i] = wpnPal[i];
+    hunterSeeker[0x3830 + i] = wpnPal[i];
+    drillArm[0x2830 + i] = wpnPal[i];
   }
+
+  writeFileSync("./out/PL00R02.BIN", crusher);
+  writeFileSync("./out/PL00R03.BIN", busterCannon);
+  writeFileSync("./out/PL00R04.BIN", hyperShell);
+  writeFileSync("./out/PL00R05.BIN", homingMissle);
+  writeFileSync("./out/PL00R06.BIN", groundCrawler);
+  writeFileSync("./out/PL00R07.BIN", vacuumArm);
+  writeFileSync("./out/PL00R08.BIN", reflectArm);
+  writeFileSync("./out/PL00R09.BIN", shieldArm);
+  writeFileSync("./out/PL00R0A.BIN", bladeArm);
+  writeFileSync("./out/PL00R0B.BIN", shiningLaser);
+  writeFileSync("./out/PL00R0C.BIN", machineGun);
+  writeFileSync("./out/PL00R0D.BIN", spreadBuster);
+  writeFileSync("./out/PL00R0E.BIN", aqauBlaster);
+  writeFileSync("./out/PL00R0F.BIN", hunterSeeker);
+  writeFileSync("./out/PL00R10.BIN", drillArm);
 
   for (let i = 0; i < faceImg.length; i++) {
     st03a2[0x35800 + i] = faceImg[i];
     pl00t2[0x9800 + i] = faceImg[i];
   }
-  writeFileSync("./out/PL00T2.BIN", pl00t2);
-  writeFileSync("./out/ST3A02.BIN", st03a2);
 
   // First we zero out the previous image
   for (let i = 0x3830; i < 0x6500; i++) {
@@ -339,11 +470,13 @@ const replaceTexture = (
   for (let i = 0; i < compressedFace.length; i++) {
     modded[faceOfs++] = compressedFace[i];
   }
-
-  return modded;
 };
 
-const encodeTexture = (bodyTexture: string, faceTexture: string) => {
+const encodeTexture = (
+  bodyTexture: string,
+  faceTexture: string,
+  specialWeaponTexture: string,
+) => {
   // Encode the body and face texture to write to ROM
   const srcTexture = readFileSync("bin/PL00T.BIN");
 
@@ -352,12 +485,43 @@ const encodeTexture = (bodyTexture: string, faceTexture: string) => {
 
   // Read the face Image
   const faceBuffer = readFileSync(faceTexture);
+  const weaponBuffer = readFileSync(specialWeaponTexture);
+
+  const facePalette = [0]; // 2
+  const weaponPalette = [0]; //3
+
+  encodePalette(faceBuffer, facePalette);
+  encodePalette(weaponBuffer, weaponPalette);
+
+  if (facePalette.length > 16) {
+    throw new Error("Too many colors for face texture");
+  }
+
+  if (weaponPalette.length > 16) {
+    throw new Error("Too many colors for weapon texture");
+  }
+
+  // Files that need to be replaced with the uncompressed versions
+  const pl00t2 = readFileSync("./bin/PL00T2.BIN");
+  const st03a2 = readFileSync("./bin/ST3A02.BIN");
 
   // Modify the Game Texture
-  const modTexture = replaceTexture(srcTexture, bodyBuffer, faceBuffer);
+  const modTexture = Buffer.from(srcTexture);
+  replaceBodyTexture(modTexture, bodyBuffer, pl00t2, st03a2);
+  replaceFaceTexture(
+    modTexture,
+    faceBuffer,
+    facePalette,
+    weaponBuffer,
+    weaponPalette,
+    pl00t2,
+    st03a2,
+  );
 
-  // Write the updated game file
-  writeFileSync("out/PL00T.BIN", modTexture);
+  // Write the updated game files
+  writeFileSync("./out/PL00T.BIN", modTexture);
+  writeFileSync("./out/PL00T2.BIN", pl00t2);
+  writeFileSync("./out/ST3A02.BIN", st03a2);
 };
 
-export { encodeTexture, encodeImage };
+export { encodePalette, encodeTexture, encodeImage, encodeFace };

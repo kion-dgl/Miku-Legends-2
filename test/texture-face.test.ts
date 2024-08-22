@@ -1,5 +1,5 @@
 /**
-  
+
   Miku-Legends-2
   Copyright (C) 2024, DashGL Project
   By Kion (kion@dashgl.com)
@@ -16,11 +16,12 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
 **/
 
 import { test, expect } from "bun:test";
 import { readFileSync, writeFileSync } from "fs";
+import { encodePalette, encodeTexture, encodeFace } from "../src/EncodeTexture";
 import { PNG } from "pngjs";
 
 type Pixel = {
@@ -73,7 +74,6 @@ test("it should decode face texture into a png", () => {
   const { fullSize, bitfieldSize } = tim;
   const bitfield: number[] = new Array();
   const target = Buffer.alloc(fullSize);
-  console.log(fullSize.toString(16));
 
   // Read Bitfield
 
@@ -174,4 +174,60 @@ test("it should decode face texture into a png", () => {
   // Export file
   const buffer = PNG.sync.write(png);
   writeFileSync("fixtures/0-face.png", buffer);
+});
+
+test("it should write a sliced texture with face and weapons", () => {
+  const faceTexture = "miku/face-1.png";
+  const specialWeaponTexture = "miku/megaman_img_002.png";
+
+  const faceBuffer = readFileSync(faceTexture);
+  const weaponBuffer = readFileSync(specialWeaponTexture);
+
+  const facePalette = [0]; // 2
+  const weaponPalette = [0]; //3
+
+  encodePalette(faceBuffer, facePalette);
+  encodePalette(weaponBuffer, weaponPalette);
+
+  expect(facePalette.length).toBeLessThan(17);
+  expect(weaponPalette.length).toBeLessThan(17);
+
+  const faceImg = encodeFace(
+    faceBuffer,
+    weaponBuffer,
+    facePalette,
+    weaponPalette,
+  );
+  expect(faceImg.length).toEqual(0x8000);
+
+  const imageData: number[] = new Array();
+  for (let ofs = 0; ofs < faceImg.length; ofs++) {
+    const byte = faceImg.readUint8(ofs);
+    imageData.push(byte & 0xf);
+    imageData.push(byte >> 4);
+  }
+
+  const width = 256;
+  const height = 256;
+
+  // Write with special weapon palette
+  const png = new PNG({ width, height });
+  const palette = weaponPalette.map((word) => wordToColor(word));
+
+  let index = 0;
+  let dst = 0;
+  for (let y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      const colorIndex = imageData[index++];
+      const { r, g, b, a } = palette[colorIndex];
+      png.data[dst++] = r;
+      png.data[dst++] = g;
+      png.data[dst++] = b;
+      png.data[dst++] = a;
+    }
+  }
+
+  // Export file
+  const buffer = PNG.sync.write(png);
+  writeFileSync("fixtures/0-weapons.png", buffer);
 });

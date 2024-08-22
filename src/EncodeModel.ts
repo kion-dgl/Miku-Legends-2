@@ -77,7 +77,11 @@ const encodeVertex = (x: number, y: number, z: number) => {
   }
 };
 
-const encodeMesh = (obj: string, materialIndex: number): Primitive => {
+const encodeMesh = (
+  obj: string,
+  materialIndex: number,
+  debugUV = false,
+): Primitive => {
   const SCALE = 1 / 0.00125;
   const ROT_X = new Matrix4();
   ROT_X.makeRotationX(Math.PI);
@@ -162,7 +166,8 @@ const encodeMesh = (obj: string, materialIndex: number): Primitive => {
     const uAdjusted = uRaw / PIXEL_TO_FLOAT_RATIO - PIXEL_ADJUSTMEST;
     const vAdjusted = vRaw / PIXEL_TO_FLOAT_RATIO - PIXEL_ADJUSTMEST;
 
-    // // Eniminate rounding to make sure it's a pixel reference
+    // Eniminate rounding to make sure it's a pixel reference
+    // const adjust = debugUV ? 1 : 1
     const uFloor = Math.floor(uAdjusted) + 1;
     const vFloor = Math.floor(vAdjusted);
 
@@ -256,6 +261,14 @@ const encodeMesh = (obj: string, materialIndex: number): Primitive => {
     const [cu, cv] = pixels[parseInt(cIdx) - 1];
     const [du, dv] = pixels[parseInt(dIdx) - 1];
 
+    if (debugUV) {
+      // console.log(`--- Index: ${i} ---`);
+      // console.log("a:", au, av);
+      // console.log("b:", bu, bv);
+      // console.log("c:", cu, cv);
+      // console.log("d:", du, dv);
+    }
+
     quad.writeUInt8(au, quadOfs);
     quadOfs++;
     quad.writeUInt8(av, quadOfs);
@@ -282,7 +295,7 @@ const encodeMesh = (obj: string, materialIndex: number): Primitive => {
     const indexC = c & FACE_MASK;
     const indexD = d & FACE_MASK;
 
-    const materialIndex = 0;
+    // const materialIndex = 0;
 
     // Material Index 0 = Img 0 - Palette 0
     // Material Index 1 = Img 0 - Palette 1
@@ -755,4 +768,4 @@ const encodeModel = (
   writeFileSync(`out/${filename}`, src);
 };
 
-export { encodeModel };
+export { encodeModel, encodeMesh };

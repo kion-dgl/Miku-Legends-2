@@ -29,11 +29,47 @@ interface FileEntry {
   size: number;
 }
 
+const replaceSegment = (rom: Buffer, needles: Buffer[], contents: Buffer[]) => {
+  let whence = -1;
+  needles.forEach((needle, index) => {
+    const locations: number[] = [];
+
+    if (index === 0) {
+      do {
+        whence += 1;
+        whence = rom.indexOf(needle, whence);
+        if (whence !== -1) {
+          locations.push(whence);
+        }
+      } while (whence !== -1);
+
+      if (locations.length !== 1) {
+        throw new Error("Only one match expected for segment");
+      }
+
+      whence = locations[0];
+    } else {
+      whence = rom.indexOf(needle, whence);
+    }
+
+    if (whence === -1) {
+      throw new Error("Unable to Find Needle");
+    }
+
+    console.log("Replacing: ", index);
+    const content = contents[index];
+    for (let i = 0; i < content.length; i++) {
+      rom[whence++] = content[i];
+    }
+  });
+};
+
 // Function to find file offset within the BIN file
 const findFileOffset = (rom: Buffer, file: Buffer) => {
   const needle = file.subarray(0, 0x800);
   let whence = -1;
   const locations: number[] = [];
+
   do {
     whence += 1;
     whence = rom.indexOf(needle, whence);
@@ -253,7 +289,251 @@ const encodeRom = () => {
   replaceInRom(rom, megaman[11], mikuHairHover);
 
   // Update Pointer Table
+  console.log("- Updating Pointer table -");
   updatePointerTable(rom);
+
+  // Update Specual weapons
+  console.log("--- Replacing Weapons ---");
+
+  const wpn_02 = readFileSync("bin/wpn_PL00R02.BIN");
+  const miku_02 = readFileSync("out/PL00R02.BIN");
+
+  console.log("  - 0x02 Crusher");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_02.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_02.subarray(0x4000, 0x4000 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_02.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_02.subarray(0x4000, 0x4000 + 0x800)),
+    ],
+  );
+
+  const wpn_03 = readFileSync("bin/wpn_PL00R03.BIN");
+  const miku_03 = readFileSync("out/PL00R03.BIN");
+
+  console.log("  - 0x03 Buster Cannon");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_03.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_03.subarray(0x4000, 0x4000 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_03.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_03.subarray(0x4000, 0x4000 + 0x800)),
+    ],
+  );
+
+  const wpn_04 = readFileSync("bin/wpn_PL00R04.BIN");
+  const miku_04 = readFileSync("out/PL00R04.BIN");
+
+  console.log("  - 0x04 Hyper Shell");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_04.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_04.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_04.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_04.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
+  const wpn_05 = readFileSync("bin/wpn_PL00R05.BIN");
+  const miku_05 = readFileSync("out/PL00R05.BIN");
+
+  console.log("  - 0x05 Homing Missle");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_05.subarray(0x800, 0x800 + 0x800)),
+      Buffer.from(wpn_05.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_05.subarray(0x800, 0x800 + 0x800)),
+      Buffer.from(miku_05.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
+
+  const wpn_06 = readFileSync("bin/wpn_PL00R06.BIN");
+  const miku_06 = readFileSync("out/PL00R06.BIN");
+
+  console.log("  - 0x06 Ground Crawler");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_06.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_06.subarray(0x3000, 0x3000 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_06.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_06.subarray(0x3000, 0x3000 + 0x800)),
+    ],
+  );
+
+  const wpn_07 = readFileSync("bin/wpn_PL00R07.BIN");
+  const miku_07 = readFileSync("out/PL00R07.BIN");
+
+  console.log("  - 0x07 Vacuum Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_07.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_07.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_07.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_07.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
+
+  const wpn_08 = readFileSync("bin/wpn_PL00R08.BIN");
+  const miku_08 = readFileSync("out/PL00R08.BIN");
+
+  console.log("  - 0x08 Reflector Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_08.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_08.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_08.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_08.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
+
+  const wpn_09 = readFileSync("bin/wpn_PL00R09.BIN");
+  const miku_09 = readFileSync("out/PL00R09.BIN");
+
+  console.log("  - 0x09 Shield Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_09.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_09.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_09.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_09.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
+
+  const wpn_0A = readFileSync("bin/wpn_PL00R0A.BIN");
+  const miku_0A = readFileSync("out/PL00R0A.BIN");
+
+  console.log("  - 0x0A Blade Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0A.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(wpn_0A.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0A.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(miku_0A.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
+  const wpn_0B = readFileSync("bin/wpn_PL00R0B.BIN");
+  const miku_0B = readFileSync("out/PL00R0B.BIN");
+
+  console.log("  - 0x0B Shining Laser");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0B.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_0B.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0B.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_0B.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
+  const wpn_0C = readFileSync("bin/wpn_PL00R0C.BIN");
+  const miku_0C = readFileSync("out/PL00R0C.BIN");
+
+  console.log("  - 0x0C Machine Gun Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0C.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(wpn_0C.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0C.subarray(0x2000, 0x2000 + 0x800)),
+      Buffer.from(miku_0C.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
+  const wpn_0D = readFileSync("bin/wpn_PL00R0D.BIN");
+  const miku_0D = readFileSync("out/PL00R0D.BIN");
+
+  console.log("  - 0x0D Spread Buster");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0D.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_0D.subarray(0x3000, 0x3000 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0D.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_0D.subarray(0x3000, 0x3000 + 0x800)),
+    ],
+  );
+
+  const wpn_0E = readFileSync("bin/wpn_PL00R0E.BIN");
+  const miku_0E = readFileSync("out/PL00R0E.BIN");
+
+  console.log("  - 0x0E Aqua Blaster");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0E.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(wpn_0E.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0E.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(miku_0E.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
+  const wpn_0F = readFileSync("bin/wpn_PL00R0F.BIN");
+  const miku_0F = readFileSync("out/PL00R0F.BIN");
+
+  console.log("  - 0x0F Hunter Seeker");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_0F.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(wpn_0F.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_0F.subarray(0x1800, 0x1800 + 0x800)),
+      Buffer.from(miku_0F.subarray(0x3800, 0x3800 + 0x800)),
+    ],
+  );
+
+  const wpn_10 = readFileSync("bin/wpn_PL00R10.BIN");
+  const miku_10 = readFileSync("out/PL00R10.BIN");
+
+  console.log("  - 0x10 Drill Arm");
+  replaceSegment(
+    rom,
+    [
+      Buffer.from(wpn_10.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(wpn_10.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+    [
+      Buffer.from(miku_10.subarray(0x1000, 0x1000 + 0x800)),
+      Buffer.from(miku_10.subarray(0x2800, 0x2800 + 0x800)),
+    ],
+  );
 
   // Write the result
   console.log("--- Wiritng ROM ---");

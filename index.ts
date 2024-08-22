@@ -1,6 +1,23 @@
 import { encodeModel } from "./src/EncodeModel";
 import { encodeTexture } from "./src/EncodeTexture";
 import { encodeRom } from "./src/EncodeRom";
+import {
+  replaceCrusher,
+  replaceBusterCannon,
+  replaceHyperShell,
+  replaceHomingMissle,
+  replaceGroundCrawler,
+  replaceVacuumArm,
+  replaceReflectorArm,
+  replaceBladeArm,
+  replaceShieldArm,
+  replaceShiningLaser,
+  replaceMachineGunArm,
+  replaceSpreadBuster,
+  replaceAquaBlaster,
+  replaceHunterSeeker,
+  replaceDrillArm,
+} from "./src/EncodeWeapon";
 
 // Encode the Texture
 encodeTexture(
@@ -8,6 +25,9 @@ encodeTexture(
   "miku/miku_body.png",
   // Face Texture
   "miku/face-1.png",
+  // Special Weapon
+  "miku/megaman_img_002.png",
+  // "miku/debug.png",
 );
 
 /**
@@ -151,5 +171,34 @@ encodeModel(
   // Head
   "miku/01_HEAD_HAIR.obj",
 );
+
+/**
+    __                 _       _   __    __
+    / _\_ __   ___  ___(_) __ _| | / / /\ \ \___  __ _ _ __   ___  _ __  ___
+    \ \| '_ \ / _ \/ __| |/ _` | | \ \/  \/ / _ \/ _` | '_ \ / _ \| '_ \/ __|
+    _\ \ |_) |  __/ (__| | (_| | |  \  /\  /  __/ (_| | |_) | (_) | | | \__ \
+    \__/ .__/ \___|\___|_|\__,_|_|   \/  \/ \___|\__,_| .__/ \___/|_| |_|___/
+    |_|                                            |_|
+**/
+
+replaceCrusher("miku/weapons/PL00R02_001.obj");
+replaceBusterCannon("miku/weapons/PL00R03_001.obj");
+replaceHyperShell("miku/weapons/PL00R04_001.obj");
+replaceHomingMissle("miku/weapons/PL00R05_001.obj");
+replaceGroundCrawler("miku/weapons/PL00R06_001.obj");
+replaceVacuumArm("miku/weapons/PL00R07_001.obj");
+replaceReflectorArm("miku/weapons/PL00R08_001.obj");
+replaceShieldArm("miku/weapons/PL00R09_001.obj");
+replaceBladeArm("miku/weapons/PL00R0A_001.obj");
+replaceShiningLaser("miku/weapons/PL00R0B_001.obj");
+replaceMachineGunArm("miku/weapons/PL00R0C_001.obj");
+replaceSpreadBuster("miku/weapons/PL00R0D_001.obj");
+replaceAquaBlaster("miku/weapons/PL00R0E_001.obj");
+replaceHunterSeeker("miku/weapons/PL00R0F_001.obj");
+replaceDrillArm("miku/weapons/PL00R10_001.obj");
+
+/**
+ Encode Rom
+**/
 
 encodeRom();
