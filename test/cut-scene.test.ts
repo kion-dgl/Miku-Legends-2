@@ -19,7 +19,7 @@
 
 **/
 
-import { test } from "bun:test";
+import { test, expect } from "bun:test";
 import { readFileSync, writeFileSync } from "fs";
 import { PNG } from "pngjs";
 
@@ -117,7 +117,8 @@ const renderImage = (src: Buffer, outName: string) => {
 
   // Export file
   const buffer = PNG.sync.write(png);
-  writeFileSync(`out/${outName}.png`, buffer);
+  writeFileSync(`fixtures/${outName}.png`, buffer);
+  return palette[0];
 };
 
 const renderTexture = (src: Buffer, outName: string) => {
@@ -250,7 +251,8 @@ const renderTexture = (src: Buffer, outName: string) => {
 
   // Export file
   const buffer = PNG.sync.write(png);
-  writeFileSync(`out/${outName}.png`, buffer);
+  writeFileSync(`fixtures/${outName}.png`, buffer);
+  return palette[0];
 };
 
 // The first thing we need to do is iterate through the files and export all of the textures
@@ -258,55 +260,160 @@ const renderTexture = (src: Buffer, outName: string) => {
 // the specific one and write a fixture for it
 
 test("it should dump all of the textures, from the texture files", () => {
-  const INPUT = ["cut-ST2501.BIN"];
+  const INPUT = [
+    {
+      name: "cut-ST1CT.BIN",
+      offset: 0x02d000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST1FT.BIN",
+      offset: 0x053000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST03T.BIN",
+      offset: 0x046000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST3A02.BIN",
+      offset: 0x03d800,
+      compressed: false,
+    },
+    {
+      name: "cut-ST4B01.BIN",
+      offset: 0x023000,
+      compressed: false,
+    },
+    {
+      name: "cut-ST4B01.BIN",
+      offset: 0x027800,
+      compressed: false,
+    },
+    {
+      name: "cut-ST4BT.BIN",
+      offset: 0x03e800,
+      compressed: true,
+    },
+    {
+      name: "cut-ST4CT.BIN",
+      offset: 0x047800,
+      compressed: true,
+    },
+    {
+      name: "cut-ST5C01.BIN",
+      offset: 0x014800,
+      compressed: false,
+    },
+    {
+      name: "cut-ST15T.BIN",
+      offset: 0x03a800,
+      compressed: true,
+    },
+    {
+      name: "cut-ST17T.BIN",
+      offset: 0x052000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST1700.BIN",
+      offset: 0x011000,
+      compressed: false,
+    },
+    {
+      name: "cut-ST1701.BIN",
+      offset: 0x00e800,
+      compressed: false,
+    },
+    {
+      name: "cut-ST1702.BIN",
+      offset: 0x00b000,
+      compressed: false,
+    },
+    {
+      name: "cut-ST25T.BIN",
+      offset: 0x049000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST27T.BIN",
+      offset: 0x067000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST28T.BIN",
+      offset: 0x06d000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST30T.BIN",
+      offset: 0x04a000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST3001T.BIN",
+      offset: 0x04a000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST39T.BIN",
+      offset: 0x01e000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST46T.BIN",
+      offset: 0x032000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST52T.BIN",
+      offset: 0x030000,
+      compressed: true,
+    },
+    {
+      name: "cut-ST0305.BIN",
+      offset: 0x041000,
+      compressed: false,
+    },
+    {
+      name: "cut-ST1802T.BIN",
+      offset: 0x052800,
+      compressed: true,
+    },
+    {
+      name: "cut-ST1803.BIN",
+      offset: 0x018000,
+      compressed: false,
+    },
+    {
+      name: "cut-ST2501.BIN",
+      offset: 0x00a000,
+      compressed: false,
+    },
+  ];
 
-  console.log("----================= Hello =================----");
+  let lastPalette: Pixel[] = [];
+  INPUT.forEach(({ name, offset, compressed }, index) => {
+    const file = readFileSync(`bin/${name}`);
+    const src = file.subarray(offset);
 
-  INPUT.forEach((filename) => {
-    const file = readFileSync(`bin/${filename}`);
-    for (let i = 0; i < file.length; i += 0x800) {
-      const type = file.readUInt32LE(i + 0x00);
-      const fullSize = file.readUInt32LE(i + 0x04);
-      const colorCount = file.readUInt16LE(i + 0x10);
-      const paletteCount = file.readUInt16LE(i + 0x12);
-      const width = file.readUInt16LE(i + 0x18);
-      const height = file.readUInt16LE(i + 0x1a);
-
-      if (fullSize % 4 !== 0) {
-        continue;
-      }
-
-      if (fullSize < 0x20) {
-        continue;
-      }
-
-      if (width === 0 || height === 0) {
-        continue;
-      }
-
-      if (type === 0x03) {
-        console.log(`Compressed texture 0x${i.toString(16).padStart(6, "0")}`);
-        if (colorCount === 0) {
-          console.log("no palette, skipping");
-          continue;
-        }
-        const src = file.subarray(i);
-        const name = `${filename}-${i.toString(16).padStart(6, "0")}-true`;
-        renderTexture(src, name);
-      }
-
-      if (type === 0x02) {
-        console.log(
-          `Uncompressed texture 0x${i.toString(16).padStart(6, "0")}`,
-        );
-        if (colorCount === 0) {
-          console.log("no palette, skipping");
-          continue;
-        }
-        const src = file.subarray(i);
-        const name = `${filename}-${i.toString(16).padStart(6, "0")}-false`;
-        renderImage(src, name);
-      }
+    const filename = `${name}-${offset.toString(16).padStart(6, "0")}-true`;
+    let p: Pixel[];
+    if (compressed) {
+      p = renderTexture(src, filename);
+    } else {
+      p = renderImage(src, filename);
     }
+
+    if (index > 0) {
+      expect(lastPalette[0]).toEqual(p[0]);
+      expect(lastPalette[1]).toEqual(p[1]);
+      expect(lastPalette[2]).toEqual(p[2]);
+      expect(lastPalette[3]).toEqual(p[3]);
+      expect(lastPalette[4]).toEqual(p[4]);
+      // expect(lastPalette[5]).toEqual(p[5]);
+    }
+    lastPalette = p;
   });
 });
