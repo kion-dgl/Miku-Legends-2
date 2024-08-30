@@ -413,6 +413,16 @@ test("it should dump all of the textures, from the texture files", () => {
       expect(lastPalette[3]).toEqual(p[3]);
       expect(lastPalette[4]).toEqual(p[4]);
       // expect(lastPalette[5]).toEqual(p[5]);
+      expect(lastPalette[6]).toEqual(p[6]);
+      expect(lastPalette[7]).toEqual(p[7]);
+      expect(lastPalette[8]).toEqual(p[8]);
+      expect(lastPalette[9]).toEqual(p[9]);
+      expect(lastPalette[10]).toEqual(p[10]);
+      expect(lastPalette[11]).toEqual(p[11]);
+      // expect(lastPalette[12]).toEqual(p[12]);
+      // expect(lastPalette[13]).toEqual(p[13]);
+      expect(lastPalette[14]).toEqual(p[14]);
+      expect(lastPalette[15]).toEqual(p[15]);
     }
     lastPalette = p;
   });
