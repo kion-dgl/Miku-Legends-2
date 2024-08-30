@@ -55,9 +55,9 @@ const encodePalette = (pngSrc: Buffer, palette: number[]) => {
   const pngInfo = PNG.sync.read(pngSrc);
   const { width, height, data } = pngInfo;
 
-  if (width !== 256 || height !== 256) {
-    throw new Error("Encoder expects a 256x256 image");
-  }
+  // if (width !== 256 || height !== 256) {
+  //   throw new Error("Encoder expects a 256x256 image");
+  // }
 
   let inOfs = 0;
   for (let y = 0; y < height; y++) {
@@ -112,7 +112,7 @@ const encodeCutScenes = () => {
       name: "cut-ST4B01.BIN",
       offset: 0x027800,
       compressed: false,
-      rename: "ST4B01 (2).png",
+      png: "ST4B01 (2).png",
     },
     {
       name: "cut-ST4BT.BIN",
@@ -241,6 +241,78 @@ const encodeCutScenes = () => {
       png: "ST2501.png",
     },
   ];
+
+  const palette = [0];
+  CUT_SCENES.forEach(({ png }) => {
+    const buffer = readFileSync(`miku/faces/${png}`);
+
+    encodePalette(buffer, palette);
+  });
+
+  if (palette.length > 16) {
+    throw new Error("Too many colors for face texture");
+  }
+
+  const pal = Buffer.alloc(0x80);
+  for (let i = 0; i < 16; i++) {
+    pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+  }
+
+  CUT_SCENES.forEach(({ name, offset, compressed, png }) => {
+    // Read the Source Image
+    const src = readFileSync(`bin/${name}`);
+    const image = readFileSync(`miku/faces/${png}`);
+    // Encode the image into binary
+    const texture = encodeCutSceneTexture(palette, image);
+
+    const tim = {
+      type: src.readUInt32LE(offset + 0x00),
+      fullSize: src.readUInt32LE(offset + 0x04),
+      paletteX: src.readUInt16LE(offset + 0x0c),
+      paletteY: src.readUInt16LE(offset + 0x0e),
+      colorCount: src.readUInt16LE(offset + 0x10),
+      paletteCount: src.readUInt16LE(offset + 0x12),
+      imageX: src.readUInt16LE(offset + 0x14),
+      imageY: src.readUInt16LE(offset + 0x16),
+      width: src.readUInt16LE(offset + 0x18),
+      height: src.readUInt16LE(offset + 0x1a),
+      bitfieldSize: src.readUInt16LE(offset + 0x24),
+      payloadSize: src.readUInt16LE(offset + 0x26),
+    };
+
+    if (!compressed) {
+      // If not compressed, then we can just replace what's there
+      console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
+      throw new Error("You need to implement uncompressed fucktard");
+    } else {
+      // Otherwise we will need to compress and pray to god nothing breaks
+      console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
+      throw new Error("You need to implement compressed fucktard");
+    }
+  });
+};
+
+const encodeCutSceneTexture = (pal: number[], src: Buffer) => {
+  const face = PNG.sync.read(src);
+  const { data, width, height } = face;
+
+  let inOfs = 0;
+  let outOfs = 0;
+  const img = Buffer.alloc(0x8000, 0);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x += 2) {
+      const lowByte = readPixel(data, inOfs, pal);
+      inOfs += 4;
+      const highByte = readPixel(data, inOfs, pal);
+      inOfs += 4;
+      const byte = ((highByte << 4) | lowByte) & 0xff;
+      img[outOfs] = byte;
+      outOfs++;
+    }
+  }
+
+  return img;
 };
 
 const encodeFace = (
@@ -486,12 +558,12 @@ const replaceBodyTexture = (
   const ST03A2_PAL_OFS = 0x2c830;
   const ST03A2_IMG_OFS = 0x2d000;
   for (let i = 0; i < bodyPal.length; i++) {
-    st03a2[ST03A2_PAL_OFS + i] = bodyPal[i];
+    // st03a2[ST03A2_PAL_OFS + i] = bodyPal[i];
     pl00t2[0x30 + i] = bodyPal[i];
   }
 
   for (let i = 0; i < bodyImg.length; i++) {
-    st03a2[ST03A2_IMG_OFS + i] = bodyImg[i];
+    // st03a2[ST03A2_IMG_OFS + i] = bodyImg[i];
     pl00t2[0x800 + i] = bodyImg[i];
   }
 
@@ -575,7 +647,7 @@ const replaceFaceTexture = (
   // Update the palette in the
   for (let i = 0; i < facePal.length; i++) {
     // Face
-    st03a2[0x35030 + i] = facePal[i];
+    // st03a2[0x35030 + i] = facePal[i];
     pl00t2[0x9030 + i] = facePal[i];
     // Weapon
     crusher[0x4030 + i] = wpnPal[i];
@@ -612,7 +684,7 @@ const replaceFaceTexture = (
   writeFileSync("./out/PL00R10.BIN", drillArm);
 
   for (let i = 0; i < faceImg.length; i++) {
-    st03a2[0x35800 + i] = faceImg[i];
+    // st03a2[0x35800 + i] = faceImg[i];
     pl00t2[0x9800 + i] = faceImg[i];
   }
 
