@@ -1,5 +1,5 @@
 import { encodeModel } from "./src/EncodeModel";
-import { encodeTexture } from "./src/EncodeTexture";
+import { encodeTexture, encodeCutScenes } from "./src/EncodeTexture";
 import { encodeRom } from "./src/EncodeRom";
 import {
   replaceCrusher,
@@ -27,8 +27,9 @@ encodeTexture(
   "miku/face-1.png",
   // Special Weapon
   "miku/megaman_img_002.png",
-  // "miku/debug.png",
 );
+
+encodeCutScenes();
 
 /**
     $$\      $$\ $$\   $$\     $$\             $$\   $$\           $$\                          $$\

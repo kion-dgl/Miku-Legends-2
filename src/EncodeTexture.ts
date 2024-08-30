@@ -70,6 +70,179 @@ const encodePalette = (pngSrc: Buffer, palette: number[]) => {
   return palette;
 };
 
+const encodeCutScenes = () => {
+  const CUT_SCENES = [
+    {
+      name: "cut-ST1CT.BIN",
+      offset: 0x02d000,
+      compressed: true,
+      png: "ST1CT-ST1C01.png",
+    },
+    {
+      name: "cut-ST1C01.BIN",
+      offset: 0x014800,
+      compressed: false,
+      png: "ST1CT-ST1C01.png",
+    },
+    {
+      name: "cut-ST1FT.BIN",
+      offset: 0x053000,
+      compressed: true,
+      png: "ST1FT.png",
+    },
+    {
+      name: "cut-ST03T.BIN",
+      offset: 0x046000,
+      compressed: true,
+      png: "ST03T.png",
+    },
+    {
+      name: "cut-ST3A02.BIN",
+      offset: 0x03d800,
+      compressed: false,
+      png: "ST3A02.png",
+    },
+    {
+      name: "cut-ST4B01.BIN",
+      offset: 0x023000,
+      compressed: false,
+      png: "ST4B01 (1).png",
+    },
+    {
+      name: "cut-ST4B01.BIN",
+      offset: 0x027800,
+      compressed: false,
+      rename: "ST4B01 (2).png",
+    },
+    {
+      name: "cut-ST4BT.BIN",
+      offset: 0x03e800,
+      compressed: true,
+      png: "ST4BT.png",
+    },
+    {
+      name: "cut-ST4CT.BIN",
+      offset: 0x047800,
+      compressed: true,
+      png: "ST4CT.png",
+    },
+    {
+      name: "cut-ST5C01.BIN",
+      offset: 0x014800,
+      compressed: false,
+      png: "ST5C01.png",
+    },
+    {
+      name: "cut-ST15T.BIN",
+      offset: 0x03a800,
+      compressed: true,
+      png: "ST15T.png",
+    },
+    {
+      name: "cut-ST17T.BIN",
+      offset: 0x052000,
+      compressed: true,
+      png: "ST17T-ST1700-ST1701-ST1702.png",
+    },
+    {
+      name: "cut-ST1700.BIN",
+      offset: 0x011000,
+      compressed: false,
+      png: "ST17T-ST1700-ST1701-ST1702.png",
+    },
+    {
+      name: "cut-ST1701.BIN",
+      offset: 0x00e800,
+      compressed: false,
+      png: "ST17T-ST1700-ST1701-ST1702.png",
+    },
+    {
+      name: "cut-ST1702.BIN",
+      offset: 0x00b000,
+      compressed: false,
+      png: "ST17T-ST1700-ST1701-ST1702.png",
+    },
+    {
+      name: "cut-ST25T.BIN",
+      offset: 0x049000,
+      compressed: true,
+      png: "ST25T.png",
+    },
+    {
+      name: "cut-ST27T.BIN",
+      offset: 0x067000,
+      compressed: true,
+      png: "ST27T.png",
+    },
+    {
+      name: "cut-ST28T.BIN",
+      offset: 0x06d000,
+      compressed: true,
+      png: "ST28T.png",
+    },
+    {
+      name: "cut-ST30T.BIN",
+      offset: 0x04a000,
+      compressed: true,
+      png: "ST30T-ST3001T-ST31T.png",
+    },
+    {
+      name: "cut-ST3001T.BIN",
+      offset: 0x04a000,
+      compressed: true,
+      png: "ST30T-ST3001T-ST31T.png",
+    },
+    {
+      name: "cut-ST31T.BIN",
+      offset: 0x04d000,
+      compressed: true,
+      png: "ST30T-ST3001T-ST31T.png",
+    },
+    {
+      name: "cut-ST39T.BIN",
+      offset: 0x01e000,
+      compressed: true,
+      png: "ST39T.png",
+    },
+    {
+      name: "cut-ST46T.BIN",
+      offset: 0x032000,
+      compressed: true,
+      png: "ST46T.png",
+    },
+    {
+      name: "cut-ST52T.BIN",
+      offset: 0x030000,
+      compressed: true,
+      png: "ST52T.png",
+    },
+    {
+      name: "cut-ST0305.BIN",
+      offset: 0x041000,
+      compressed: false,
+      png: "ST0305.png",
+    },
+    {
+      name: "cut-ST1802T.BIN",
+      offset: 0x052800,
+      compressed: true,
+      png: "ST1802T-ST1803.png",
+    },
+    {
+      name: "cut-ST1803.BIN",
+      offset: 0x018000,
+      compressed: false,
+      png: "ST1802T-ST1803.png",
+    },
+    {
+      name: "cut-ST2501.BIN",
+      offset: 0x00a000,
+      compressed: false,
+      png: "ST2501.png",
+    },
+  ];
+};
+
 const encodeFace = (
   faceSrc: Buffer,
   wpnSrc: Buffer,
@@ -305,7 +478,7 @@ const replaceBodyTexture = (
   modded: Buffer,
   bodyBuffer: Buffer,
   pl00t2: Buffer,
-  st03a2: Buffer,
+  // st03a2: Buffer,
 ) => {
   // Replace Body
   const [bodyPal, bodyImg] = encodeImage(bodyBuffer);
@@ -363,7 +536,7 @@ const replaceFaceTexture = (
   weaponBuffer: Buffer,
   weaponPalette: number[],
   pl00t2: Buffer,
-  st03a2: Buffer,
+  // st03a2: Buffer,
 ) => {
   // Encode the Face Image
   const faceImg = encodeFace(
@@ -503,11 +676,16 @@ const encodeTexture = (
 
   // Files that need to be replaced with the uncompressed versions
   const pl00t2 = readFileSync("./bin/PL00T2.BIN");
-  const st03a2 = readFileSync("./bin/ST3A02.BIN");
+  // const st03a2 = readFileSync("./bin/ST3A02.BIN");
 
   // Modify the Game Texture
   const modTexture = Buffer.from(srcTexture);
-  replaceBodyTexture(modTexture, bodyBuffer, pl00t2, st03a2);
+  replaceBodyTexture(
+    modTexture,
+    bodyBuffer,
+    pl00t2,
+    // st03a2
+  );
   replaceFaceTexture(
     modTexture,
     faceBuffer,
@@ -515,13 +693,19 @@ const encodeTexture = (
     weaponBuffer,
     weaponPalette,
     pl00t2,
-    st03a2,
+    // st03a2,
   );
 
   // Write the updated game files
   writeFileSync("./out/PL00T.BIN", modTexture);
   writeFileSync("./out/PL00T2.BIN", pl00t2);
-  writeFileSync("./out/ST3A02.BIN", st03a2);
+  // writeFileSync("./out/ST3A02.BIN", st03a2);
 };
 
-export { encodePalette, encodeTexture, encodeImage, encodeFace };
+export {
+  encodePalette,
+  encodeTexture,
+  encodeImage,
+  encodeFace,
+  encodeCutScenes,
+};

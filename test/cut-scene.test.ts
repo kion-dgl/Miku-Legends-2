@@ -391,6 +391,16 @@ test("it should dump all of the textures, from the texture files", () => {
       offset: 0x00a000,
       compressed: false,
     },
+    {
+      name: "cut-ST1C01.BIN",
+      offset: 0x014800,
+      compressed: false,
+    },
+    {
+      name: "cut-ST31T.BIN",
+      offset: 0x04d000,
+      compressed: true,
+    },
   ];
 
   let lastPalette: Pixel[] = [];
