@@ -22,6 +22,14 @@
 import { readFileSync, writeFileSync } from "fs";
 import { PNG } from "pngjs";
 
+type Command = {
+  ofs: number;
+  cmd: number;
+  byteLength: number;
+  index: number;
+  word: number;
+};
+
 const encodeTexel = (r: number, g: number, b: number, a: number) => {
   const rClr = Math.floor((r >> 3) & 0xff);
   const gClr = Math.floor((g >> 3) & 0xff);
@@ -77,168 +85,196 @@ const encodeCutScenes = () => {
       offset: 0x02d000,
       compressed: true,
       png: "ST1CT-ST1C01.png",
+      end: 0x2e1f2,
     },
     {
       name: "cut-ST1C01.BIN",
       offset: 0x014800,
       compressed: false,
       png: "ST1CT-ST1C01.png",
+      end: -1,
     },
     {
       name: "cut-ST1FT.BIN",
       offset: 0x053000,
       compressed: true,
       png: "ST1FT.png",
+      end: -1,
     },
     {
       name: "cut-ST03T.BIN",
       offset: 0x046000,
       compressed: true,
       png: "ST03T.png",
+      end: -1,
     },
     {
       name: "cut-ST3A02.BIN",
       offset: 0x03d800,
       compressed: false,
       png: "ST3A02.png",
+      end: -1,
     },
     {
       name: "cut-ST4B01.BIN",
       offset: 0x023000,
       compressed: false,
       png: "ST4B01 (1).png",
+      end: -1,
     },
     {
       name: "cut-ST4B01.BIN",
       offset: 0x027800,
       compressed: false,
       png: "ST4B01 (2).png",
+      end: -1,
     },
     {
       name: "cut-ST4BT.BIN",
       offset: 0x03e800,
       compressed: true,
       png: "ST4BT.png",
+      end: -1,
     },
     {
       name: "cut-ST4CT.BIN",
       offset: 0x047800,
       compressed: true,
       png: "ST4CT.png",
+      end: -1,
     },
     {
       name: "cut-ST5C01.BIN",
       offset: 0x014800,
       compressed: false,
       png: "ST5C01.png",
+      end: -1,
     },
     {
       name: "cut-ST15T.BIN",
       offset: 0x03a800,
       compressed: true,
       png: "ST15T.png",
+      end: -1,
     },
     {
       name: "cut-ST17T.BIN",
       offset: 0x052000,
       compressed: true,
       png: "ST17T-ST1700-ST1701-ST1702.png",
+      end: -1,
     },
     {
       name: "cut-ST1700.BIN",
       offset: 0x011000,
       compressed: false,
       png: "ST17T-ST1700-ST1701-ST1702.png",
+      end: -1,
     },
     {
       name: "cut-ST1701.BIN",
       offset: 0x00e800,
       compressed: false,
       png: "ST17T-ST1700-ST1701-ST1702.png",
+      end: -1,
     },
     {
       name: "cut-ST1702.BIN",
       offset: 0x00b000,
       compressed: false,
       png: "ST17T-ST1700-ST1701-ST1702.png",
+      end: -1,
     },
     {
       name: "cut-ST25T.BIN",
       offset: 0x049000,
       compressed: true,
       png: "ST25T.png",
+      end: -1,
     },
     {
       name: "cut-ST27T.BIN",
       offset: 0x067000,
       compressed: true,
       png: "ST27T.png",
+      end: -1,
     },
     {
       name: "cut-ST28T.BIN",
       offset: 0x06d000,
       compressed: true,
       png: "ST28T.png",
+      end: -1,
     },
     {
       name: "cut-ST30T.BIN",
       offset: 0x04a000,
       compressed: true,
       png: "ST30T-ST3001T-ST31T.png",
+      end: -1,
     },
     {
       name: "cut-ST3001T.BIN",
       offset: 0x04a000,
       compressed: true,
       png: "ST30T-ST3001T-ST31T.png",
+      end: -1,
     },
     {
       name: "cut-ST31T.BIN",
       offset: 0x04d000,
       compressed: true,
       png: "ST30T-ST3001T-ST31T.png",
+      end: -1,
     },
     {
       name: "cut-ST39T.BIN",
       offset: 0x01e000,
       compressed: true,
       png: "ST39T.png",
+      end: -1,
     },
     {
       name: "cut-ST46T.BIN",
       offset: 0x032000,
       compressed: true,
       png: "ST46T.png",
+      end: -1,
     },
     {
       name: "cut-ST52T.BIN",
       offset: 0x030000,
       compressed: true,
       png: "ST52T.png",
+      end: -1,
     },
     {
       name: "cut-ST0305.BIN",
       offset: 0x041000,
       compressed: false,
       png: "ST0305.png",
+      end: -1,
     },
     {
       name: "cut-ST1802T.BIN",
       offset: 0x052800,
       compressed: true,
       png: "ST1802T-ST1803.png",
+      end: -1,
     },
     {
       name: "cut-ST1803.BIN",
       offset: 0x018000,
       compressed: false,
       png: "ST1802T-ST1803.png",
+      end: -1,
     },
     {
       name: "cut-ST2501.BIN",
       offset: 0x00a000,
       compressed: false,
       png: "ST2501.png",
+      end: -1,
     },
   ];
 
@@ -253,12 +289,7 @@ const encodeCutScenes = () => {
     throw new Error("Too many colors for face texture");
   }
 
-  const pal = Buffer.alloc(0x80);
-  for (let i = 0; i < 16; i++) {
-    pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
-  }
-
-  CUT_SCENES.forEach(({ name, offset, compressed, png }) => {
+  CUT_SCENES.forEach(({ name, offset, compressed, png, end }) => {
     // Read the Source Image
     const src = readFileSync(`bin/${name}`);
     const image = readFileSync(`miku/faces/${png}`);
@@ -280,6 +311,13 @@ const encodeCutScenes = () => {
       payloadSize: src.readUInt16LE(offset + 0x26),
     };
 
+    const COLOR_SIZE = 2; //bytes;
+    const { colorCount, paletteCount } = tim;
+    const pal = Buffer.alloc(colorCount * paletteCount * COLOR_SIZE);
+    for (let i = 0; i < 16; i++) {
+      pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+    }
+
     if (!compressed) {
       // If not compressed, then we can just replace what's there
       console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
@@ -287,8 +325,52 @@ const encodeCutScenes = () => {
     } else {
       // Otherwise we will need to compress and pray to god nothing breaks
       console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
-      throw new Error("You need to implement compressed fucktard");
+
+      const blocks = src.readUInt16LE(offset + 0x08);
+
+      console.log("Colors: :0x%s", colorCount.toString(16));
+      console.log("Palettes: %s", paletteCount);
+
+      if (end === -1) {
+        throw new Error("You need to implement compressed fucktard");
+      }
+
+      // Zero Out the Previous Data
+      for (let i = offset + 0x30; i < end; i++) {
+        src[i] = 0;
+      }
+
+      const [bodyBitField, compressedBody] = compressNewTexture(pal, texture);
+
+      // Update the bitfield length in header
+      src.writeInt16LE(bodyBitField.length, 0x24);
+
+      let bodyOfs = offset + 0x30;
+
+      // Write the bitfield
+      for (let i = 0; i < bodyBitField.length; i++) {
+        src[bodyOfs++] = bodyBitField[i];
+      }
+
+      // Write the compressed Texture
+      for (let i = 0; i < compressedBody.length; i++) {
+        src[bodyOfs++] = compressedBody[i];
+      }
+
+      const lower = Math.floor(end / 0x800) * 0x800;
+      const upper = Math.ceil(end / 0x800) * 0x800;
+
+      if (bodyOfs > lower && bodyOfs < upper) {
+        console.log("Looks good");
+      } else if (bodyOfs <= lower) {
+        console.log("too short");
+      } else {
+        console.log("too long");
+      }
     }
+
+    writeFileSync(`out/${name}`, src);
+    throw new Error("Look at exported file");
   });
 };
 
@@ -518,6 +600,126 @@ const encodeBitfield = (bits: boolean[]): Buffer => {
   return buffer;
 };
 
+const compressNewSegment = (inBuffer: Buffer) => {
+  const crossedOut: number[] = [];
+  const commands: Command[] = [];
+  // Loop through the list of possible commands
+  for (let cmd = 7; cmd >= 0; cmd--) {
+    const byteLength = (cmd + 2) * 2;
+    for (let ofs = 0; ofs < inBuffer.length; ofs += 2) {
+      // Check if the offset has already been found
+
+      let isCrossedOut = false;
+      const start = ofs;
+      const end = ofs + byteLength;
+
+      for (let k = start; k < end; k += 2) {
+        if (crossedOut.includes(k)) {
+          isCrossedOut = true;
+        }
+      }
+
+      if (isCrossedOut) {
+        continue;
+      }
+
+      const needle = inBuffer.subarray(start, end);
+      // Check for buffer passed the length
+      if (ofs + byteLength > inBuffer.length || ofs < byteLength) {
+        continue;
+      }
+
+      const haystack = inBuffer.subarray(0, ofs);
+      // Check if the needle is in the haystack
+      const index = haystack.indexOf(needle);
+      if (index === -1) {
+        continue;
+      }
+
+      const word = (index << 3) | cmd;
+      // If found, we add the indexes to be skipped
+      for (let k = start; k < end; k += 2) {
+        crossedOut.push(k);
+      }
+      crossedOut.sort();
+      commands.push({ ofs, cmd, byteLength, index, word });
+    }
+  }
+
+  for (let ofs = 0; ofs < inBuffer.length; ofs += 2) {
+    // Check if the offset has already been found
+    if (crossedOut.includes(ofs)) {
+      continue;
+    }
+    const word = inBuffer.readUInt16LE(ofs);
+    commands.push({ ofs, cmd: -1, byteLength: 2, index: -1, word });
+  }
+
+  commands.sort((a, b) => a.ofs - b.ofs);
+  const bits: boolean[] = [];
+  const outBuffer = Buffer.alloc(commands.length * 2 + 2);
+  let outOfs = 0;
+  let inOfs = 0;
+  commands.forEach((command, i) => {
+    const { ofs, cmd, byteLength, word } = command;
+
+    if (inOfs !== ofs) {
+      throw new Error("Invalid offfset!!!!! Got " + ofs + "Expected: " + inOfs);
+    }
+    inOfs += byteLength;
+
+    if (i < 5) {
+      console.log(command);
+    }
+
+    if (cmd === -1) {
+      try {
+        bits.push(false);
+        outBuffer.writeUInt16LE(word, outOfs);
+        outOfs += 2;
+      } catch (err) {
+        console.log(command);
+        console.log(i, commands.length);
+        throw err;
+      }
+    } else {
+      bits.push(true);
+      outBuffer.writeUInt16LE(word, outOfs);
+      outOfs += 2;
+    }
+  });
+
+  bits.push(true);
+  outBuffer.writeUInt16LE(0xffff, outOfs);
+  outOfs += 2;
+
+  return { bits, outBuffer: Buffer.from(outBuffer.subarray(0, outOfs)) };
+};
+
+const compressNewTexture = (pal: Buffer, img: Buffer) => {
+  const decompressed = Buffer.concat([pal, img]);
+
+  const SEGMENT_LENGTH = 0x2000;
+  const segmentCount = Math.ceil(decompressed.length / SEGMENT_LENGTH);
+  const segments: Buffer[] = [];
+  for (let i = 0; i < segmentCount; i++) {
+    segments.push(
+      decompressed.subarray(i * SEGMENT_LENGTH, (i + 1) * SEGMENT_LENGTH),
+    );
+  }
+
+  const bits: boolean[] = [];
+  const loads: Buffer[] = [];
+  segments.forEach((segment, index) => {
+    const { bits, outBuffer } = compressNewSegment(segment);
+    bits.forEach((bit) => bits.push(bit));
+    loads.push(outBuffer);
+  });
+
+  const bitfied = encodeBitfield(bits);
+  return [bitfied, Buffer.concat(loads)];
+};
+
 const compressTexture = (
   pal: Buffer,
   img: Buffer,
@@ -526,13 +728,14 @@ const compressTexture = (
 ) => {
   const decompressed = Buffer.concat([pal, img]);
 
-  const segments = [
-    decompressed.subarray(0x0000, 0x2000),
-    decompressed.subarray(0x2000, 0x4000),
-    decompressed.subarray(0x4000, 0x6000),
-    decompressed.subarray(0x6000, 0x8000),
-    decompressed.subarray(0x8000),
-  ];
+  const SEGMENT_LENGTH = 0x2000;
+  const segmentCount = Math.ceil(decompressed.length / SEGMENT_LENGTH);
+  const segments: Buffer[] = [];
+  for (let i = 0; i < segmentCount; i++) {
+    segments.push(
+      decompressed.subarray(i * SEGMENT_LENGTH, (i + 1) * SEGMENT_LENGTH),
+    );
+  }
 
   const bits: boolean[] = [];
   const loads: Buffer[] = [];
