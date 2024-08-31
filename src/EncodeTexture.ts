@@ -99,14 +99,14 @@ const encodeCutScenes = () => {
       offset: 0x053000,
       compressed: true,
       png: "ST1FT.png",
-      end: -1,
+      end: 0x054cac,
     },
     {
       name: "cut-ST03T.BIN",
       offset: 0x046000,
       compressed: true,
       png: "ST03T.png",
-      end: -1,
+      end: 0x047f58,
     },
     {
       name: "cut-ST3A02.BIN",
@@ -134,14 +134,14 @@ const encodeCutScenes = () => {
       offset: 0x03e800,
       compressed: true,
       png: "ST4BT.png",
-      end: -1,
+      end: 0x03fa34,
     },
     {
       name: "cut-ST4CT.BIN",
       offset: 0x047800,
       compressed: true,
       png: "ST4CT.png",
-      end: -1,
+      end: 0x0493a4,
     },
     {
       name: "cut-ST5C01.BIN",
@@ -155,7 +155,7 @@ const encodeCutScenes = () => {
       offset: 0x03a800,
       compressed: true,
       png: "ST15T.png",
-      end: -1,
+      end: 0x03b888,
     },
     {
       name: "cut-ST17T.BIN",
@@ -318,10 +318,12 @@ const encodeCutScenes = () => {
       pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
     }
 
+    let stop = false;
     if (!compressed) {
       // If not compressed, then we can just replace what's there
       console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
-      throw new Error("You need to implement uncompressed fucktard");
+      // throw new Error("You need to implement uncompressed fucktard");
+      return;
     } else {
       // Otherwise we will need to compress and pray to god nothing breaks
       console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
@@ -364,13 +366,17 @@ const encodeCutScenes = () => {
         console.log("Looks good");
       } else if (bodyOfs <= lower) {
         console.log("too short");
+        stop = true;
       } else {
         console.log("too long");
+        stop = true;
       }
     }
 
     writeFileSync(`out/${name}`, src);
-    throw new Error("Look at exported file");
+    if (stop) {
+      throw new Error("Look at exported file");
+    }
   });
 };
 
