@@ -289,9 +289,18 @@ const encodeCutScenes = () => {
     throw new Error("Too many colors for face texture");
   }
 
+  let ST4B01: Buffer | null = null;
   CUT_SCENES.forEach(({ name, offset, compressed, png, end }) => {
     // Read the Source Image
-    const src = readFileSync(`bin/${name}`);
+    console.log(name);
+    const src =
+      name === "cut-ST4B01.BIN" && ST4B01
+        ? ST4B01
+        : readFileSync(`bin/${name}`);
+    if (name === "cut-ST4B01.BIN" && !ST4B01) {
+      ST4B01 = src;
+    }
+    console.log(src);
     const image = readFileSync(`miku/faces/${png}`);
     // Encode the image into binary
     const texture = encodeCutSceneTexture(palette, image);
@@ -313,7 +322,8 @@ const encodeCutScenes = () => {
 
     const COLOR_SIZE = 2; //bytes;
     const { colorCount, paletteCount } = tim;
-    const pal = Buffer.alloc(colorCount * paletteCount * COLOR_SIZE);
+    const pal = Buffer.alloc(colorCount * paletteCount);
+    console.log(colorCount.toString(16));
     for (let i = 0; i < 16; i++) {
       pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
     }
@@ -322,20 +332,21 @@ const encodeCutScenes = () => {
     if (!compressed) {
       // If not compressed, then we can just replace what's there
       console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
-      // throw new Error("You need to implement uncompressed fucktard");
-      return;
+
+      // Replace the existing palette
+      for (let i = 0; i < pal.length; i++) {
+        src[offset + 0x30 + i] = pal[i];
+      }
+
+      // Replace the texture
+      for (let i = 0; i < texture.length; i++) {
+        src[offset + 0x800 + i] = texture[i];
+      }
     } else {
       // Otherwise we will need to compress and pray to god nothing breaks
       console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
 
       const blocks = src.readUInt16LE(offset + 0x08);
-
-      console.log("Colors: :0x%s", colorCount.toString(16));
-      console.log("Palettes: %s", paletteCount);
-
-      if (end === -1) {
-        throw new Error("You need to implement compressed fucktard");
-      }
 
       // Zero Out the Previous Data
       for (let i = offset + 0x30; i < end; i++) {
@@ -345,11 +356,15 @@ const encodeCutScenes = () => {
       let makeBad = -1;
       switch (name) {
         case "cut-ST25T.BIN":
+        case "cut-ST31T.BIN":
+        case "cut-ST39T.BIN":
           makeBad = 1;
           break;
         case "cut-ST30T.BIN":
-        case "cut-ST3001T.BIN":
           makeBad = 2;
+          break;
+        case "cut-ST3001T.BIN":
+          makeBad = 3;
           break;
       }
 
@@ -358,6 +373,19 @@ const encodeCutScenes = () => {
         texture,
         makeBad,
       );
+
+      if (name === "cut-ST46T.BIN") {
+        console.log(tim);
+        const totalLen = bodyBitField.length + compressedBody.length;
+        console.log("Decompressed length: 0x%s", texture.length.toString(16));
+        console.log("Compressed length: 0x%s", totalLen.toString(16));
+        console.log("Expected End: 0x%s", end.toString(16));
+        console.log(
+          "Actuall end: 0x%s",
+          (offset + 0x30 + totalLen).toString(16),
+        );
+        return;
+      }
 
       // Update the bitfield length in header
       src.writeInt16LE(bodyBitField.length, 0x24);
@@ -393,8 +421,6 @@ const encodeCutScenes = () => {
       throw new Error("Look at exported file");
     }
   });
-
-  throw new Error("All done!!??? Stopping...");
 };
 
 const encodeCutSceneTexture = (pal: number[], src: Buffer) => {
@@ -636,6 +662,9 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
     start = 5;
     end = 0;
   } else if (makeBad === 2) {
+    start = 5;
+    end = 2;
+  } else if (makeBad === 3) {
     start = 5;
     end = 2;
   }

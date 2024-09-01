@@ -219,16 +219,12 @@ const encodeRom = () => {
   const pl00t = readFileSync("bin/PL00T.BIN");
   const mikuTexturePatch = readFileSync("out/PL00T2.BIN");
   const pl00t2 = readFileSync("bin/PL00T2.BIN");
-  const st03a2 = readFileSync("./bin/ST3A02.BIN");
-  const st03a2Miku = readFileSync("./out/ST3A02.BIN");
 
   console.log("--- Replacing Textures ---");
   console.log("  - Body + Face Texture (compressed)");
   replaceInRom(rom, pl00t, mikuTexture);
   console.log("  - Body + Face Texture (uncompressed)");
   replaceInRom(rom, pl00t2, mikuTexturePatch);
-  console.log("  - First Cut Scene Patch");
-  replaceInRom(rom, st03a2, st03a2Miku);
 
   // Encode Models
   const mikuHairNorm = readFileSync("out/PL00P010.BIN");
@@ -534,6 +530,47 @@ const encodeRom = () => {
       Buffer.from(miku_10.subarray(0x2800, 0x2800 + 0x800)),
     ],
   );
+
+  // Update Cut Scene Textures
+
+  const CUT_SCENES = [
+    "cut-ST1CT.BIN",
+    "cut-ST1C01.BIN",
+    "cut-ST1FT.BIN",
+    "cut-ST03T.BIN",
+    "cut-ST3A02.BIN",
+    "cut-ST4B01.BIN",
+    "cut-ST4BT.BIN",
+    "cut-ST4CT.BIN",
+    "cut-ST5C01.BIN",
+    "cut-ST15T.BIN",
+    "cut-ST17T.BIN",
+    "cut-ST1700.BIN",
+    "cut-ST1701.BIN",
+    "cut-ST1702.BIN",
+    "cut-ST25T.BIN",
+    "cut-ST27T.BIN",
+    "cut-ST28T.BIN",
+    "cut-ST30T.BIN",
+    "cut-ST3001T.BIN",
+    "cut-ST31T.BIN",
+    "cut-ST39T.BIN",
+    "cut-ST46T.BIN",
+    "cut-ST52T.BIN",
+    "cut-ST0305.BIN",
+    "cut-ST1802T.BIN",
+    "cut-ST1803.BIN",
+    "cut-ST2501.BIN",
+  ];
+
+  console.log("--- Replacing Cut Scene Textures ---");
+
+  CUT_SCENES.forEach((name) => {
+    console.log(`  - ${name}`);
+    const src = readFileSync(`bin/${name}`);
+    const mod = readFileSync(`out/${name}`);
+    replaceInRom(rom, src, mod);
+  });
 
   // Write the result
   console.log("--- Wiritng ROM ---");
