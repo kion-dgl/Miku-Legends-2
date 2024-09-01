@@ -342,7 +342,16 @@ const encodeCutScenes = () => {
         src[i] = 0;
       }
 
-      const makeBad = ["cut-ST25T.BIN"].indexOf(name) !== -1;
+      let makeBad = -1;
+      switch (name) {
+        case "cut-ST25T.BIN":
+          makeBad = 1;
+          break;
+        case "cut-ST30T.BIN":
+        case "cut-ST3001T.BIN":
+          makeBad = 2;
+          break;
+      }
 
       const [bodyBitField, compressedBody] = compressNewTexture(
         pal,
@@ -614,15 +623,25 @@ const encodeBitfield = (bits: boolean[]): Buffer => {
   return buffer;
 };
 
-const compressNewSegment = (inBuffer: Buffer, makeBad: boolean) => {
+const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
   const crossedOut: number[] = [];
   const commands: Command[] = [];
 
   const MAX_COMMAND = 7;
-  const start = makeBad ? 5 : MAX_COMMAND;
+  const MIN_COMMAND = 0;
+  let start = MAX_COMMAND;
+  let end = MIN_COMMAND;
+
+  if (makeBad === 1) {
+    start = 5;
+    end = 0;
+  } else if (makeBad === 2) {
+    start = 5;
+    end = 2;
+  }
 
   // Loop through the list of possible commands
-  for (let cmd = start; cmd >= 0; cmd--) {
+  for (let cmd = start; cmd >= end; cmd--) {
     const byteLength = (cmd + 2) * 2;
     for (let ofs = 0; ofs < inBuffer.length; ofs += 2) {
       // Check if the offset has already been found
@@ -710,7 +729,7 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: boolean) => {
   return { bits, outBuffer: Buffer.from(outBuffer.subarray(0, outOfs)) };
 };
 
-const compressNewTexture = (pal: Buffer, img: Buffer, makeBad: boolean) => {
+const compressNewTexture = (pal: Buffer, img: Buffer, makeBad: number) => {
   const decompressed = Buffer.concat([pal, img]);
 
   const SEGMENT_LENGTH = 0x2000;
