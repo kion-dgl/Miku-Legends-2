@@ -342,7 +342,13 @@ const encodeCutScenes = () => {
         src[i] = 0;
       }
 
-      const [bodyBitField, compressedBody] = compressNewTexture(pal, texture);
+      const makeBad = ["cut-ST25T.BIN"].indexOf(name) !== -1;
+
+      const [bodyBitField, compressedBody] = compressNewTexture(
+        pal,
+        texture,
+        makeBad,
+      );
 
       // Update the bitfield length in header
       src.writeInt16LE(bodyBitField.length, 0x24);
@@ -365,7 +371,7 @@ const encodeCutScenes = () => {
       if (bodyOfs > lower && bodyOfs < upper) {
         console.log("Looks good");
       } else if (bodyOfs <= lower) {
-        console.log("too short");
+        console.log(`${name} too short`);
         stop = true;
       } else {
         console.log("too long");
@@ -378,6 +384,8 @@ const encodeCutScenes = () => {
       throw new Error("Look at exported file");
     }
   });
+
+  throw new Error("All done!!??? Stopping...");
 };
 
 const encodeCutSceneTexture = (pal: number[], src: Buffer) => {
@@ -606,11 +614,15 @@ const encodeBitfield = (bits: boolean[]): Buffer => {
   return buffer;
 };
 
-const compressNewSegment = (inBuffer: Buffer) => {
+const compressNewSegment = (inBuffer: Buffer, makeBad: boolean) => {
   const crossedOut: number[] = [];
   const commands: Command[] = [];
+
+  const MAX_COMMAND = 7;
+  const start = makeBad ? 5 : MAX_COMMAND;
+
   // Loop through the list of possible commands
-  for (let cmd = 7; cmd >= 0; cmd--) {
+  for (let cmd = start; cmd >= 0; cmd--) {
     const byteLength = (cmd + 2) * 2;
     for (let ofs = 0; ofs < inBuffer.length; ofs += 2) {
       // Check if the offset has already been found
@@ -674,10 +686,6 @@ const compressNewSegment = (inBuffer: Buffer) => {
     }
     inOfs += byteLength;
 
-    if (i < 5) {
-      console.log(command);
-    }
-
     if (cmd === -1) {
       try {
         bits.push(false);
@@ -702,7 +710,7 @@ const compressNewSegment = (inBuffer: Buffer) => {
   return { bits, outBuffer: Buffer.from(outBuffer.subarray(0, outOfs)) };
 };
 
-const compressNewTexture = (pal: Buffer, img: Buffer) => {
+const compressNewTexture = (pal: Buffer, img: Buffer, makeBad: boolean) => {
   const decompressed = Buffer.concat([pal, img]);
 
   const SEGMENT_LENGTH = 0x2000;
@@ -717,7 +725,7 @@ const compressNewTexture = (pal: Buffer, img: Buffer) => {
   const bits: boolean[] = [];
   const loads: Buffer[] = [];
   segments.forEach((segment, index) => {
-    const { bits, outBuffer } = compressNewSegment(segment);
+    const { bits, outBuffer } = compressNewSegment(segment, makeBad);
     bits.forEach((bit) => bits.push(bit));
     loads.push(outBuffer);
   });
