@@ -289,18 +289,19 @@ const encodeCutScenes = () => {
     throw new Error("Too many colors for face texture");
   }
 
-  let ST4B01: Buffer | null = null;
+  let ST4B01: Buffer = Buffer.alloc(0);
   CUT_SCENES.forEach(({ name, offset, compressed, png, end }) => {
     // Read the Source Image
-    console.log(name);
-    const src =
-      name === "cut-ST4B01.BIN" && ST4B01
-        ? ST4B01
-        : readFileSync(`bin/${name}`);
-    if (name === "cut-ST4B01.BIN" && !ST4B01) {
+    let src = readFileSync(`bin/${name}`);
+    if (name === "cut-ST4B01.BIN" && ST4B01.length === 0) {
       ST4B01 = src;
+    } else if (name === "cut-ST4B01.BIN" && ST4B01.length !== 0) {
+      src = ST4B01;
     }
-    console.log(src);
+
+    if (name === "cut-ST4B01.BIN") {
+      writeFileSync(`out/debug-${name}`, src);
+    }
     const image = readFileSync(`miku/faces/${png}`);
     // Encode the image into binary
     const texture = encodeCutSceneTexture(palette, image);
@@ -320,10 +321,17 @@ const encodeCutScenes = () => {
       payloadSize: src.readUInt16LE(offset + 0x26),
     };
 
-    const COLOR_SIZE = 2; //bytes;
-    const { colorCount, paletteCount } = tim;
-    const pal = Buffer.alloc(colorCount * paletteCount);
-    console.log(colorCount.toString(16));
+    const { type, fullSize } = tim;
+    const palSize = fullSize - texture.length;
+    if (type === 2) {
+      if (palSize !== 0x7d0) {
+        throw new Error("Uncompressed invalid palette");
+      }
+    } else if (palSize < 0x20 || palSize > 0x80) {
+      throw new Error("Invalid pal size");
+    }
+
+    const pal = Buffer.alloc(palSize);
     for (let i = 0; i < 16; i++) {
       pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
     }
@@ -355,16 +363,16 @@ const encodeCutScenes = () => {
 
       let makeBad = -1;
       switch (name) {
+        case "cut-ST1CT.BIN":
+        case "cut-ST4BT.BIN":
+        case "cut-ST15T.BIN":
+        case "cut-ST17T.BIN":
         case "cut-ST25T.BIN":
+        case "cut-ST30T.BIN":
+        case "cut-ST3001T.BIN":
         case "cut-ST31T.BIN":
         case "cut-ST39T.BIN":
-          makeBad = 1;
-          break;
-        case "cut-ST30T.BIN":
           makeBad = 2;
-          break;
-        case "cut-ST3001T.BIN":
-          makeBad = 3;
           break;
       }
 
@@ -374,21 +382,8 @@ const encodeCutScenes = () => {
         makeBad,
       );
 
-      if (name === "cut-ST46T.BIN") {
-        console.log(tim);
-        const totalLen = bodyBitField.length + compressedBody.length;
-        console.log("Decompressed length: 0x%s", texture.length.toString(16));
-        console.log("Compressed length: 0x%s", totalLen.toString(16));
-        console.log("Expected End: 0x%s", end.toString(16));
-        console.log(
-          "Actuall end: 0x%s",
-          (offset + 0x30 + totalLen).toString(16),
-        );
-        return;
-      }
-
       // Update the bitfield length in header
-      src.writeInt16LE(bodyBitField.length, 0x24);
+      src.writeInt16LE(bodyBitField.length, offset + 0x24);
 
       let bodyOfs = offset + 0x30;
 
@@ -429,7 +424,7 @@ const encodeCutSceneTexture = (pal: number[], src: Buffer) => {
 
   let inOfs = 0;
   let outOfs = 0;
-  const img = Buffer.alloc(0x8000, 0);
+  const img = Buffer.alloc((width * height) / 2, 0);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x += 2) {
