@@ -94,6 +94,8 @@ const encodeCutScenes = () => {
   console.log(palette);
   console.log(newPal);
 
+  const RED_COLOR = encodeTexel(255, 0, 0, 1);
+
   if (palette.length > 16) {
     throw new Error("Too many colors for face texture");
   }
@@ -140,7 +142,11 @@ const encodeCutScenes = () => {
 
     const pal = Buffer.alloc(palSize);
     for (let i = 0; i < 16; i++) {
-      pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+      if (name !== "cut-ST3A02.BIN") {
+        pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+      } else {
+        pal.writeUInt16LE(RED_COLOR);
+      }
     }
 
     let stop = false;
@@ -715,11 +721,14 @@ const replaceFaceTexture = (
   const hunterSeeker = readFileSync("./bin/wpn_PL00R0F.BIN");
   const drillArm = readFileSync("./bin/wpn_PL00R10.BIN");
 
+  const BLUE_COLOR = encodeTexel(0, 0, 255, 1);
+
   // Update the palette in the
   for (let i = 0; i < facePal.length; i++) {
     // Face
     st03a2[0x35030 + i] = facePal[i];
-    pl00t2[0x9030 + i] = facePal[i];
+    pl00t2[0x9030 + i] = BLUE_COLOR;
+
     // Weapon
     crusher[0x4030 + i] = wpnPal[i];
     busterCannon[0x4030 + i] = wpnPal[i];
