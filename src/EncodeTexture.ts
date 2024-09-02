@@ -80,21 +80,15 @@ const encodePalette = (pngSrc: Buffer, palette: number[]) => {
 };
 
 const encodeCutScenes = () => {
-  const palette = [0];
+  const palette = [
+    0, 51935, 56127, 49790, 45629, 40203, 41338, 38090, 55956, 58103, 62364,
+    51650, 55843, 59077, 61222, 48703,
+  ];
 
   CUT_SCENES.forEach(({ png }) => {
     const buffer = readFileSync(`miku/faces/${png}`);
     encodePalette(buffer, palette);
   });
-
-  const newPal = [0];
-  const face = readFileSync("miku/face-1.png");
-  encodePalette(face, newPal);
-
-  console.log(palette);
-  console.log(newPal);
-
-  const RED_COLOR = encodeTexel(255, 0, 0, 1);
 
   if (palette.length > 16) {
     throw new Error("Too many colors for face texture");
@@ -142,11 +136,7 @@ const encodeCutScenes = () => {
 
     const pal = Buffer.alloc(palSize);
     for (let i = 0; i < 16; i++) {
-      if (name !== "cut-ST3A02.BIN") {
-        pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
-      } else {
-        pal.writeUInt16LE(RED_COLOR);
-      }
+      pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
     }
 
     let stop = false;
@@ -228,7 +218,6 @@ const encodeCutScenes = () => {
     }
 
     writeFileSync(`out/${name}`, src);
-    writeFileSync(`fixtures/miku-${name.substring(4)}`, src);
     if (stop) {
       throw new Error("Look at exported file");
     }
@@ -721,13 +710,11 @@ const replaceFaceTexture = (
   const hunterSeeker = readFileSync("./bin/wpn_PL00R0F.BIN");
   const drillArm = readFileSync("./bin/wpn_PL00R10.BIN");
 
-  const BLUE_COLOR = encodeTexel(0, 0, 255, 1);
-
   // Update the palette in the
   for (let i = 0; i < facePal.length; i++) {
     // Face
     st03a2[0x35030 + i] = facePal[i];
-    pl00t2[0x9030 + i] = BLUE_COLOR;
+    pl00t2[0x9030 + i] = facePal[i];
 
     // Weapon
     crusher[0x4030 + i] = wpnPal[i];
@@ -833,7 +820,7 @@ const encodeTexture = (
 
   // Files that need to be replaced with the uncompressed versions
   const pl00t2 = readFileSync("./bin/PL00T2.BIN");
-  const st03a2 = readFileSync("./bin/cut-ST3A02.BIN");
+  const st03a2 = readFileSync("./bin/ST3A02.BIN");
 
   // Modify the Game Texture
   const modTexture = Buffer.from(srcTexture);
@@ -851,7 +838,7 @@ const encodeTexture = (
   // Write the updated game files
   writeFileSync("./out/PL00T.BIN", modTexture);
   writeFileSync("./out/PL00T2.BIN", pl00t2);
-  writeFileSync("./out/cut-ST3A02.BIN", st03a2);
+  writeFileSync("./bin/cut-ST3A02.BIN", st03a2);
 };
 
 export {

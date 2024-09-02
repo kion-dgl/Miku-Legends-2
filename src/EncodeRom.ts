@@ -571,7 +571,10 @@ const encodeRom = () => {
 
   CUT_SCENES.forEach((name) => {
     console.log(`  - ${name}`);
-    const src = readFileSync(`bin/${name}`);
+    const src =
+      name === "cut-ST3A02.BIN"
+        ? readFileSync(`bin/ST3A02.BIN`)
+        : readFileSync(`bin/${name}`);
     const mod = readFileSync(`out/${name}`);
     replaceInRom(rom, src, mod);
   });
