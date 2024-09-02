@@ -22,6 +22,7 @@
 import { test, expect } from "bun:test";
 import { readFileSync, writeFileSync } from "fs";
 import { PNG } from "pngjs";
+import CUT_SCENES from "../src/CutScenes";
 
 type Pixel = {
   r: number;
@@ -435,5 +436,19 @@ test("it should dump all of the textures, from the texture files", () => {
       expect(lastPalette[15]).toEqual(p[15]);
     }
     lastPalette = p;
+  });
+});
+
+test("it should render miku cutscene textures", () => {
+  CUT_SCENES.forEach(({ name, offset, compressed }, index) => {
+    const file = readFileSync(`fixtures/miku-${name.substring(4)}`);
+    const src = file.subarray(offset);
+
+    const filename = `miku-${name.substring(4)}-${offset.toString(16).padStart(6, "0")}-true`;
+    if (compressed) {
+      renderTexture(src, filename);
+    } else {
+      renderImage(src, filename);
+    }
   });
 });
