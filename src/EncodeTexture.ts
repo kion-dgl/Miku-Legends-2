@@ -166,14 +166,16 @@ const encodeCutScenes = () => {
       let makeBad = -1;
       switch (name) {
         case "cut-ST1CT.BIN":
-        case "cut-ST4BT.BIN":
-        case "cut-ST15T.BIN":
-        case "cut-ST17T.BIN":
         case "cut-ST25T.BIN":
         case "cut-ST30T.BIN":
         case "cut-ST3001T.BIN":
         case "cut-ST31T.BIN":
         case "cut-ST39T.BIN":
+          makeBad = 1;
+          break;
+        case "cut-ST4BT.BIN":
+        case "cut-ST15T.BIN":
+        case "cut-ST17T.BIN":
           makeBad = 2;
           break;
       }
@@ -186,6 +188,7 @@ const encodeCutScenes = () => {
 
       // Update the bitfield length in header
       src.writeInt16LE(bodyBitField.length, offset + 0x24);
+      console.log("BitField Size: 0x%s", bodyBitField.length.toString(16));
 
       let bodyOfs = offset + 0x30;
 
@@ -568,15 +571,15 @@ const compressNewTexture = (pal: Buffer, img: Buffer, makeBad: number) => {
     );
   }
 
-  const bits: boolean[] = [];
+  const bucket: boolean[] = [];
   const loads: Buffer[] = [];
   segments.forEach((segment, index) => {
     const { bits, outBuffer } = compressNewSegment(segment, makeBad);
-    bits.forEach((bit) => bits.push(bit));
+    bits.forEach((bit) => bucket.push(bit));
     loads.push(outBuffer);
   });
 
-  const bitfied = encodeBitfield(bits);
+  const bitfied = encodeBitfield(bucket);
   return [bitfied, Buffer.concat(loads)];
 };
 
