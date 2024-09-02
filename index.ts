@@ -24,7 +24,8 @@ encodeTexture(
   // Body Texture
   "miku/miku_body.png",
   // Face Texture
-  "miku/face-1.png",
+  // "miku/face-1.png",
+  "miku/faces/ST1CT-ST1C01.png",
   // Special Weapon
   "miku/megaman_img_002.png",
 );

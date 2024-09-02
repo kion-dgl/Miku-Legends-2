@@ -81,11 +81,18 @@ const encodePalette = (pngSrc: Buffer, palette: number[]) => {
 
 const encodeCutScenes = () => {
   const palette = [0];
+
   CUT_SCENES.forEach(({ png }) => {
     const buffer = readFileSync(`miku/faces/${png}`);
-
     encodePalette(buffer, palette);
   });
+
+  const newPal = [0];
+  const face = readFileSync("miku/face-1.png");
+  encodePalette(face, newPal);
+
+  console.log(palette);
+  console.log(newPal);
 
   if (palette.length > 16) {
     throw new Error("Too many colors for face texture");
@@ -798,7 +805,12 @@ const encodeTexture = (
   const faceBuffer = readFileSync(faceTexture);
   const weaponBuffer = readFileSync(specialWeaponTexture);
 
-  const facePalette = [0]; // 2
+  // const facePalette = [0]; // 2
+  const facePalette = [
+    0, 51935, 56127, 49790, 45629, 40203, 41338, 38090, 55956, 58103, 62364,
+    51650, 55843, 59077, 61222, 48703,
+  ];
+
   const weaponPalette = [0]; //3
 
   encodePalette(faceBuffer, facePalette);
