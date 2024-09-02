@@ -101,16 +101,14 @@ const encodeCutScenes = () => {
   let ST4B01: Buffer = Buffer.alloc(0);
   CUT_SCENES.forEach(({ name, offset, compressed, png, end }) => {
     // Read the Source Image
-    let src = readFileSync(`bin/${name}`);
+    const dir = name === "cut-ST3A02.BIN" ? "out" : "bin";
+    let src = readFileSync(`${dir}/${name}`);
     if (name === "cut-ST4B01.BIN" && ST4B01.length === 0) {
       ST4B01 = src;
     } else if (name === "cut-ST4B01.BIN" && ST4B01.length !== 0) {
       src = ST4B01;
     }
 
-    if (name === "cut-ST4B01.BIN") {
-      writeFileSync(`out/debug-${name}`, src);
-    }
     const image = readFileSync(`miku/faces/${png}`);
     // Encode the image into binary
     const texture = encodeCutSceneTexture(palette, image);
@@ -623,7 +621,7 @@ const replaceBodyTexture = (
   modded: Buffer,
   bodyBuffer: Buffer,
   pl00t2: Buffer,
-  // st03a2: Buffer,
+  st03a2: Buffer,
 ) => {
   // Replace Body
   const [bodyPal, bodyImg] = encodeImage(bodyBuffer);
@@ -631,12 +629,12 @@ const replaceBodyTexture = (
   const ST03A2_PAL_OFS = 0x2c830;
   const ST03A2_IMG_OFS = 0x2d000;
   for (let i = 0; i < bodyPal.length; i++) {
-    // st03a2[ST03A2_PAL_OFS + i] = bodyPal[i];
+    st03a2[ST03A2_PAL_OFS + i] = bodyPal[i];
     pl00t2[0x30 + i] = bodyPal[i];
   }
 
   for (let i = 0; i < bodyImg.length; i++) {
-    // st03a2[ST03A2_IMG_OFS + i] = bodyImg[i];
+    st03a2[ST03A2_IMG_OFS + i] = bodyImg[i];
     pl00t2[0x800 + i] = bodyImg[i];
   }
 
@@ -681,7 +679,7 @@ const replaceFaceTexture = (
   weaponBuffer: Buffer,
   weaponPalette: number[],
   pl00t2: Buffer,
-  // st03a2: Buffer,
+  st03a2: Buffer,
 ) => {
   // Encode the Face Image
   const faceImg = encodeFace(
@@ -720,7 +718,7 @@ const replaceFaceTexture = (
   // Update the palette in the
   for (let i = 0; i < facePal.length; i++) {
     // Face
-    // st03a2[0x35030 + i] = facePal[i];
+    st03a2[0x35030 + i] = facePal[i];
     pl00t2[0x9030 + i] = facePal[i];
     // Weapon
     crusher[0x4030 + i] = wpnPal[i];
@@ -757,7 +755,7 @@ const replaceFaceTexture = (
   writeFileSync("./out/PL00R10.BIN", drillArm);
 
   for (let i = 0; i < faceImg.length; i++) {
-    // st03a2[0x35800 + i] = faceImg[i];
+    st03a2[0x35800 + i] = faceImg[i];
     pl00t2[0x9800 + i] = faceImg[i];
   }
 
@@ -826,16 +824,11 @@ const encodeTexture = (
 
   // Files that need to be replaced with the uncompressed versions
   const pl00t2 = readFileSync("./bin/PL00T2.BIN");
-  // const st03a2 = readFileSync("./bin/ST3A02.BIN");
+  const st03a2 = readFileSync("./bin/cut-ST3A02.BIN");
 
   // Modify the Game Texture
   const modTexture = Buffer.from(srcTexture);
-  replaceBodyTexture(
-    modTexture,
-    bodyBuffer,
-    pl00t2,
-    // st03a2
-  );
+  replaceBodyTexture(modTexture, bodyBuffer, pl00t2, st03a2);
   replaceFaceTexture(
     modTexture,
     faceBuffer,
@@ -843,13 +836,13 @@ const encodeTexture = (
     weaponBuffer,
     weaponPalette,
     pl00t2,
-    // st03a2,
+    st03a2,
   );
 
   // Write the updated game files
   writeFileSync("./out/PL00T.BIN", modTexture);
   writeFileSync("./out/PL00T2.BIN", pl00t2);
-  // writeFileSync("./out/ST3A02.BIN", st03a2);
+  writeFileSync("./out/cut-ST3A02.BIN", st03a2);
 };
 
 export {

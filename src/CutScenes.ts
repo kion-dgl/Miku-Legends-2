@@ -1,5 +1,12 @@
 const CUT_SCENES = [
   {
+    name: "cut-ST3A02.BIN",
+    offset: 0x03d800,
+    compressed: false,
+    png: "ST3A02.png",
+    end: -1,
+  },
+  {
     name: "cut-ST1CT.BIN",
     offset: 0x02d000,
     compressed: true,
