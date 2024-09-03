@@ -97,8 +97,7 @@ const encodeCutScenes = () => {
   let ST4B01: Buffer = Buffer.alloc(0);
   CUT_SCENES.forEach(({ name, offset, compressed, png, end }) => {
     // Read the Source Image
-    const dir = name === "cut-ST3A02.BIN" ? "out" : "bin";
-    let src = readFileSync(`${dir}/${name}`);
+    let src = readFileSync(`bin/${name}`);
     if (name === "cut-ST4B01.BIN" && ST4B01.length === 0) {
       ST4B01 = src;
     } else if (name === "cut-ST4B01.BIN" && ST4B01.length !== 0) {
