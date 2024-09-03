@@ -461,9 +461,9 @@ const encodeModel = (
   let headerOfs = 0;
   let ptrOfs = 0x2f0;
 
-  const encodeBody = (filename: string) => {
+  const encodeBody = (filename: string, matId = 0) => {
     const obj = readFileSync(filename, "ascii");
-    const { tri, quad, vertices } = encodeMesh(obj, 0);
+    const { tri, quad, vertices } = encodeMesh(obj, matId);
 
     const triCount = Math.floor(tri.length / 12);
     const quadCount = Math.floor(quad.length / 12);
@@ -678,7 +678,9 @@ const encodeModel = (
   }
   headerOfs = 0x130;
   encodeBody(hairObject);
-  encodeFace();
+  // encodeFace();
+  encodeBody("miku/01_HEAD_FACE.obj", 2);
+  encodeBody("miku/01_HEAD_MOUTH.obj", 2);
 
   // Encode Feet
   label = Buffer.from("----  FEET  ----", "ascii");
