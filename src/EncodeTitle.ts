@@ -137,6 +137,10 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
     start = 2;
     end = 2;
     skip = 440;
+  } else if (makeBad === 5) {
+    start = 2;
+    end = 2;
+    skip = 800;
   }
 
   // Loop through the list of possible commands
@@ -340,7 +344,7 @@ const encodeTitle = (src: string) => {
   (() => {
     const [bodyBitField, compressedBody] = compressNewTexture(segment1, 4);
     const len = bodyBitField.length + compressedBody.length;
-    console.log("Segment 1: 0x%s", len.toString(16));
+    console.log("Segment 2: 0x%s", len.toString(16));
 
     if (len <= 0x3000) {
       console.log("too short!!!");
@@ -365,6 +369,37 @@ const encodeTitle = (src: string) => {
 
     console.log("End: 0x%s", ofs.toString(16));
     bin.writeInt16LE(bodyBitField.length, 0x7824);
+  })();
+
+  // Segment 2
+  (() => {
+    const [bodyBitField, compressedBody] = compressNewTexture(segment2, 5);
+    const len = bodyBitField.length + compressedBody.length;
+    console.log("Segment 3: 0x%s", len.toString(16));
+
+    if (len <= 0x3800) {
+      console.log("too short!!!");
+    } else if (len > 0x4000) {
+      console.log("too long");
+    } else {
+      console.log("yaya!!!");
+    }
+
+    for (let i = 0xb030; i < 0xeea6; i++) {
+      bin[i] = 0;
+    }
+
+    let ofs = 0xb030;
+    for (let i = 0; i < bodyBitField.length; i++) {
+      bin[ofs++] = bodyBitField[i];
+    }
+
+    for (let i = 0; i < compressedBody.length; i++) {
+      bin[ofs++] = compressedBody[i];
+    }
+
+    console.log("End: 0x%s", ofs.toString(16));
+    bin.writeInt16LE(bodyBitField.length, 0xb024);
   })();
 
   writeFileSync("out/TITLE.BIN", bin);
