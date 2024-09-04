@@ -170,7 +170,7 @@ const renderTexture = (src: Buffer, outName: string, p: Pixel[][] | null) => {
 
   // Export file
   const buffer = PNG.sync.write(png);
-  writeFileSync(`out/${outName}.png`, buffer);
+  writeFileSync(`fixtures/${outName}.png`, buffer);
   return palette;
 };
 

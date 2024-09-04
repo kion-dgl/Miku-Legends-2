@@ -214,6 +214,12 @@ const encodeRom = () => {
 
   const rom = readFileSync(sourceRom);
 
+  const mikuTitle = readFileSync("out/TITLE.BIN");
+  const title = readFileSync("bin/TITLE.BIN");
+
+  console.log("--- Replacing Title ---");
+  replaceInRom(rom, title, mikuTitle);
+
   // Replace Textures
   const mikuTexture = readFileSync("out/PL00T.BIN");
   const pl00t = readFileSync("bin/PL00T.BIN");

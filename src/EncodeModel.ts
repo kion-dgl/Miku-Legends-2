@@ -174,12 +174,6 @@ const encodeMesh = (
     const u = uFloor > 255 ? 255 : uFloor < 0 ? 0 : uFloor;
     const v = vFloor > 255 ? 255 : vFloor < 0 ? 0 : vFloor;
 
-    if (debugUV && u > 166 && u < 166 + 50 && v > 213 && v < 213 + 20) {
-      console.log(i);
-      console.log(uv[1], uv[2]);
-      console.log(u, v);
-    }
-
     // Push the pixels to be referenced
     pixels.push([u, v]);
   }
