@@ -133,6 +133,7 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
   } else if (makeBad === 3) {
     start = 5;
     end = 2;
+    skip = 280;
   } else if (makeBad === 4) {
     start = 2;
     end = 2;
@@ -312,7 +313,7 @@ const encodeTitle = (src: string) => {
 
   // Segment 0
   (() => {
-    const [bodyBitField, compressedBody] = compressNewTexture(segment0, 1);
+    const [bodyBitField, compressedBody] = compressNewTexture(segment0, 3);
     const len = bodyBitField.length + compressedBody.length;
     console.log("Segment 0: 0x%s", len.toString(16));
 
