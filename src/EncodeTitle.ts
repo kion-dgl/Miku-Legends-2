@@ -402,6 +402,37 @@ const encodeTitle = (src: string) => {
     bin.writeInt16LE(bodyBitField.length, 0xb024);
   })();
 
+  // Segment 3
+  (() => {
+    const [bodyBitField, compressedBody] = compressNewTexture(segment3, 2);
+    const len = bodyBitField.length + compressedBody.length;
+    console.log("Segment 4: 0x%s", len.toString(16));
+
+    if (len <= 0x1800) {
+      console.log("too short!!!");
+    } else if (len > 0x2000) {
+      console.log("too long");
+    } else {
+      console.log("yaya!!!");
+    }
+
+    for (let i = 0xf030; i < 0x10cea; i++) {
+      bin[i] = 0;
+    }
+
+    let ofs = 0xf030;
+    for (let i = 0; i < bodyBitField.length; i++) {
+      bin[ofs++] = bodyBitField[i];
+    }
+
+    for (let i = 0; i < compressedBody.length; i++) {
+      bin[ofs++] = compressedBody[i];
+    }
+
+    console.log("End: 0x%s", ofs.toString(16));
+    bin.writeInt16LE(bodyBitField.length, 0xf024);
+  })();
+
   writeFileSync("out/TITLE.BIN", bin);
 };
 
