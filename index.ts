@@ -1,5 +1,6 @@
 import { encodeModel } from "./src/EncodeModel";
 import { encodeTexture, encodeCutScenes } from "./src/EncodeTexture";
+import { encodeTitle } from "./src/EncodeTitle";
 import { encodeRom } from "./src/EncodeRom";
 import {
   replaceCrusher,
@@ -18,6 +19,9 @@ import {
   replaceHunterSeeker,
   replaceDrillArm,
 } from "./src/EncodeWeapon";
+
+encodeTitle("miku/title.png");
+// process.exit();
 
 // Encode the Texture
 encodeTexture(
