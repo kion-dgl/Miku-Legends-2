@@ -20,6 +20,9 @@ import {
   replaceDrillArm,
 } from "./src/EncodeWeapon";
 
+encodeTitle("miku/title.png");
+// process.exit();
+
 // Encode the Texture
 encodeTexture(
   // Body Texture
@@ -31,7 +34,6 @@ encodeTexture(
 );
 
 encodeCutScenes();
-encodeTitle("miku/title.png");
 
 /**
     $$\      $$\ $$\   $$\     $$\             $$\   $$\           $$\                          $$\

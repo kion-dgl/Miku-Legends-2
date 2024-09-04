@@ -22,6 +22,14 @@
 import { readFileSync, writeFileSync } from "fs";
 import { PNG } from "pngjs";
 
+type Command = {
+  ofs: number;
+  cmd: number;
+  byteLength: number;
+  index: number;
+  word: number;
+};
+
 const encodeBitfield = (bits: boolean[]): Buffer => {
   const length = Math.ceil(bits.length / 32) * 4;
   let ofs = 0;
@@ -114,6 +122,7 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
   const MIN_COMMAND = 0;
   let start = MAX_COMMAND;
   let end = MIN_COMMAND;
+  let skip = 0;
 
   if (makeBad === 1) {
     start = 5;
@@ -124,6 +133,10 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
   } else if (makeBad === 3) {
     start = 5;
     end = 2;
+  } else if (makeBad === 4) {
+    start = 2;
+    end = 2;
+    skip = 440;
   }
 
   // Loop through the list of possible commands
@@ -156,6 +169,12 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
       // Check if the needle is in the haystack
       const index = haystack.indexOf(needle);
       if (index === -1) {
+        continue;
+      }
+
+      // Skip over stuff that might be found to make compression worse
+      if (skip > 0) {
+        skip--;
         continue;
       }
 
@@ -243,7 +262,7 @@ const encodeImage = (pngSrc: Buffer) => {
 
   let inOfs = 0;
   let outOfs = 0;
-  const palette: number[] = [0];
+  const palette: number[] = [];
   const pal = Buffer.alloc(0x200, 0);
   const img = Buffer.alloc(0x1fe00, 0);
 
@@ -254,6 +273,9 @@ const encodeImage = (pngSrc: Buffer) => {
       outOfs++;
     }
   }
+
+  console.log("Palette");
+  console.log(palette);
 
   outOfs = 0;
   for (let i = 0; i < 16; i++) {
@@ -284,31 +306,67 @@ const encodeTitle = (src: string) => {
   const segment2 = Buffer.from(img.subarray(SEG_SIZE * 2, SEG_SIZE * 3));
   const segment3 = Buffer.from(img.subarray(SEG_SIZE * 3, SEG_SIZE * 4));
 
-  const [bodyBitField, compressedBody] = compressNewTexture(segment0, 0);
-  const len = bodyBitField.length + compressedBody.length;
-  console.log("Segment 0: 0x%s", len.toString(16));
-  if (len <= 0x1800) {
-    console.log("too short!!!");
-  } else if (len > 0x2000) {
-    console.log("too long");
-  } else {
-    console.log("yaya!!!");
-  }
+  // Segment 0
+  (() => {
+    const [bodyBitField, compressedBody] = compressNewTexture(segment0, 1);
+    const len = bodyBitField.length + compressedBody.length;
+    console.log("Segment 0: 0x%s", len.toString(16));
 
-  for (let i = 0x5830; i < 0x7422; i++) {
-    bin[i] = 0;
-  }
+    if (len <= 0x1800) {
+      console.log("too short!!!");
+    } else if (len > 0x2000) {
+      console.log("too long");
+    } else {
+      console.log("yaya!!!");
+    }
 
-  let ofs = 0x5830;
-  for (let i = 0; i < bodyBitField.length; i++) {
-    bin[ofs++] = bodyBitField[i];
-  }
+    for (let i = 0x5830; i < 0x7422; i++) {
+      bin[i] = 0;
+    }
 
-  for (let i = 0; i < compressedBody.length; i++) {
-    bin[ofs++] = compressedBody[i];
-  }
+    let ofs = 0x5830;
+    for (let i = 0; i < bodyBitField.length; i++) {
+      bin[ofs++] = bodyBitField[i];
+    }
 
-  bin.writeInt16LE(bodyBitField.length, 0x5824);
+    for (let i = 0; i < compressedBody.length; i++) {
+      bin[ofs++] = compressedBody[i];
+    }
+
+    bin.writeInt16LE(bodyBitField.length, 0x5824);
+  })();
+
+  // Segment 1
+  (() => {
+    const [bodyBitField, compressedBody] = compressNewTexture(segment1, 4);
+    const len = bodyBitField.length + compressedBody.length;
+    console.log("Segment 1: 0x%s", len.toString(16));
+
+    if (len <= 0x3000) {
+      console.log("too short!!!");
+    } else if (len > 0x3800) {
+      console.log("too long");
+    } else {
+      console.log("yaya!!!");
+    }
+
+    for (let i = 0x7830; i < 0xaab0; i++) {
+      bin[i] = 0;
+    }
+
+    let ofs = 0x7830;
+    for (let i = 0; i < bodyBitField.length; i++) {
+      bin[ofs++] = bodyBitField[i];
+    }
+
+    for (let i = 0; i < compressedBody.length; i++) {
+      bin[ofs++] = compressedBody[i];
+    }
+
+    console.log("End: 0x%s", ofs.toString(16));
+    bin.writeInt16LE(bodyBitField.length, 0x7824);
+  })();
+
   writeFileSync("out/TITLE.BIN", bin);
 };
 
