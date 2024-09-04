@@ -661,7 +661,7 @@ const encodeModel = (
     mesh[0x80 + i] = label[i];
   }
   headerOfs = 0x90;
-  encodeBody("miku/02_BODY.obj", 0, true);
+  encodeBody("miku/02_BODY.obj");
   encodeBody("miku/03_HIPS.obj");
   encodeBody("miku/10_LEG_RIGHT_TOP.obj");
   encodeBody("miku/11_LEG_RIGHT_BOTTOM.obj");
