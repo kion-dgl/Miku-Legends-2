@@ -151,25 +151,24 @@ const encodeMesh = (
     vertOfs += 4;
   }
 
-  const PIXEL_TO_FLOAT_RATIO = 0.00390625;
-  const PIXEL_ADJUSTMEST = 0.001953125;
   const pixels: [number, number][] = [];
 
   for (let i = 0; i < uvs.length; i++) {
     // Parse the information from the string
     const uv = uvs[i].split(" ");
+
     const uRaw = parseFloat(uv[1]);
     // Flip V
     const vRaw = 1 - parseFloat(uv[2]);
 
     // // Approximate the pixel
-    const uAdjusted = uRaw / PIXEL_TO_FLOAT_RATIO - PIXEL_ADJUSTMEST;
-    const vAdjusted = vRaw / PIXEL_TO_FLOAT_RATIO - PIXEL_ADJUSTMEST;
+    const uAdjusted = uRaw * 255;
+    const vAdjusted = vRaw * 255;
 
     // Eniminate rounding to make sure it's a pixel reference
     // const adjust = debugUV ? 1 : 1
-    const uFloor = Math.floor(uAdjusted) + 1;
-    const vFloor = Math.floor(vAdjusted);
+    const uFloor = Math.round(uAdjusted);
+    const vFloor = Math.round(vAdjusted + 0.5);
 
     // // Make sure it fits in one byte
     const u = uFloor > 255 ? 255 : uFloor < 0 ? 0 : uFloor;
@@ -260,14 +259,6 @@ const encodeMesh = (
     const [bu, bv] = pixels[parseInt(bIdx) - 1];
     const [cu, cv] = pixels[parseInt(cIdx) - 1];
     const [du, dv] = pixels[parseInt(dIdx) - 1];
-
-    if (debugUV) {
-      // console.log(`--- Index: ${i} ---`);
-      // console.log("a:", au, av);
-      // console.log("b:", bu, bv);
-      // console.log("c:", cu, cv);
-      // console.log("d:", du, dv);
-    }
 
     quad.writeUInt8(au, quadOfs);
     quadOfs++;
@@ -461,9 +452,9 @@ const encodeModel = (
   let headerOfs = 0;
   let ptrOfs = 0x2f0;
 
-  const encodeBody = (filename: string) => {
+  const encodeBody = (filename: string, matId = 0) => {
     const obj = readFileSync(filename, "ascii");
-    const { tri, quad, vertices } = encodeMesh(obj, 0);
+    const { tri, quad, vertices } = encodeMesh(obj, matId);
 
     const triCount = Math.floor(tri.length / 12);
     const quadCount = Math.floor(quad.length / 12);
@@ -678,7 +669,9 @@ const encodeModel = (
   }
   headerOfs = 0x130;
   encodeBody(hairObject);
-  encodeFace();
+  // encodeFace();
+  encodeBody("miku/01_HEAD_FACE.obj", 2);
+  encodeBody("miku/01_HEAD_MOUTH.obj", 2);
 
   // Encode Feet
   label = Buffer.from("----  FEET  ----", "ascii");
