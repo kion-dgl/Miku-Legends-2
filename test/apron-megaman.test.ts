@@ -217,6 +217,9 @@ test("it should create a obj of apron megaman", () => {
 
   // ** Read Geomtry ** //
 
+  const modelVertices: string[] = [];
+  const modelFaces: string[] = [];
+
   for (let i = 0; i < submeshCount; i++) {
     // Read triangle offset and count
     reader.seek(geometryOfs + i * 0x10);
@@ -239,21 +242,36 @@ test("it should create a obj of apron megaman", () => {
     const quads = readFace(reader, quadOfs, quadCount, true);
 
     const obj: string[] = [];
-    vertices.forEach(({ x, y, z }) => {
+    const w = modelVertices.length + 1;
+    vertices.forEach((vec3) => {
+      const { x, y, z } = vec3;
       obj.push(`v ${x.toFixed(3)} ${y.toFixed(3)} ${z.toFixed(3)}`);
+      vec3.applyMatrix4(bone.matrixWorld);
+      modelVertices.push(
+        `v ${vec3.x.toFixed(3)} ${vec3.y.toFixed(3)} ${vec3.z.toFixed(3)}`,
+      );
     });
 
     tris.forEach((face) => {
       const [a, b, c] = face;
       obj.push(`f ${a.index + 1} ${b.index + 1} ${c.index + 1}`);
+      modelFaces.push(`f ${a.index + w} ${b.index + w} ${c.index + w}`);
     });
 
     quads.forEach((face) => {
       const [a, b, c, d] = face;
       obj.push(`f ${a.index + 1} ${b.index + 1} ${d.index + 1} ${c.index + 1}`);
+      modelFaces.push(
+        `f ${a.index + w} ${b.index + w} ${d.index + w} ${c.index + w}`,
+      );
     });
 
     const name = `mesh_${i.toString().padStart(3, "0")}`;
     writeFileSync(`./fixtures/APRON/${name}.OBJ`, obj.join("\n"));
   }
+
+  writeFileSync(
+    `./fixtures/APRON/full.OBJ`,
+    modelVertices.join("\n") + modelFaces.join("\n"),
+  );
 });
