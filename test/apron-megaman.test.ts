@@ -81,8 +81,6 @@ const renderTexture = (src: Buffer, outName: string) => {
     payloadSize: src.readUInt16LE(0x26),
   };
 
-  console.log(tim);
-
   switch (tim.colorCount) {
     case 16:
       tim.width *= 4;
