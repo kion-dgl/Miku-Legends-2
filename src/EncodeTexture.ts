@@ -79,6 +79,92 @@ const encodePalette = (pngSrc: Buffer, palette: number[]) => {
   return palette;
 };
 
+const updateApronBody = () => {
+  const buffer = readFileSync(`miku/faces/ST03T_body.png`);
+  const palette: number[] = [];
+  encodePalette(buffer, palette);
+  if (palette.length > 16) {
+    throw new Error("Too many colors for face texture");
+  }
+  let src = readFileSync(`out/cut-ST03T.BIN`);
+  const offset = 0x043000;
+  const compressed = true;
+  const end = 0x045260;
+  const texture = encodeCutSceneTexture(palette, buffer);
+  const makeBad = 0;
+
+  const tim = {
+    type: src.readUInt32LE(offset + 0x00),
+    fullSize: src.readUInt32LE(offset + 0x04),
+    paletteX: src.readUInt16LE(offset + 0x0c),
+    paletteY: src.readUInt16LE(offset + 0x0e),
+    colorCount: src.readUInt16LE(offset + 0x10),
+    paletteCount: src.readUInt16LE(offset + 0x12),
+    imageX: src.readUInt16LE(offset + 0x14),
+    imageY: src.readUInt16LE(offset + 0x16),
+    width: src.readUInt16LE(offset + 0x18),
+    height: src.readUInt16LE(offset + 0x1a),
+    bitfieldSize: src.readUInt16LE(offset + 0x24),
+    payloadSize: src.readUInt16LE(offset + 0x26),
+  };
+
+  const { type, fullSize } = tim;
+  const palSize = fullSize - texture.length;
+  if (palSize < 0x20 || palSize > 0x80) {
+    throw new Error("Invalid pal size");
+  }
+
+  const pal = Buffer.alloc(palSize);
+  for (let i = 0; i < 16; i++) {
+    pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+  }
+
+  let stop = false;
+  const blocks = src.readUInt16LE(offset + 0x08);
+
+  // Zero Out the Previous Data
+  for (let i = offset + 0x30; i < end; i++) {
+    src[i] = 0;
+  }
+
+  const [bodyBitField, compressedBody] = compressNewTexture(
+    pal,
+    texture,
+    makeBad,
+  );
+
+  // Update the bitfield length in header
+  src.writeInt16LE(bodyBitField.length, offset + 0x24);
+  console.log("BitField Size: 0x%s", bodyBitField.length.toString(16));
+
+  let bodyOfs = offset + 0x30;
+
+  // Write the bitfield
+  for (let i = 0; i < bodyBitField.length; i++) {
+    src[bodyOfs++] = bodyBitField[i];
+  }
+
+  // Write the compressed Texture
+  for (let i = 0; i < compressedBody.length; i++) {
+    src[bodyOfs++] = compressedBody[i];
+  }
+
+  const lower = Math.floor(end / 0x800) * 0x800;
+  const upper = Math.ceil(end / 0x800) * 0x800;
+
+  if (bodyOfs > lower && bodyOfs < upper) {
+    console.log("Looks good");
+  } else if (bodyOfs <= lower) {
+    console.log(`${name} too short`);
+    stop = true;
+  } else {
+    console.log("too long");
+    stop = true;
+  }
+
+  writeFileSync(`out/$cut-ST03T.BIN`, src);
+};
+
 const encodeCutScenes = () => {
   const palette = [
     0, 51935, 56127, 49790, 45629, 40203, 41338, 38090, 55956, 58103, 62364,
@@ -221,6 +307,9 @@ const encodeCutScenes = () => {
       throw new Error("Look at exported file");
     }
   });
+
+  // Update the body for Miku in Apron
+  updateApronBody();
 };
 
 const encodeCutSceneTexture = (pal: number[], src: Buffer) => {
