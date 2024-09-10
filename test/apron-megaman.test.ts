@@ -492,12 +492,14 @@ test("it should create a obj of apron megaman", () => {
 
     tris.forEach((face) => {
       const [a, b, c] = face;
+      console.log(a.materialIndex);
       obj.push(`f ${a.index + 1} ${b.index + 1} ${c.index + 1}`);
       modelFaces.push(`f ${a.index + w} ${b.index + w} ${c.index + w}`);
     });
 
     quads.forEach((face) => {
       const [a, b, c, d] = face;
+      console.log(a.materialIndex);
       obj.push(`f ${a.index + 1} ${b.index + 1} ${d.index + 1} ${c.index + 1}`);
       modelFaces.push(
         `f ${a.index + w} ${b.index + w} ${d.index + w} ${c.index + w}`,

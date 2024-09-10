@@ -80,7 +80,7 @@ const encodePalette = (pngSrc: Buffer, palette: number[]) => {
 };
 
 const updateApronBody = () => {
-  const buffer = readFileSync(`miku/faces/ST03T_body.png`);
+  const buffer = readFileSync(`miku/miku_body.png`);
   const palette: number[] = [];
   encodePalette(buffer, palette);
   if (palette.length > 16) {
@@ -163,57 +163,6 @@ const updateApronBody = () => {
   }
 
   writeFileSync(`out/cut-ST03T.BIN`, src);
-};
-
-const updateApronBody2 = () => {
-  const buffer = readFileSync(`miku/faces/ST0305_body.png`);
-  const palette: number[] = [];
-  encodePalette(buffer, palette);
-  if (palette.length > 16) {
-    throw new Error("Too many colors for aprob bodyyyss texture");
-  }
-  let src = readFileSync(`out/cut-ST0305.BIN`);
-  const offset = 0x038800;
-  const compressed = false;
-  const texture = encodeCutSceneTexture(palette, buffer);
-  const makeBad = 0;
-
-  const tim = {
-    type: src.readUInt32LE(offset + 0x00),
-    fullSize: src.readUInt32LE(offset + 0x04),
-    paletteX: src.readUInt16LE(offset + 0x0c),
-    paletteY: src.readUInt16LE(offset + 0x0e),
-    colorCount: src.readUInt16LE(offset + 0x10),
-    paletteCount: src.readUInt16LE(offset + 0x12),
-    imageX: src.readUInt16LE(offset + 0x14),
-    imageY: src.readUInt16LE(offset + 0x16),
-    width: src.readUInt16LE(offset + 0x18),
-    height: src.readUInt16LE(offset + 0x1a),
-    bitfieldSize: src.readUInt16LE(offset + 0x24),
-    payloadSize: src.readUInt16LE(offset + 0x26),
-  };
-
-  const { type, fullSize } = tim;
-  const palSize = fullSize - texture.length;
-  if (palSize !== 0x7d0) {
-    throw new Error("Uncompressed invalid palette");
-  }
-
-  const pal = Buffer.alloc(palSize);
-  for (let i = 0; i < 16; i++) {
-    pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
-  }
-
-  for (let i = 0; i < pal.length; i++) {
-    src[offset + 0x30 + i] = pal[i];
-  }
-
-  // Replace the texture
-  for (let i = 0; i < texture.length; i++) {
-    src[offset + 0x800 + i] = texture[i];
-  }
-
-  writeFileSync(`out/cut-ST0305.BIN`, src);
 };
 
 const encodeCutScenes = () => {
@@ -361,7 +310,6 @@ const encodeCutScenes = () => {
 
   // Update the body for Miku in Apron
   updateApronBody();
-  updateApronBody2();
 };
 
 const encodeCutSceneTexture = (pal: number[], src: Buffer) => {
@@ -987,4 +935,5 @@ export {
   encodeImage,
   encodeFace,
   encodeCutScenes,
+  encodeCutSceneTexture,
 };
