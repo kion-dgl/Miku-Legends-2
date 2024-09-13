@@ -120,7 +120,9 @@ const appendRange = (range: Range[], s: number, e: number) => {
 
 const getWriteOffset = (buffer: Buffer, data: Buffer, meta: Alloc) => {
   const { length } = data;
+
   // First search for available space
+
   for (let i = 0; i < meta.ranges.length; i++) {
     const { start, end } = meta.ranges[i];
     if (length <= end - start) {
@@ -169,6 +171,14 @@ const clearMesh = (src: Buffer, headerOfs: number, meta: Alloc) => {
   src.fill(0, srcTriOfs, srcTriEnd);
   src.fill(0, srcQuadOfs, srcQuadEnd);
   src.fill(0, srcVertOfs, srcVertEnd);
+
+  src.writeUInt8(0, headerOfs + 0);
+  src.writeUInt8(0, headerOfs + 1);
+  src.writeUInt8(0, headerOfs + 2);
+
+  src.writeUInt32LE(0, headerOfs + 4);
+  src.writeUInt32LE(0, headerOfs + 8);
+  src.writeUInt32LE(0, headerOfs + 12);
 
   appendRange(meta.ranges, srcTriOfs, srcTriEnd);
   appendRange(meta.ranges, srcQuadOfs, srcQuadEnd);
@@ -231,8 +241,28 @@ const encodeApronMegaman = () => {
   };
 
   clearMesh(buffer, 0xc0, meta);
+  clearMesh(buffer, 0xd0, meta);
+  clearMesh(buffer, 0xe0, meta);
+  clearMesh(buffer, 0xf0, meta);
+  clearMesh(buffer, 0x100, meta);
+  clearMesh(buffer, 0x110, meta);
+  clearMesh(buffer, 0x120, meta);
+  clearMesh(buffer, 0x130, meta);
+  clearMesh(buffer, 0x140, meta);
+  clearMesh(buffer, 0x150, meta);
+  clearMesh(buffer, 0x160, meta);
+  clearMesh(buffer, 0x170, meta);
+  clearMesh(buffer, 0x180, meta);
+  clearMesh(buffer, 0x190, meta);
+  clearMesh(buffer, 0x1a0, meta);
+  clearMesh(buffer, 0x1b0, meta);
+  clearMesh(buffer, 0x1c0, meta);
+  clearMesh(buffer, 0x1d0, meta);
+  clearMesh(buffer, 0x1e0, meta);
   console.log(meta);
+
   packMesh(buffer, "miku/02_BODY.obj", 0xc0, meta);
+  packMesh(buffer, "miku/01_HEAD_HAIR.obj", 0xd0, meta);
 
   console.log(meta);
   // Update the content length to read
@@ -241,7 +271,7 @@ const encodeApronMegaman = () => {
   // Update the Texture
   updateApronBody2(file);
   writeFileSync("out/cut-ST0305.BIN", file);
-  process.exit();
+  writeFileSync("out/debug-apron.ebd", buffer);
 };
 
 export default encodeApronMegaman;
