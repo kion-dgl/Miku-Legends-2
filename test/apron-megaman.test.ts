@@ -423,6 +423,8 @@ test("it should create a obj of apron megaman", () => {
   const hierarchy: HierarchyStruct[] = [];
   const nbSegments = (textureOfs - heirarchyOfs) / 4;
   reader.seek(heirarchyOfs);
+  expect(heirarchyOfs).toBe(0x1e24);
+  expect(nbSegments).toBe(18);
   for (let i = 0; i < nbSegments; i++) {
     const polygonIndex = reader.readInt8();
     const boneParent = reader.readInt8();
@@ -434,6 +436,8 @@ test("it should create a obj of apron megaman", () => {
     if (bones[boneIndex] && bones[boneParent] && !bones[boneIndex].parent) {
       bones[boneParent].add(bones[boneIndex]);
     }
+
+    expect(shareVertices).toBeFalse();
 
     if (flags & 0x3f) {
       console.error(`Unknown Flag: 0x${(flags & 0x3f).toString(16)}`);

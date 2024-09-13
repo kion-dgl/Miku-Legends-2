@@ -240,6 +240,18 @@ const encodeApronMegaman = () => {
     contentEnd,
   };
 
+  // Remove share vertices flag
+  const heirarchyOfs = 0x1e24;
+  const nbSegments = 19;
+  let ofs = heirarchyOfs;
+  let doStop = false;
+  for (let i = 0; i < nbSegments; i++) {
+    const flags = buffer.readUInt8(ofs + 3);
+    buffer.writeUInt8(flags & 0xb7, ofs + 3);
+    ofs += 4;
+  }
+
+  // Remove Prior Mesh from File
   clearMesh(buffer, 0xc0, meta);
   clearMesh(buffer, 0xd0, meta);
   clearMesh(buffer, 0xe0, meta);
@@ -259,10 +271,17 @@ const encodeApronMegaman = () => {
   clearMesh(buffer, 0x1c0, meta);
   clearMesh(buffer, 0x1d0, meta);
   clearMesh(buffer, 0x1e0, meta);
-  console.log(meta);
 
-  packMesh(buffer, "miku/02_BODY.obj", 0xc0, meta);
-  packMesh(buffer, "miku/01_HEAD_HAIR.obj", 0xd0, meta);
+  packMesh(buffer, "miku/02_BODY.obj", 0xc0, meta); // 000
+  packMesh(buffer, "miku/01_HEAD_HAIR.obj", 0xd0, meta); // 001
+
+  packMesh(buffer, "miku/07_LEFT_SHOULDER.obj", 0xe0, meta); // 002
+  packMesh(buffer, "miku/08_LEFT_ARM.obj", 0xf0, meta); // 003
+  packMesh(buffer, "miku/09_LEFT_HAND.obj", 0x100, meta); // 004
+
+  packMesh(buffer, "miku/04_RIGHT_SHOULDER.obj", 0x110, meta); // 005
+  packMesh(buffer, "miku/05_RIGHT_ARM.obj", 0x120, meta); // 006
+  packMesh(buffer, "miku/06_RIGHT_HAND.obj", 0x130, meta); // 007
 
   console.log(meta);
   // Update the content length to read
