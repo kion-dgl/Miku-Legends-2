@@ -247,30 +247,35 @@ const encodeApronMegaman = () => {
   let doStop = false;
   for (let i = 0; i < nbSegments; i++) {
     const flags = buffer.readUInt8(ofs + 3);
-    buffer.writeUInt8(flags & 0xb7, ofs + 3);
+    console.log("%d) 0x%s", i, flags.toString(16));
+
+    if (i < 9) {
+      buffer.writeUInt8(flags & 0x83, ofs + 3);
+    }
+
     ofs += 4;
   }
 
   // Remove Prior Mesh from File
-  clearMesh(buffer, 0xc0, meta);
-  clearMesh(buffer, 0xd0, meta);
-  clearMesh(buffer, 0xe0, meta);
-  clearMesh(buffer, 0xf0, meta);
-  clearMesh(buffer, 0x100, meta);
-  clearMesh(buffer, 0x110, meta);
-  clearMesh(buffer, 0x120, meta);
-  clearMesh(buffer, 0x130, meta);
-  clearMesh(buffer, 0x140, meta);
-  clearMesh(buffer, 0x150, meta);
-  clearMesh(buffer, 0x160, meta);
-  clearMesh(buffer, 0x170, meta);
-  clearMesh(buffer, 0x180, meta);
-  clearMesh(buffer, 0x190, meta);
-  clearMesh(buffer, 0x1a0, meta);
-  clearMesh(buffer, 0x1b0, meta);
-  clearMesh(buffer, 0x1c0, meta);
-  clearMesh(buffer, 0x1d0, meta);
-  clearMesh(buffer, 0x1e0, meta);
+  clearMesh(buffer, 0xc0, meta); // 000
+  clearMesh(buffer, 0xd0, meta); // 001
+  clearMesh(buffer, 0xe0, meta); // 002
+  clearMesh(buffer, 0xf0, meta); // 003
+  clearMesh(buffer, 0x100, meta); // 004
+  clearMesh(buffer, 0x110, meta); // 005
+  clearMesh(buffer, 0x120, meta); // 006
+  clearMesh(buffer, 0x130, meta); // 007
+  clearMesh(buffer, 0x140, meta); // 008
+  clearMesh(buffer, 0x150, meta); // 009
+  clearMesh(buffer, 0x160, meta); // 010
+  clearMesh(buffer, 0x170, meta); // 011
+  clearMesh(buffer, 0x180, meta); // 012
+  clearMesh(buffer, 0x190, meta); // 013
+  clearMesh(buffer, 0x1a0, meta); // 014
+  clearMesh(buffer, 0x1b0, meta); // 015
+  clearMesh(buffer, 0x1c0, meta); // 016
+  clearMesh(buffer, 0x1d0, meta); // 017
+  clearMesh(buffer, 0x1e0, meta); // 018
 
   packMesh(buffer, "miku/02_BODY.obj", 0xc0, meta); // 000
   packMesh(buffer, "miku/01_HEAD_HAIR.obj", 0xd0, meta); // 001
@@ -286,14 +291,14 @@ const encodeApronMegaman = () => {
   // 08 Bow Tie
 
   // Right Leg
-  packMesh(buffer, "miku/10_LEG_RIGHT_TOP.obj", 0x150, meta); // 009
-  packMesh(buffer, "miku/11_LEG_RIGHT_BOTTOM.obj", 0x160, meta); // 010
-  packMesh(buffer, "miku/12_RIGHT_FOOT.obj", 0x170, meta); // 011
+  // packMesh(buffer, "miku/10_LEG_RIGHT_TOP.obj", 0x150, meta); // 009
+  // packMesh(buffer, "miku/11_LEG_RIGHT_BOTTOM.obj", 0x160, meta); // 010
+  // packMesh(buffer, "miku/12_RIGHT_FOOT.obj", 0x170, meta); // 011
 
   // Left Leg
-  packMesh(buffer, "miku/13_LEG_LEFT_TOP.obj", 0x180, meta); // 012
-  packMesh(buffer, "miku/14_LEG_LEFT_BOTTOM.obj", 0x190, meta); // 013
-  packMesh(buffer, "miku/15_LEFT_FOOT.obj", 0x1a0, meta); // 014
+  // packMesh(buffer, "miku/13_LEG_LEFT_TOP.obj", 0x180, meta); // 012
+  // packMesh(buffer, "miku/14_LEG_LEFT_BOTTOM.obj", 0x190, meta); // 013
+  // packMesh(buffer, "miku/15_LEFT_FOOT.obj", 0x1a0, meta); // 014
 
   console.log(meta);
   // Update the content length to read
@@ -303,6 +308,8 @@ const encodeApronMegaman = () => {
   updateApronBody2(file);
   writeFileSync("out/cut-ST0305.BIN", file);
   writeFileSync("out/debug-apron.ebd", buffer);
+
+  // process.exit();
 };
 
 export default encodeApronMegaman;
