@@ -45,6 +45,9 @@ type TextureCoords = {
   paletteY: number;
 };
 
+type Range = { start: number; end: number };
+type Alloc = { ranges: Range[]; contentEnd: number };
+
 const updateApronBody2 = (src: Buffer) => {
   const buffer = readFileSync(`miku/miku_body.png`);
   const palette: number[] = [];
@@ -96,14 +99,45 @@ const updateApronBody2 = (src: Buffer) => {
   }
 };
 
-const packMesh = (
-  src: Buffer,
-  filename: string,
-  headerOfs: number,
-  meta: { gapStart: number; gapEnd: number; contentEnd: number },
-) => {
-  // First we want to remove the existing content
+const appendRange = (range: Range[], s: number, e: number) => {
+  // First, search for overlapping ranges
+  for (let i = 0; i < range.length; i++) {
+    const { start, end } = range[i];
+    // Ends at the start of a previous range
+    if (e === start) {
+      range[i].start = s;
+      return;
+    }
+    // Starts at the end of a previous range
+    if (s === end) {
+      range[i].end = e;
+      return;
+    }
+  }
 
+  range.push({ start: s, end: e });
+};
+
+const getWriteOffset = (buffer: Buffer, data: Buffer, meta: Alloc) => {
+  const { length } = data;
+  // First search for available space
+  for (let i = 0; i < meta.ranges.length; i++) {
+    const { start, end } = meta.ranges[i];
+    if (length <= end - start) {
+      meta.ranges[i].start += length;
+    }
+    console.log("Found space");
+    return start;
+  }
+
+  console.log("appending");
+  // Otherwise append to the file
+  const { contentEnd } = meta;
+  meta.contentEnd += length;
+  return contentEnd;
+};
+
+const clearMesh = (src: Buffer, headerOfs: number, meta: Alloc) => {
   const srcTriCount = src.readUInt8(headerOfs + 0);
   const srcQuadCount = src.readUInt8(headerOfs + 1);
   const srcVertCount = src.readUInt8(headerOfs + 2);
@@ -116,17 +150,44 @@ const packMesh = (
   const srcQuadEnd = srcQuadOfs + srcQuadCount * 12;
   const srcVertEnd = srcVertOfs + srcVertCount + 4;
 
+  console.log(
+    "Triangles: 0x%s to 0s%s",
+    srcTriOfs.toString(16),
+    srcTriEnd.toString(16),
+  );
+  console.log(
+    "Quads: 0x%s to 0s%s",
+    srcQuadOfs.toString(16),
+    srcQuadEnd.toString(16),
+  );
+  console.log(
+    "Vertices: 0x%s to 0s%s",
+    srcVertOfs.toString(16),
+    srcVertEnd.toString(16),
+  );
+
   src.fill(0, srcTriOfs, srcTriEnd);
   src.fill(0, srcQuadOfs, srcQuadEnd);
   src.fill(0, srcVertOfs, srcVertEnd);
 
-  // Then we want to encode and pack
+  appendRange(meta.ranges, srcTriOfs, srcTriEnd);
+  appendRange(meta.ranges, srcQuadOfs, srcQuadEnd);
+  appendRange(meta.ranges, srcVertOfs, srcVertEnd);
+};
 
+const packMesh = (
+  src: Buffer,
+  filename: string,
+  headerOfs: number,
+  meta: Alloc,
+) => {
+  // First we want to remove the existing content
+
+  // Then we want to encode and pack
   const obj = readFileSync(filename, "ascii");
   const { tri, quad, vertices } = encodeMesh(obj, 0);
 
   // Write Counts
-
   const triCount = Math.floor(tri.length / 12);
   const quadCount = Math.floor(quad.length / 12);
   const vertCount = Math.floor(vertices.length / 4);
@@ -136,21 +197,24 @@ const packMesh = (
   src.writeUInt8(vertCount, headerOfs + 2);
 
   // Tri Offset
-  src.writeUInt32LE(meta.contentEnd, headerOfs + 4);
+  const triOfs = getWriteOffset(src, tri, meta);
+  src.writeUInt32LE(triOfs, headerOfs + 4);
   for (let i = 0; i < tri.length; i++) {
-    src[meta.contentEnd++] = tri[i];
+    src[triOfs + i] = tri[i];
   }
 
   // Quad Offset
-  src.writeUInt32LE(meta.contentEnd, headerOfs + 8);
+  const quadOfs = getWriteOffset(src, quad, meta);
+  src.writeUInt32LE(quadOfs, headerOfs + 8);
   for (let i = 0; i < quad.length; i++) {
-    src[meta.contentEnd++] = quad[i];
+    src[quadOfs + i] = quad[i];
   }
 
   // Vert Offset
-  src.writeUInt32LE(meta.contentEnd, headerOfs + 12);
+  const vertOfs = getWriteOffset(src, vertices, meta);
+  src.writeUInt32LE(vertOfs, headerOfs + 12);
   for (let i = 0; i < vertices.length; i++) {
-    src[meta.contentEnd++] = vertices[i];
+    src[vertOfs + i] = vertices[i];
   }
 
   return vertCount;
@@ -159,23 +223,25 @@ const packMesh = (
 const encodeApronMegaman = () => {
   const file = readFileSync("out/cut-ST0305.BIN");
   const contentEnd = file.readUInt32LE(0x04);
-  const buffer = Buffer.from(file.subarray(0x30, 0xe000));
+  const buffer = file.subarray(0x30, 0xe000);
 
-  const meta = {
-    gapStart: -1,
-    gapEnd: -1,
+  const meta: Alloc = {
+    ranges: [],
     contentEnd,
   };
 
+  clearMesh(buffer, 0xc0, meta);
+  console.log(meta);
   packMesh(buffer, "miku/02_BODY.obj", 0xc0, meta);
+
+  console.log(meta);
+  // Update the content length to read
   file.writeUInt32LE(meta.contentEnd, 0x04);
-  for (let i = 0; i < buffer.length; i++) {
-    file[0x30 + i] = buffer[i];
-  }
 
   // Update the Texture
   updateApronBody2(file);
   writeFileSync("out/cut-ST0305.BIN", file);
+  process.exit();
 };
 
 export default encodeApronMegaman;
