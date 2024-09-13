@@ -283,6 +283,18 @@ const encodeApronMegaman = () => {
   packMesh(buffer, "miku/05_RIGHT_ARM.obj", 0x120, meta); // 006
   packMesh(buffer, "miku/06_RIGHT_HAND.obj", 0x130, meta); // 007
 
+  // 08 Bow Tie
+
+  // Right Leg
+  packMesh(buffer, "miku/10_LEG_RIGHT_TOP.obj", 0x150, meta); // 009
+  packMesh(buffer, "miku/11_LEG_RIGHT_BOTTOM.obj", 0x160, meta); // 010
+  packMesh(buffer, "miku/12_RIGHT_FOOT.obj", 0x170, meta); // 011
+
+  // Left Leg
+  packMesh(buffer, "miku/13_LEG_LEFT_TOP.obj", 0x180, meta); // 012
+  packMesh(buffer, "miku/14_LEG_LEFT_BOTTOM.obj", 0x190, meta); // 013
+  packMesh(buffer, "miku/15_LEFT_FOOT.obj", 0x1a0, meta); // 014
+
   console.log(meta);
   // Update the content length to read
   file.writeUInt32LE(meta.contentEnd, 0x04);
