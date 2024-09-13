@@ -175,6 +175,7 @@ const clearMesh = (src: Buffer, headerOfs: number, meta: Alloc) => {
   src.writeUInt8(0, headerOfs + 0);
   src.writeUInt8(0, headerOfs + 1);
   src.writeUInt8(0, headerOfs + 2);
+  src.writeUInt8(0, headerOfs + 3);
 
   src.writeUInt32LE(0, headerOfs + 4);
   src.writeUInt32LE(0, headerOfs + 8);
@@ -190,12 +191,13 @@ const packMesh = (
   filename: string,
   headerOfs: number,
   meta: Alloc,
+  isFace = false,
 ) => {
   // First we want to remove the existing content
 
   // Then we want to encode and pack
   const obj = readFileSync(filename, "ascii");
-  const { tri, quad, vertices } = encodeMesh(obj, 0);
+  const { tri, quad, vertices } = encodeMesh(obj, isFace ? 2 : 0);
 
   // Write Counts
   const triCount = Math.floor(tri.length / 12);
@@ -248,10 +250,7 @@ const encodeApronMegaman = () => {
   for (let i = 0; i < nbSegments; i++) {
     const flags = buffer.readUInt8(ofs + 3);
     console.log("%d) 0x%s", i, flags.toString(16));
-
-    if (i < 9) {
-      buffer.writeUInt8(flags & 0x83, ofs + 3);
-    }
+    buffer.writeUInt8(flags & 0x83, ofs + 3);
 
     ofs += 4;
   }
@@ -291,14 +290,18 @@ const encodeApronMegaman = () => {
   // 08 Bow Tie
 
   // Right Leg
-  // packMesh(buffer, "miku/10_LEG_RIGHT_TOP.obj", 0x150, meta); // 009
+  packMesh(buffer, "miku/10_LEG_RIGHT_TOP.obj", 0x150, meta); // 009
   // packMesh(buffer, "miku/11_LEG_RIGHT_BOTTOM.obj", 0x160, meta); // 010
   // packMesh(buffer, "miku/12_RIGHT_FOOT.obj", 0x170, meta); // 011
 
   // Left Leg
-  // packMesh(buffer, "miku/13_LEG_LEFT_TOP.obj", 0x180, meta); // 012
+  packMesh(buffer, "miku/13_LEG_LEFT_TOP.obj", 0x180, meta); // 012
   // packMesh(buffer, "miku/14_LEG_LEFT_BOTTOM.obj", 0x190, meta); // 013
   // packMesh(buffer, "miku/15_LEFT_FOOT.obj", 0x1a0, meta); // 014
+
+  // Face
+  packMesh(buffer, "miku/01_HEAD_FACE.obj", 0x1b0, meta, true); // 015
+  // packMesh(buffer, "miku/01_HEAD_MOUTH.obj", 0x1c0, meta); // 016
 
   console.log(meta);
   // Update the content length to read

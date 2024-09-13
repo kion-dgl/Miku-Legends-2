@@ -195,7 +195,7 @@ const renderTexture = (src: Buffer, outName: string) => {
 
   // Export file
   const buffer = PNG.sync.write(png);
-  writeFileSync(`fixtures/APRON-MIKU/${outName}.png`, buffer);
+  writeFileSync(`fixtures/APRON/${outName}.png`, buffer);
   return imageData;
 };
 
@@ -210,7 +210,7 @@ test("it should dump all of the textures, from the texture files", () => {
 
   let img: number[] = [];
   INPUT.forEach((filename) => {
-    const file = readFileSync(`out/${filename}`);
+    const file = readFileSync(`bin/${filename}`);
     for (let i = 0x43000; i <= 0x46000; i += 0x800) {
       const type = file.readUInt32LE(i + 0x00);
       const fullSize = file.readUInt32LE(i + 0x04);
@@ -264,7 +264,7 @@ test("it should dump all of the textures, from the texture files", () => {
 
         // Export file
         const buffer = PNG.sync.write(png);
-        writeFileSync(`fixtures/APRON-MIKU/${name}.png`, buffer);
+        writeFileSync(`fixtures/APRON/${name}.png`, buffer);
       }
 
       if (width === 0 || height === 0) {
@@ -289,11 +289,11 @@ test("it should dump all of the textures, from the texture files", () => {
 });
 
 test("it should create a obj of apron megaman", () => {
-  const file = readFileSync("out/cut-ST0305.BIN");
+  const file = readFileSync("bin/ST0305.BIN");
   const length = file.readUInt32LE(0x04);
   const buffer = Buffer.from(file.subarray(0x30, 0x30 + length));
   const reader = new ByteReader(buffer.buffer as ArrayBuffer);
-  writeFileSync("fixtures/miku-apron.ebd", buffer);
+  writeFileSync("fixtures/apron.ebd", buffer);
 
   const count = reader.readUInt32();
   expect(count).toEqual(8);
@@ -511,11 +511,11 @@ test("it should create a obj of apron megaman", () => {
     });
 
     const name = `mesh_${i.toString().padStart(3, "0")}`;
-    writeFileSync(`./fixtures/APRON-MIKU/${name}.OBJ`, obj.join("\n"));
+    writeFileSync(`./fixtures/APRON/${name}.OBJ`, obj.join("\n"));
   }
 
   writeFileSync(
-    `./fixtures/APRON-MIKU/full.OBJ`,
+    `./fixtures/APRON/full.OBJ`,
     modelVertices.join("\n") + modelFaces.join("\n"),
   );
 });
