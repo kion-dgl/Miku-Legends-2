@@ -49,7 +49,7 @@ type Range = { start: number; end: number };
 type Alloc = { ranges: Range[]; contentEnd: number };
 
 const updateApronBody2 = (src: Buffer) => {
-  const buffer = readFileSync(`miku/miku_body.png`);
+  const buffer = readFileSync(`miku/apron/ApronMikuTex.png`);
   const palette: number[] = [];
   encodePalette(buffer, palette);
   if (palette.length > 16) {
@@ -276,32 +276,11 @@ const encodeApronMegaman = () => {
   clearMesh(buffer, 0x1d0, meta); // 017
   clearMesh(buffer, 0x1e0, meta); // 018
 
-  packMesh(buffer, "miku/02_BODY.obj", 0xc0, meta); // 000
+  packMesh(buffer, "miku/apron/mesh_000.obj", 0xc0, meta); // 000
   packMesh(buffer, "miku/01_HEAD_HAIR.obj", 0xd0, meta); // 001
-
-  packMesh(buffer, "miku/07_LEFT_SHOULDER.obj", 0xe0, meta); // 002
-  packMesh(buffer, "miku/08_LEFT_ARM.obj", 0xf0, meta); // 003
-  packMesh(buffer, "miku/09_LEFT_HAND.obj", 0x100, meta); // 004
-
-  packMesh(buffer, "miku/04_RIGHT_SHOULDER.obj", 0x110, meta); // 005
-  packMesh(buffer, "miku/05_RIGHT_ARM.obj", 0x120, meta); // 006
-  packMesh(buffer, "miku/06_RIGHT_HAND.obj", 0x130, meta); // 007
-
-  // 08 Bow Tie
-
-  // Right Leg
-  packMesh(buffer, "miku/10_LEG_RIGHT_TOP.obj", 0x150, meta); // 009
-  // packMesh(buffer, "miku/11_LEG_RIGHT_BOTTOM.obj", 0x160, meta); // 010
-  // packMesh(buffer, "miku/12_RIGHT_FOOT.obj", 0x170, meta); // 011
-
-  // Left Leg
-  packMesh(buffer, "miku/13_LEG_LEFT_TOP.obj", 0x180, meta); // 012
-  // packMesh(buffer, "miku/14_LEG_LEFT_BOTTOM.obj", 0x190, meta); // 013
-  // packMesh(buffer, "miku/15_LEFT_FOOT.obj", 0x1a0, meta); // 014
-
-  // Face
-  packMesh(buffer, "miku/01_HEAD_FACE.obj", 0x1b0, meta, true); // 015
-  // packMesh(buffer, "miku/01_HEAD_MOUTH.obj", 0x1c0, meta); // 016
+  packMesh(buffer, "miku/apron/mesh_002.obj", 0xe0, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_003.obj", 0xf0, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_004.obj", 0x100, meta); // 003
 
   console.log(meta);
   // Update the content length to read
