@@ -250,37 +250,40 @@ const encodeApronMegaman = () => {
   for (let i = 0; i < nbSegments; i++) {
     const flags = buffer.readUInt8(ofs + 3);
     console.log("%d) 0x%s", i, flags.toString(16));
-    buffer.writeUInt8(flags & 0x83, ofs + 3);
+    // buffer.writeUInt8(flags & 0x83, ofs + 3);
 
     ofs += 4;
   }
 
   // Remove Prior Mesh from File
-  clearMesh(buffer, 0xc0, meta); // 000
+  // clearMesh(buffer, 0xc0, meta); // 000
   clearMesh(buffer, 0xd0, meta); // 001
-  clearMesh(buffer, 0xe0, meta); // 002
-  clearMesh(buffer, 0xf0, meta); // 003
-  clearMesh(buffer, 0x100, meta); // 004
-  clearMesh(buffer, 0x110, meta); // 005
-  clearMesh(buffer, 0x120, meta); // 006
-  clearMesh(buffer, 0x130, meta); // 007
-  clearMesh(buffer, 0x140, meta); // 008
-  clearMesh(buffer, 0x150, meta); // 009
-  clearMesh(buffer, 0x160, meta); // 010
-  clearMesh(buffer, 0x170, meta); // 011
-  clearMesh(buffer, 0x180, meta); // 012
-  clearMesh(buffer, 0x190, meta); // 013
-  clearMesh(buffer, 0x1a0, meta); // 014
+  // clearMesh(buffer, 0xe0, meta); // 002
+  // clearMesh(buffer, 0xf0, meta); // 003
+  // clearMesh(buffer, 0x100, meta); // 004
+  // clearMesh(buffer, 0x110, meta); // 005
+  // clearMesh(buffer, 0x120, meta); // 006
+  // clearMesh(buffer, 0x130, meta); // 007
+  // clearMesh(buffer, 0x140, meta); // 008
+  // clearMesh(buffer, 0x150, meta); // 009
+  // clearMesh(buffer, 0x160, meta); // 010
+  // clearMesh(buffer, 0x170, meta); // 011
+  // clearMesh(buffer, 0x180, meta); // 012
+  // clearMesh(buffer, 0x190, meta); // 013
+  // clearMesh(buffer, 0x1a0, meta); // 014
   clearMesh(buffer, 0x1b0, meta); // 015
   clearMesh(buffer, 0x1c0, meta); // 016
-  clearMesh(buffer, 0x1d0, meta); // 017
-  clearMesh(buffer, 0x1e0, meta); // 018
+  // clearMesh(buffer, 0x1d0, meta); // 017
+  // clearMesh(buffer, 0x1e0, meta); // 018
 
-  packMesh(buffer, "miku/apron/mesh_000.obj", 0xc0, meta); // 000
-  packMesh(buffer, "miku/01_HEAD_HAIR.obj", 0xd0, meta); // 001
-  packMesh(buffer, "miku/apron/mesh_002.obj", 0xe0, meta); // 002
-  packMesh(buffer, "miku/apron/mesh_003.obj", 0xf0, meta); // 002
-  packMesh(buffer, "miku/apron/mesh_004.obj", 0x100, meta); // 003
+  // packMesh(buffer, "miku/apron/mesh_000.obj", 0xc0, meta); // 000
+  //packMesh(buffer, "miku/01_HEAD_HAIR.obj", 0xd0, meta); // 001
+  // packMesh(buffer, "miku/apron/mesh_002.obj", 0xe0, meta); // 002
+  // packMesh(buffer, "miku/apron/mesh_003.obj", 0xf0, meta); // 002
+  // packMesh(buffer, "miku/apron/mesh_004.obj", 0x100, meta); // 003
+
+  packMesh(buffer, "miku/01_HEAD_FACE.obj", 0x1b0, meta, true); // 001
+  packMesh(buffer, "miku/01_HEAD_MOUTH.obj", 0x1c0, meta, true); // 001
 
   console.log(meta);
   // Update the content length to read
