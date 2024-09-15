@@ -116,27 +116,48 @@ const appendRange = (range: Range[], s: number, e: number) => {
   }
 
   range.push({ start: s, end: e });
+  range.sort((a, b) => a.end - a.start - (b.end - b.start));
 };
 
 const getWriteOffset = (buffer: Buffer, data: Buffer, meta: Alloc) => {
   const { length } = data;
 
   // First search for available space
-
   for (let i = 0; i < meta.ranges.length; i++) {
     const { start, end } = meta.ranges[i];
-    if (length <= end - start) {
-      meta.ranges[i].start += length;
+    if (length > end - start) {
+      continue;
     }
-    console.log("Found space");
+    console.log("Found space: ", start);
+    meta.ranges[i].start += length;
+    meta.ranges.sort((a, b) => a.end - a.start - (b.end - b.start));
     return start;
   }
 
-  console.log("appending");
   // Otherwise append to the file
   const { contentEnd } = meta;
+  console.log("Data Length: 0x%s", length.toString(16));
+  console.log("appending: 0x%s", contentEnd.toString(16));
   meta.contentEnd += length;
   return contentEnd;
+};
+
+const checkClear = (src: Buffer, meta: Alloc) => {
+  const { ranges, contentEnd } = meta;
+
+  ranges.forEach(({ start, end }) => {
+    for (let i = start; i < end; i++) {
+      if (src[i] !== 0) {
+        throw new Error("Invalid clear 1");
+      }
+    }
+  });
+
+  for (let i = contentEnd; i < src.length; i++) {
+    if (src[i] !== 0) {
+      throw new Error("Invalid clear 2");
+    }
+  }
 };
 
 const clearMesh = (src: Buffer, headerOfs: number, meta: Alloc) => {
@@ -209,23 +230,39 @@ const packMesh = (
   src.writeUInt8(vertCount, headerOfs + 2);
 
   // Tri Offset
+  console.log("tri");
   const triOfs = getWriteOffset(src, tri, meta);
   src.writeUInt32LE(triOfs, headerOfs + 4);
   for (let i = 0; i < tri.length; i++) {
+    if (src[triOfs + i] !== 0) {
+      writeFileSync("out/debug-apron789.ebd", src);
+      const errStr = `Tri ofs, not zero 0x${triOfs.toString(16)} ${i}`;
+      throw new Error(errStr);
+    }
     src[triOfs + i] = tri[i];
   }
 
   // Quad Offset
   const quadOfs = getWriteOffset(src, quad, meta);
   src.writeUInt32LE(quadOfs, headerOfs + 8);
+  console.log("quad");
   for (let i = 0; i < quad.length; i++) {
+    if (src[quadOfs + i] !== 0) {
+      writeFileSync("out/debug-apron789.ebd", src);
+      throw new Error("Quad ofs, not zero" + quadOfs);
+    }
     src[quadOfs + i] = quad[i];
   }
 
   // Vert Offset
   const vertOfs = getWriteOffset(src, vertices, meta);
   src.writeUInt32LE(vertOfs, headerOfs + 12);
+  console.log("vertices");
   for (let i = 0; i < vertices.length; i++) {
+    if (src[vertOfs + i] !== 0) {
+      writeFileSync("out/debug-apron789.ebd", src);
+      throw new Error("Vert ofs, not zero" + vertOfs);
+    }
     src[vertOfs + i] = vertices[i];
   }
 
@@ -236,6 +273,8 @@ const encodeApronMegaman = () => {
   const file = readFileSync("out/cut-ST0305.BIN");
   const contentEnd = file.readUInt32LE(0x04);
   const buffer = file.subarray(0x30, 0xe000);
+  writeFileSync("out/debug-apron000.ebd", buffer);
+  //buffer.fill(0, contentEnd);
 
   const meta: Alloc = {
     ranges: [],
@@ -250,13 +289,16 @@ const encodeApronMegaman = () => {
   for (let i = 0; i < nbSegments; i++) {
     const flags = buffer.readUInt8(ofs + 3);
     console.log("%d) 0x%s", i, flags.toString(16));
-    // buffer.writeUInt8(flags & 0x83, ofs + 3);
 
+    if (i < 9) {
+      buffer.writeUInt8(flags & 0x83, ofs + 3);
+    }
     ofs += 4;
   }
 
   // Remove Prior Mesh from File
   // clearMesh(buffer, 0xc0, meta); // 000
+  console.log("Clear hair");
   clearMesh(buffer, 0xd0, meta); // 001
   // clearMesh(buffer, 0xe0, meta); // 002
   // clearMesh(buffer, 0xf0, meta); // 003
@@ -271,19 +313,30 @@ const encodeApronMegaman = () => {
   // clearMesh(buffer, 0x180, meta); // 012
   // clearMesh(buffer, 0x190, meta); // 013
   // clearMesh(buffer, 0x1a0, meta); // 014
+  console.log("clear hair and mouth");
   clearMesh(buffer, 0x1b0, meta); // 015
   clearMesh(buffer, 0x1c0, meta); // 016
   // clearMesh(buffer, 0x1d0, meta); // 017
   // clearMesh(buffer, 0x1e0, meta); // 018
+  checkClear(buffer, meta);
 
   // packMesh(buffer, "miku/apron/mesh_000.obj", 0xc0, meta); // 000
-  //packMesh(buffer, "miku/01_HEAD_HAIR.obj", 0xd0, meta); // 001
+  //
   // packMesh(buffer, "miku/apron/mesh_002.obj", 0xe0, meta); // 002
   // packMesh(buffer, "miku/apron/mesh_003.obj", 0xf0, meta); // 002
   // packMesh(buffer, "miku/apron/mesh_004.obj", 0x100, meta); // 003
 
+  console.log("encode face");
   packMesh(buffer, "miku/01_HEAD_FACE.obj", 0x1b0, meta, true); // 001
+  writeFileSync("out/debug-apron001.ebd", buffer);
+  checkClear(buffer, meta);
+  console.log("encode mouth");
   packMesh(buffer, "miku/01_HEAD_MOUTH.obj", 0x1c0, meta, true); // 001
+  writeFileSync("out/debug-apron001.ebd", buffer);
+  console.log("encode hair");
+  checkClear(buffer, meta);
+  packMesh(buffer, "miku/apron/10_HELMET_buns.obj", 0xd0, meta); // 001
+  writeFileSync("out/debug-apron002.ebd", buffer);
 
   console.log(meta);
   // Update the content length to read
@@ -292,7 +345,7 @@ const encodeApronMegaman = () => {
   // Update the Texture
   updateApronBody2(file);
   writeFileSync("out/cut-ST0305.BIN", file);
-  writeFileSync("out/debug-apron.ebd", buffer);
+  writeFileSync("out/debug-apron456.ebd", buffer);
 
   // process.exit();
 };
