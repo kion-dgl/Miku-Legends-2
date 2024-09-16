@@ -936,4 +936,5 @@ export {
   encodeFace,
   encodeCutScenes,
   encodeCutSceneTexture,
+  compressNewTexture,
 };

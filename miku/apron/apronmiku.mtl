@@ -1,0 +1,11 @@
+newmtl m0
+Kd 1.000000 1.000000 1.000000
+map_Kd body-01.png
+
+newmtl m1
+Kd 1.000000 1.000000 1.000000
+map_Kd body-01.png
+
+newmtl m2
+Kd 1.000000 1.000000 1.000000
+map_Kd ST03T.png

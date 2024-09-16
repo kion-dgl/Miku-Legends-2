@@ -21,7 +21,11 @@
 
 import { readFileSync, writeFileSync } from "fs";
 import { encodeMesh } from "./EncodeModel";
-import { encodePalette, encodeCutSceneTexture } from "./EncodeTexture";
+import {
+  encodePalette,
+  encodeCutSceneTexture,
+  compressNewTexture,
+} from "./EncodeTexture";
 
 type EntityHeader = {
   id: string;
@@ -48,8 +52,161 @@ type TextureCoords = {
 type Range = { start: number; end: number };
 type Alloc = { ranges: Range[]; contentEnd: number };
 
+const CUT_SCENES = [
+  {
+    name: "cut-ST0305.BIN",
+    offset: 0x041000,
+    compressed: false,
+    png: "ST0305.png",
+    end: -1,
+  },
+];
+
+const encodeCutScenes = () => {
+  const palette: number[] = [];
+
+  CUT_SCENES.forEach(({ png }) => {
+    const buffer = readFileSync(`miku/faces/${png}`);
+    encodePalette(buffer, palette);
+  });
+
+  if (palette.length > 16) {
+    throw new Error("Too many colors for face texture");
+  }
+
+  let ST4B01: Buffer = Buffer.alloc(0);
+  CUT_SCENES.forEach(({ name, offset, compressed, png, end }) => {
+    // Read the Source Image
+    let src = readFileSync(`bin/${name}`);
+    if (name === "cut-ST4B01.BIN" && ST4B01.length === 0) {
+      ST4B01 = src;
+    } else if (name === "cut-ST4B01.BIN" && ST4B01.length !== 0) {
+      src = ST4B01;
+    }
+
+    const image = readFileSync(`miku/faces/${png}`);
+    // Encode the image into binary
+    const texture = encodeCutSceneTexture(palette, image);
+
+    const tim = {
+      type: src.readUInt32LE(offset + 0x00),
+      fullSize: src.readUInt32LE(offset + 0x04),
+      paletteX: src.readUInt16LE(offset + 0x0c),
+      paletteY: src.readUInt16LE(offset + 0x0e),
+      colorCount: src.readUInt16LE(offset + 0x10),
+      paletteCount: src.readUInt16LE(offset + 0x12),
+      imageX: src.readUInt16LE(offset + 0x14),
+      imageY: src.readUInt16LE(offset + 0x16),
+      width: src.readUInt16LE(offset + 0x18),
+      height: src.readUInt16LE(offset + 0x1a),
+      bitfieldSize: src.readUInt16LE(offset + 0x24),
+      payloadSize: src.readUInt16LE(offset + 0x26),
+    };
+
+    const { type, fullSize } = tim;
+    const palSize = fullSize - texture.length;
+    if (type === 2) {
+      if (palSize !== 0x7d0) {
+        throw new Error("Uncompressed invalid palette");
+      }
+    } else if (palSize < 0x20 || palSize > 0x80) {
+      throw new Error("Invalid pal size");
+    }
+
+    const pal = Buffer.alloc(palSize);
+    for (let i = 0; i < 16; i++) {
+      pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+    }
+
+    let stop = false;
+    if (!compressed) {
+      // If not compressed, then we can just replace what's there
+      console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
+
+      // Replace the existing palette
+      for (let i = 0; i < pal.length; i++) {
+        src[offset + 0x30 + i] = pal[i];
+      }
+
+      // Replace the texture
+      for (let i = 0; i < texture.length; i++) {
+        src[offset + 0x800 + i] = texture[i];
+      }
+    } else {
+      // Otherwise we will need to compress and pray to god nothing breaks
+      console.log(`File: ${name}, Offset: 0x${offset.toString(16)}`);
+
+      const blocks = src.readUInt16LE(offset + 0x08);
+
+      // Zero Out the Previous Data
+      for (let i = offset + 0x30; i < end; i++) {
+        src[i] = 0;
+      }
+
+      let makeBad = -1;
+      switch (name) {
+        case "cut-ST1CT.BIN":
+        case "cut-ST25T.BIN":
+        case "cut-ST30T.BIN":
+        case "cut-ST3001T.BIN":
+        case "cut-ST31T.BIN":
+        case "cut-ST39T.BIN":
+          makeBad = 1;
+          break;
+        case "cut-ST4BT.BIN":
+        case "cut-ST15T.BIN":
+        case "cut-ST17T.BIN":
+          makeBad = 2;
+          break;
+      }
+
+      const [bodyBitField, compressedBody] = compressNewTexture(
+        pal,
+        texture,
+        makeBad,
+      );
+
+      // Update the bitfield length in header
+      src.writeInt16LE(bodyBitField.length, offset + 0x24);
+      console.log("BitField Size: 0x%s", bodyBitField.length.toString(16));
+
+      let bodyOfs = offset + 0x30;
+
+      // Write the bitfield
+      for (let i = 0; i < bodyBitField.length; i++) {
+        src[bodyOfs++] = bodyBitField[i];
+      }
+
+      // Write the compressed Texture
+      for (let i = 0; i < compressedBody.length; i++) {
+        src[bodyOfs++] = compressedBody[i];
+      }
+
+      const lower = Math.floor(end / 0x800) * 0x800;
+      const upper = Math.ceil(end / 0x800) * 0x800;
+
+      if (bodyOfs > lower && bodyOfs < upper) {
+        console.log("Looks good");
+      } else if (bodyOfs <= lower) {
+        console.log(`${name} too short`);
+        stop = true;
+      } else {
+        console.log("too long");
+        stop = true;
+      }
+    }
+
+    writeFileSync(`out/${name}`, src);
+    if (stop) {
+      throw new Error("Look at exported file");
+    }
+  });
+
+  // Update the body for Miku in Apron
+};
+
 const updateApronBody2 = (src: Buffer) => {
-  const buffer = readFileSync(`miku/apron/ApronMikuTex.png`);
+  const buffer = readFileSync(`miku/apron/body-01.png`);
   const palette: number[] = [];
   encodePalette(buffer, palette);
   if (palette.length > 16) {
@@ -270,182 +427,113 @@ const packMesh = (
 };
 
 const encodeApronMegaman = () => {
+  encodeCutScenes();
   const file = readFileSync("out/cut-ST0305.BIN");
-  const image = Buffer.from(file.subarray(0xe000, 0x17000));
-
-  // Shift the MegaMan Body Texture Down by 0x800 bytes
-  for (let i = 0; i < image.length; i++) {
-    file[0xe800 + i] = image[i];
-  }
-
-  // Get the Length of the content
-
-  let contentStart = 0x1f0;
-  let contentEnd = file.readUInt32LE(0x04);
-  const rollStart = 0x2534;
-  const buffer = file.subarray(0x30, 0xe800);
-
-  // Clear out available space
-  buffer.fill(0, 0xc0, rollStart);
+  // const image = Buffer.from(file.subarray(0xe000, 0x17000));
+  // for (let i = 0; i < image.length; i++) {
+  //   file[0xe800 + i] = image[i];
+  // }
+  const contentEnd = file.readUInt32LE(0x04);
+  const buffer = file.subarray(0x30, 0xe000);
   buffer.fill(0, contentEnd);
+  writeFileSync("out/debug-apron000.ebd", buffer);
+  //buffer.fill(0, contentEnd);
+
+  const meta: Alloc = {
+    ranges: [],
+    contentEnd,
+  };
 
   // Remove share vertices flag
   const heirarchyOfs = 0x1e24;
   const nbSegments = 19;
   let ofs = heirarchyOfs;
+  let doStop = false;
   for (let i = 0; i < nbSegments; i++) {
     const flags = buffer.readUInt8(ofs + 3);
-    buffer.writeUInt8(flags & 0x83, ofs + 3);
+    console.log("%d) 0x%s", i, flags.toString(16));
+    buffer.writeUInt8(flags & 0x3, ofs + 3);
     ofs += 4;
   }
 
-  // Update Vertex Color Offset
-  buffer.writeUInt32LE(0x1f0, 0xa4);
-  buffer.writeUInt32LE(0x1f0, 0xa8);
-  buffer.writeUInt32LE(0x1f0, 0xac);
+  // Remove Prior Mesh from File
+  clearMesh(buffer, 0xc0, meta); // 000
+  console.log("Clear hair");
+  clearMesh(buffer, 0xd0, meta); // 001
+  clearMesh(buffer, 0xe0, meta); // 002
+  clearMesh(buffer, 0xf0, meta); // 003
+  clearMesh(buffer, 0x100, meta); // 004
+  clearMesh(buffer, 0x110, meta); // 005
+  clearMesh(buffer, 0x120, meta); // 006
+  clearMesh(buffer, 0x130, meta); // 007
+  clearMesh(buffer, 0x140, meta); // 008
+  clearMesh(buffer, 0x150, meta); // 009
+  clearMesh(buffer, 0x160, meta); // 010
+  clearMesh(buffer, 0x170, meta); // 011
+  clearMesh(buffer, 0x180, meta); // 012
+  clearMesh(buffer, 0x190, meta); // 013
+  clearMesh(buffer, 0x1a0, meta); // 014
+  console.log("clear hair and mouth");
+  clearMesh(buffer, 0x1b0, meta); // 015
+  clearMesh(buffer, 0x1c0, meta); // 016
+  clearMesh(buffer, 0x1d0, meta); // 017
+  clearMesh(buffer, 0x1e0, meta); // 018
+  checkClear(buffer, meta);
 
-  const files = [
-    // 000 Body
-    {
-      offset: 0xc0,
-      name: "miku/apron/mesh_000.obj",
-      matId: 0,
-    },
-    // 001 Head
-    {
-      offset: 0xd0,
-      name: "miku/apron/10_HELMET_buns.obj",
-      matId: 0,
-    },
-    // 002 Right Shoulder
-    {
-      offset: 0xe0,
-      name: "miku/apron/mesh_002.obj",
-      matId: 0,
-    },
-    // 003 Right Arm
-    {
-      offset: 0xf0,
-      name: "miku/05_RIGHT_ARM.obj",
-      matId: 0,
-    },
-    // 004 Right Hand
-    {
-      offset: 0x100,
-      name: "miku/apron/mesh_004.obj",
-      matId: 0,
-    },
-    // 005 Left Shoulder
-    {
-      offset: 0x110,
-      name: "miku/apron/mesh_005.obj",
-      matId: 0,
-    },
-    // 006 left Arm
-    {
-      offset: 0x120,
-      name: "miku/08_LEFT_ARM.obj",
-      matId: 0,
-    },
-    // 007 Left Hand
-    {
-      offset: 0x130,
-      name: "miku/apron/mesh_007.obj",
-      matId: 0,
-    },
-    // 008 Bow Tie
-    {
-      offset: 0x140,
-      name: "miku/apron/mesh_008.obj",
-      matId: 0,
-    },
-    // 009 Right Leg Top
-    {
-      offset: 0x150,
-      name: "miku/10_LEG_RIGHT_TOP.obj",
-      matId: 0,
-    },
-    // 010 Right Leg Lower
-    {
-      offset: 0x160,
-      name: "miku/apron/mesh_010.obj",
-      matId: 0,
-    },
-    // 011 Right Foot
-    {
-      offset: 0x170,
-      name: "miku/apron/mesh_011.obj",
-      matId: 0,
-    },
-    // 012 left Leg Top
-    {
-      offset: 0x180,
-      name: "miku/10_LEG_LEFT_TOP.obj",
-      matId: 0,
-    },
-    // 013 Right Leg Lower
-    {
-      offset: 0x190,
-      name: "miku/apron/mesh_013.obj",
-      matId: 0,
-    },
-    // 014 Left Foot
-    {
-      offset: 0x1a0,
-      name: "miku/apron/mesh_014.obj",
-      matId: 0,
-    },
-    // 015 Face
-    {
-      offset: 0x1b0,
-      name: "miku/01_HEAD_FACE.obj",
-      matId: 2,
-    },
-    // 016 Mouth
-    {
-      offset: 0x1c0,
-      name: "miku/01_HEAD_MOUTH.obj",
-      matId: 2,
-    },
-    // 017 Hand with Plate
-    {
-      offset: 0x1d0,
-      name: "miku/apron/mesh_017.obj",
-      matId: 0,
-    },
-    // 018 Hand with Frypan
-    {
-      offset: 0x1e0,
-      name: "miku/apron/mesh_018.obj",
-      matId: 0,
-    },
-  ];
+  // Body
+  packMesh(buffer, "miku/apron/02_BODY.obj", 0xc0, meta); // 000
 
-  let vertexCount = 0;
-  const encodedModel = files.map(({ name, matId }) => {
-    const obj = readFileSync(name, "ascii");
-    const { tri, quad, vertices } = encodeMesh(obj, matId);
+  // Hair
+  packMesh(buffer, "miku/apron/01_HEAD_HAIR.obj", 0xd0, meta, true); // 001
 
-    // Write Counts
-    const triCount = Math.floor(tri.length / 12);
-    const quadCount = Math.floor(quad.length / 12);
-    const vertCount = Math.floor(vertices.length / 4);
-    vertexCount += vertCount;
+  // Right Arm
+  packMesh(buffer, "miku/apron/07_RIGHT_SHOULDER.obj", 0xe0, meta); // 002
+  packMesh(buffer, "miku/apron/08_RIGHT_ARM.obj", 0xf0, meta); // 002
+  packMesh(buffer, "miku/apron/09_RIGHT_HAND.obj", 0x100, meta); // 003
 
-    return { tri, quad, vertices, triCount, quadCount, vertCount };
-  });
+  // Left Arm
+  packMesh(buffer, "miku/apron/04_LEFT_SHOULDER.obj", 0x110, meta); // 002
+  packMesh(buffer, "miku/apron/05_LEFT_ARM.obj", 0x120, meta); // 002
+  packMesh(buffer, "miku/apron/06_LEFT_HAND.obj", 0x130, meta); // 003
 
+  // Hips (dont lie)
+  packMesh(buffer, "miku/apron/03_HIPS.obj", 0x140, meta); // 002
+
+  // Right Leg
+  packMesh(buffer, "miku/apron/10_LEG_RIGHT_TOP.obj", 0x150, meta); // 002
+  packMesh(buffer, "miku/apron/11_LEG_RIGHT_BOTTOM.obj", 0x160, meta); // 003
+  packMesh(buffer, "miku/apron/12_RIGHT_FOOT.obj", 0x170, meta); // 002
+
+  // Left Leg
+
+  packMesh(buffer, "miku/apron/13_LEG_LEFT_TOP.obj", 0x180, meta); // 002
+  packMesh(buffer, "miku/apron/14_LEG_LEFT_BOTTOM.obj", 0x190, meta); // 003
+  packMesh(buffer, "miku/apron/15_LEFT_FOOT.obj", 0x1a0, meta); // 003
+
+  console.log("encode face");
+  packMesh(buffer, "miku/apron/01_HEAD_FACE.obj", 0x1b0, meta, true); // 015
+  checkClear(buffer, meta);
+  console.log("encode mouth");
+  packMesh(buffer, "miku/apron/01_HEAD_MOUTH.obj", 0x1c0, meta, true); // 016
+  console.log("encode hair");
+  checkClear(buffer, meta);
+
+  packMesh(buffer, "miku/apron/09_RIGHT_HAND_PLATE.obj", 0x1d0, meta); // 017
+  packMesh(buffer, "miku/apron/06_LEFT_HAND_PAN.obj", 0x1e0, meta); // 018
+
+  console.log(meta);
   // Update the content length to read
-  file.writeUInt32LE(contentEnd, 0x04);
-  file.writeUInt32LE(0x1d, 0x08);
+  file.writeUInt32LE(meta.contentEnd, 0x04);
+  // file.writeUInt32LE(0x1d, 0x08);
 
-  if (contentEnd > 0xe800) {
+  if (meta.contentEnd > 0xe000) {
     throw new Error("File content too big");
   }
 
   // Update the Texture
   updateApronBody2(file);
   writeFileSync("out/cut-ST0305.BIN", file);
+  writeFileSync("out/debug-apron456.ebd", buffer);
 
   // process.exit();
 };
