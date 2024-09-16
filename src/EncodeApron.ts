@@ -440,7 +440,12 @@ const encodeApronMegaman = () => {
   //buffer.fill(0, contentEnd);
 
   const meta: Alloc = {
-    ranges: [],
+    ranges: [
+      {
+        start: 0x1f0,
+        end: 0x1dc8,
+      },
+    ],
     contentEnd,
   };
 
@@ -456,29 +461,31 @@ const encodeApronMegaman = () => {
     ofs += 4;
   }
 
-  // Remove Prior Mesh from File
-  clearMesh(buffer, 0xc0, meta); // 000
-  console.log("Clear hair");
-  clearMesh(buffer, 0xd0, meta); // 001
-  clearMesh(buffer, 0xe0, meta); // 002
-  clearMesh(buffer, 0xf0, meta); // 003
-  clearMesh(buffer, 0x100, meta); // 004
-  clearMesh(buffer, 0x110, meta); // 005
-  clearMesh(buffer, 0x120, meta); // 006
-  clearMesh(buffer, 0x130, meta); // 007
-  clearMesh(buffer, 0x140, meta); // 008
-  clearMesh(buffer, 0x150, meta); // 009
-  clearMesh(buffer, 0x160, meta); // 010
-  clearMesh(buffer, 0x170, meta); // 011
-  clearMesh(buffer, 0x180, meta); // 012
-  clearMesh(buffer, 0x190, meta); // 013
-  clearMesh(buffer, 0x1a0, meta); // 014
-  console.log("clear hair and mouth");
-  clearMesh(buffer, 0x1b0, meta); // 015
-  clearMesh(buffer, 0x1c0, meta); // 016
-  clearMesh(buffer, 0x1d0, meta); // 017
-  clearMesh(buffer, 0x1e0, meta); // 018
-  checkClear(buffer, meta);
+  // // Remove Prior Mesh from File
+  // clearMesh(buffer, 0xc0, meta); // 000
+  // console.log("Clear hair");
+  // clearMesh(buffer, 0xd0, meta); // 001
+  // clearMesh(buffer, 0xe0, meta); // 002
+  // clearMesh(buffer, 0xf0, meta); // 003
+  // clearMesh(buffer, 0x100, meta); // 004
+  // clearMesh(buffer, 0x110, meta); // 005
+  // clearMesh(buffer, 0x120, meta); // 006
+  // clearMesh(buffer, 0x130, meta); // 007
+  // clearMesh(buffer, 0x140, meta); // 008
+  // clearMesh(buffer, 0x150, meta); // 009
+  // clearMesh(buffer, 0x160, meta); // 010
+  // clearMesh(buffer, 0x170, meta); // 011
+  // clearMesh(buffer, 0x180, meta); // 012
+  // clearMesh(buffer, 0x190, meta); // 013
+  // clearMesh(buffer, 0x1a0, meta); // 014
+  // console.log("clear hair and mouth");
+  // clearMesh(buffer, 0x1b0, meta); // 015
+  // clearMesh(buffer, 0x1c0, meta); // 016
+  // clearMesh(buffer, 0x1d0, meta); // 017
+  // clearMesh(buffer, 0x1e0, meta); // 018
+  // checkClear(buffer, meta);
+
+  buffer.fill(0, 0xc0, 0x1dc8);
 
   // Body
   packMesh(buffer, "miku/apron/02_BODY.obj", 0xc0, meta); // 000
