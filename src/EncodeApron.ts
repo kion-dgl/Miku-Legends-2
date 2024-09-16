@@ -271,8 +271,13 @@ const packMesh = (
 
 const encodeApronMegaman = () => {
   const file = readFileSync("out/cut-ST0305.BIN");
+  const image = Buffer.from(file.subarray(0xe000, 0x17000));
+  for (let i = 0; i < image.length; i++) {
+    file[0xe800 + i] = image[i];
+  }
   const contentEnd = file.readUInt32LE(0x04);
-  const buffer = file.subarray(0x30, 0xe000);
+  const buffer = file.subarray(0x30, 0xe800);
+  buffer.fill(0, contentEnd);
   writeFileSync("out/debug-apron000.ebd", buffer);
   //buffer.fill(0, contentEnd);
 
@@ -289,58 +294,83 @@ const encodeApronMegaman = () => {
   for (let i = 0; i < nbSegments; i++) {
     const flags = buffer.readUInt8(ofs + 3);
     console.log("%d) 0x%s", i, flags.toString(16));
-
-    if (i < 9) {
-      buffer.writeUInt8(flags & 0x83, ofs + 3);
-    }
+    buffer.writeUInt8(flags & 0x3, ofs + 3);
     ofs += 4;
   }
 
   // Remove Prior Mesh from File
-  // clearMesh(buffer, 0xc0, meta); // 000
+  clearMesh(buffer, 0xc0, meta); // 000
   console.log("Clear hair");
   clearMesh(buffer, 0xd0, meta); // 001
-  // clearMesh(buffer, 0xe0, meta); // 002
-  // clearMesh(buffer, 0xf0, meta); // 003
-  // clearMesh(buffer, 0x100, meta); // 004
-  // clearMesh(buffer, 0x110, meta); // 005
-  // clearMesh(buffer, 0x120, meta); // 006
-  // clearMesh(buffer, 0x130, meta); // 007
-  // clearMesh(buffer, 0x140, meta); // 008
-  // clearMesh(buffer, 0x150, meta); // 009
-  // clearMesh(buffer, 0x160, meta); // 010
-  // clearMesh(buffer, 0x170, meta); // 011
-  // clearMesh(buffer, 0x180, meta); // 012
-  // clearMesh(buffer, 0x190, meta); // 013
-  // clearMesh(buffer, 0x1a0, meta); // 014
+  clearMesh(buffer, 0xe0, meta); // 002
+  clearMesh(buffer, 0xf0, meta); // 003
+  clearMesh(buffer, 0x100, meta); // 004
+  clearMesh(buffer, 0x110, meta); // 005
+  clearMesh(buffer, 0x120, meta); // 006
+  clearMesh(buffer, 0x130, meta); // 007
+  clearMesh(buffer, 0x140, meta); // 008
+  clearMesh(buffer, 0x150, meta); // 009
+  clearMesh(buffer, 0x160, meta); // 010
+  clearMesh(buffer, 0x170, meta); // 011
+  clearMesh(buffer, 0x180, meta); // 012
+  clearMesh(buffer, 0x190, meta); // 013
+  clearMesh(buffer, 0x1a0, meta); // 014
   console.log("clear hair and mouth");
   clearMesh(buffer, 0x1b0, meta); // 015
   clearMesh(buffer, 0x1c0, meta); // 016
-  // clearMesh(buffer, 0x1d0, meta); // 017
-  // clearMesh(buffer, 0x1e0, meta); // 018
+  clearMesh(buffer, 0x1d0, meta); // 017
+  clearMesh(buffer, 0x1e0, meta); // 018
   checkClear(buffer, meta);
 
-  // packMesh(buffer, "miku/apron/mesh_000.obj", 0xc0, meta); // 000
-  //
-  // packMesh(buffer, "miku/apron/mesh_002.obj", 0xe0, meta); // 002
-  // packMesh(buffer, "miku/apron/mesh_003.obj", 0xf0, meta); // 002
-  // packMesh(buffer, "miku/apron/mesh_004.obj", 0x100, meta); // 003
+  // Body
+  packMesh(buffer, "miku/apron/mesh_000.obj", 0xc0, meta); // 000
+
+  // Hair
+  packMesh(buffer, "miku/apron/10_HELMET_buns.obj", 0xd0, meta); // 001
+  writeFileSync("out/debug-apron002.ebd", buffer);
+
+  // Right Arm
+  packMesh(buffer, "miku/apron/mesh_002.obj", 0xe0, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_003.obj", 0xf0, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_004.obj", 0x100, meta); // 003
+
+  // Left Arm
+  packMesh(buffer, "miku/apron/mesh_005.obj", 0x110, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_006.obj", 0x120, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_007.obj", 0x130, meta); // 003
+
+  // Right Leg
+  packMesh(buffer, "miku/apron/mesh_008.obj", 0x140, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_009.obj", 0x150, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_010.obj", 0x160, meta); // 003
+
+  // Left Leg
+  packMesh(buffer, "miku/apron/mesh_011.obj", 0x170, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_012.obj", 0x180, meta); // 002
+  packMesh(buffer, "miku/apron/mesh_013.obj", 0x190, meta); // 003
+  packMesh(buffer, "miku/apron/mesh_014.obj", 0x1a0, meta); // 003
 
   console.log("encode face");
-  packMesh(buffer, "miku/01_HEAD_FACE.obj", 0x1b0, meta, true); // 001
+  packMesh(buffer, "miku/01_HEAD_FACE.obj", 0x1b0, meta, true); // 015
   writeFileSync("out/debug-apron001.ebd", buffer);
   checkClear(buffer, meta);
   console.log("encode mouth");
-  packMesh(buffer, "miku/01_HEAD_MOUTH.obj", 0x1c0, meta, true); // 001
+  packMesh(buffer, "miku/01_HEAD_MOUTH.obj", 0x1c0, meta, true); // 016
   writeFileSync("out/debug-apron001.ebd", buffer);
   console.log("encode hair");
   checkClear(buffer, meta);
-  packMesh(buffer, "miku/apron/10_HELMET_buns.obj", 0xd0, meta); // 001
-  writeFileSync("out/debug-apron002.ebd", buffer);
+
+  // packMesh(buffer, "miku/apron/mesh_017.obj", 0x1d0, meta); // 017
+  // packMesh(buffer, "miku/apron/mesh_018.obj", 0x1e0, meta); // 018
 
   console.log(meta);
   // Update the content length to read
   file.writeUInt32LE(meta.contentEnd, 0x04);
+  file.writeUInt32LE(0x1d, 0x08);
+
+  if (meta.contentEnd > 0xe800) {
+    throw new Error("File content too big");
+  }
 
   // Update the Texture
   updateApronBody2(file);
