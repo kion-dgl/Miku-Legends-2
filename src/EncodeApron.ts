@@ -271,23 +271,15 @@ const packMesh = (
 
 const encodeApronMegaman = () => {
   const file = readFileSync("out/cut-ST0305.BIN");
-  const image = Buffer.from(file.subarray(0xe000, 0x17000));
-
-  // Shift the MegaMan Body Texture Down by 0x800 bytes
-  for (let i = 0; i < image.length; i++) {
-    file[0xe800 + i] = image[i];
-  }
 
   // Get the Length of the content
-
-  let contentStart = 0x1f0;
   let contentEnd = file.readUInt32LE(0x04);
   const rollStart = 0x2534;
-  const buffer = file.subarray(0x30, 0xe800);
+  const buffer = Buffer.from(file.subarray(0x30, 0xe800));
 
   // Clear out available space
   buffer.fill(0, 0xc0, rollStart);
-  buffer.fill(0, contentEnd);
+  buffer.fill(0, contentEnd, buffer.length);
 
   // Remove share vertices flag
   const heirarchyOfs = 0x1e24;
@@ -380,7 +372,7 @@ const encodeApronMegaman = () => {
     // 012 left Leg Top
     {
       offset: 0x180,
-      name: "miku/10_LEG_LEFT_TOP.obj",
+      name: "miku/13_LEG_LEFT_TOP.obj",
       matId: 0,
     },
     // 013 Right Leg Lower
@@ -408,11 +400,11 @@ const encodeApronMegaman = () => {
       matId: 2,
     },
     // 017 Hand with Plate
-    {
-      offset: 0x1d0,
-      name: "miku/apron/mesh_017.obj",
-      matId: 0,
-    },
+    // {
+    //   offset: 0x1d0,
+    //   name: "miku/apron/mesh_017.obj",
+    //   matId: 0,
+    // },
     // 018 Hand with Frypan
     {
       offset: 0x1e0,
@@ -421,8 +413,8 @@ const encodeApronMegaman = () => {
     },
   ];
 
-  let vertexCount = 0;
-  const encodedModel = files.map(({ name, matId }) => {
+  ofs = 0x1f0;
+  const encodedModel = files.map(({ name, matId, offset }) => {
     const obj = readFileSync(name, "ascii");
     const { tri, quad, vertices } = encodeMesh(obj, matId);
 
@@ -430,19 +422,92 @@ const encodeApronMegaman = () => {
     const triCount = Math.floor(tri.length / 12);
     const quadCount = Math.floor(quad.length / 12);
     const vertCount = Math.floor(vertices.length / 4);
-    vertexCount += vertCount;
+    for (let i = 0; i < vertCount; i++) {
+      buffer[ofs + 0] = 0x79;
+      buffer[ofs + 1] = 0x79;
+      buffer[ofs + 2] = 0x79;
+      ofs += 4;
+    }
 
-    return { tri, quad, vertices, triCount, quadCount, vertCount };
+    return { tri, quad, vertices, triCount, quadCount, vertCount, offset };
   });
+
+  console.log(" ------- ");
+  console.log("Content Offset: 0x%s", ofs.toString(16));
+
+  encodedModel.forEach(
+    ({ tri, quad, vertices, triCount, quadCount, vertCount, offset }) => {
+      buffer.writeUInt8(triCount, offset + 0);
+      buffer.writeUInt8(quadCount, offset + 1);
+      buffer.writeUInt8(vertCount, offset + 2);
+
+      // Triangles
+      let triOfs = -1;
+      if (ofs + tri.length <= rollStart) {
+        triOfs = ofs;
+        ofs += tri.length;
+      } else {
+        triOfs = contentEnd;
+        contentEnd += tri.length;
+      }
+
+      buffer.writeUInt32LE(triOfs, offset + 4);
+      for (let i = 0; i < tri.length; i++) {
+        buffer[triOfs + i] = tri[i];
+      }
+
+      // Quads
+      let quadOfs = -1;
+      if (ofs + quad.length <= rollStart) {
+        quadOfs = ofs;
+        ofs += quad.length;
+      } else {
+        quadOfs = contentEnd;
+        contentEnd += quad.length;
+      }
+
+      buffer.writeUInt32LE(quadOfs, offset + 8);
+      for (let i = 0; i < quad.length; i++) {
+        buffer[quadOfs + i] = quad[i];
+      }
+
+      // Vertices
+      let vertOfs = -1;
+      if (ofs + vertices.length <= rollStart) {
+        vertOfs = ofs;
+        ofs += vertices.length;
+      } else {
+        vertOfs = contentEnd;
+        contentEnd += vertices.length;
+      }
+
+      buffer.writeUInt32LE(vertOfs, offset + 12);
+      for (let i = 0; i < vertices.length; i++) {
+        buffer[vertOfs + i] = vertices[i];
+      }
+    },
+  );
 
   // Update the content length to read
   file.writeUInt32LE(contentEnd, 0x04);
-  file.writeUInt32LE(0x1d, 0x08);
 
-  if (contentEnd > 0xe800) {
+  console.log("Content end: 0x%s", contentEnd.toString(16));
+  if (contentEnd > 0xe000 && contentEnd <= 0xe800) {
+    // Shift the MegaMan Body Texture Down by 0x800 bytes
+    const image = Buffer.from(file.subarray(0xe000, 0x17000));
+    for (let i = 0; i < image.length; i++) {
+      file[0xe800 + i] = image[i];
+    }
+    file.writeUInt32LE(0x1d, 0x08);
+  } else if (contentEnd > 0xe800) {
     throw new Error("File content too big");
   }
 
+  for (let i = 0; i < contentEnd; i++) {
+    file[0x30 + i] = buffer[i];
+  }
+
+  writeFileSync("out/debug-apron.ebd", buffer);
   // Update the Texture
   updateApronBody2(file);
   writeFileSync("out/cut-ST0305.BIN", file);
