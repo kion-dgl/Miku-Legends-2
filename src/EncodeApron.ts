@@ -272,107 +272,180 @@ const packMesh = (
 const encodeApronMegaman = () => {
   const file = readFileSync("out/cut-ST0305.BIN");
   const image = Buffer.from(file.subarray(0xe000, 0x17000));
+
+  // Shift the MegaMan Body Texture Down by 0x800 bytes
   for (let i = 0; i < image.length; i++) {
     file[0xe800 + i] = image[i];
   }
-  const contentEnd = file.readUInt32LE(0x04);
-  const buffer = file.subarray(0x30, 0xe800);
-  buffer.fill(0, contentEnd);
-  writeFileSync("out/debug-apron000.ebd", buffer);
-  //buffer.fill(0, contentEnd);
 
-  const meta: Alloc = {
-    ranges: [],
-    contentEnd,
-  };
+  // Get the Length of the content
+
+  let contentStart = 0x1f0;
+  let contentEnd = file.readUInt32LE(0x04);
+  const rollStart = 0x2534;
+  const buffer = file.subarray(0x30, 0xe800);
+
+  // Clear out available space
+  buffer.fill(0, 0xc0, rollStart);
+  buffer.fill(0, contentEnd);
 
   // Remove share vertices flag
   const heirarchyOfs = 0x1e24;
   const nbSegments = 19;
   let ofs = heirarchyOfs;
-  let doStop = false;
   for (let i = 0; i < nbSegments; i++) {
     const flags = buffer.readUInt8(ofs + 3);
-    console.log("%d) 0x%s", i, flags.toString(16));
-    buffer.writeUInt8(flags & 0x3, ofs + 3);
+    buffer.writeUInt8(flags & 0x83, ofs + 3);
     ofs += 4;
   }
 
-  // Remove Prior Mesh from File
-  clearMesh(buffer, 0xc0, meta); // 000
-  console.log("Clear hair");
-  clearMesh(buffer, 0xd0, meta); // 001
-  clearMesh(buffer, 0xe0, meta); // 002
-  clearMesh(buffer, 0xf0, meta); // 003
-  clearMesh(buffer, 0x100, meta); // 004
-  clearMesh(buffer, 0x110, meta); // 005
-  clearMesh(buffer, 0x120, meta); // 006
-  clearMesh(buffer, 0x130, meta); // 007
-  clearMesh(buffer, 0x140, meta); // 008
-  clearMesh(buffer, 0x150, meta); // 009
-  clearMesh(buffer, 0x160, meta); // 010
-  clearMesh(buffer, 0x170, meta); // 011
-  clearMesh(buffer, 0x180, meta); // 012
-  clearMesh(buffer, 0x190, meta); // 013
-  clearMesh(buffer, 0x1a0, meta); // 014
-  console.log("clear hair and mouth");
-  clearMesh(buffer, 0x1b0, meta); // 015
-  clearMesh(buffer, 0x1c0, meta); // 016
-  clearMesh(buffer, 0x1d0, meta); // 017
-  clearMesh(buffer, 0x1e0, meta); // 018
-  checkClear(buffer, meta);
+  // Update Vertex Color Offset
+  buffer.writeUInt32LE(0x1f0, 0xa4);
+  buffer.writeUInt32LE(0x1f0, 0xa8);
+  buffer.writeUInt32LE(0x1f0, 0xac);
 
-  // Body
-  packMesh(buffer, "miku/apron/mesh_000.obj", 0xc0, meta); // 000
+  const files = [
+    // 000 Body
+    {
+      offset: 0xc0,
+      name: "miku/apron/mesh_000.obj",
+      matId: 0,
+    },
+    // 001 Head
+    {
+      offset: 0xd0,
+      name: "miku/apron/10_HELMET_buns.obj",
+      matId: 0,
+    },
+    // 002 Right Shoulder
+    {
+      offset: 0xe0,
+      name: "miku/apron/mesh_002.obj",
+      matId: 0,
+    },
+    // 003 Right Arm
+    {
+      offset: 0xf0,
+      name: "miku/05_RIGHT_ARM.obj",
+      matId: 0,
+    },
+    // 004 Right Hand
+    {
+      offset: 0x100,
+      name: "miku/apron/mesh_004.obj",
+      matId: 0,
+    },
+    // 005 Left Shoulder
+    {
+      offset: 0x110,
+      name: "miku/apron/mesh_005.obj",
+      matId: 0,
+    },
+    // 006 left Arm
+    {
+      offset: 0x120,
+      name: "miku/08_LEFT_ARM.obj",
+      matId: 0,
+    },
+    // 007 Left Hand
+    {
+      offset: 0x130,
+      name: "miku/apron/mesh_007.obj",
+      matId: 0,
+    },
+    // 008 Bow Tie
+    {
+      offset: 0x140,
+      name: "miku/apron/mesh_008.obj",
+      matId: 0,
+    },
+    // 009 Right Leg Top
+    {
+      offset: 0x150,
+      name: "miku/10_LEG_RIGHT_TOP.obj",
+      matId: 0,
+    },
+    // 010 Right Leg Lower
+    {
+      offset: 0x160,
+      name: "miku/apron/mesh_010.obj",
+      matId: 0,
+    },
+    // 011 Right Foot
+    {
+      offset: 0x170,
+      name: "miku/apron/mesh_011.obj",
+      matId: 0,
+    },
+    // 012 left Leg Top
+    {
+      offset: 0x180,
+      name: "miku/10_LEG_LEFT_TOP.obj",
+      matId: 0,
+    },
+    // 013 Right Leg Lower
+    {
+      offset: 0x190,
+      name: "miku/apron/mesh_013.obj",
+      matId: 0,
+    },
+    // 014 Left Foot
+    {
+      offset: 0x1a0,
+      name: "miku/apron/mesh_014.obj",
+      matId: 0,
+    },
+    // 015 Face
+    {
+      offset: 0x1b0,
+      name: "miku/01_HEAD_FACE.obj",
+      matId: 2,
+    },
+    // 016 Mouth
+    {
+      offset: 0x1c0,
+      name: "miku/01_HEAD_MOUTH.obj",
+      matId: 2,
+    },
+    // 017 Hand with Plate
+    {
+      offset: 0x1d0,
+      name: "miku/apron/mesh_017.obj",
+      matId: 0,
+    },
+    // 018 Hand with Frypan
+    {
+      offset: 0x1e0,
+      name: "miku/apron/mesh_018.obj",
+      matId: 0,
+    },
+  ];
 
-  // Hair
-  // packMesh(buffer, "miku/apron/10_HELMET_buns.obj", 0xd0, meta); // 001
+  let vertexCount = 0;
+  const encodedModel = files.map(({ name, matId }) => {
+    const obj = readFileSync(name, "ascii");
+    const { tri, quad, vertices } = encodeMesh(obj, matId);
 
-  // Right Arm
-  packMesh(buffer, "miku/apron/mesh_002.obj", 0xe0, meta); // 002
-  packMesh(buffer, "miku/05_RIGHT_ARM.obj", 0xf0, meta); // 002
-  packMesh(buffer, "miku/apron/mesh_004.obj", 0x100, meta); // 003
+    // Write Counts
+    const triCount = Math.floor(tri.length / 12);
+    const quadCount = Math.floor(quad.length / 12);
+    const vertCount = Math.floor(vertices.length / 4);
+    vertexCount += vertCount;
 
-  // Left Arm
-  packMesh(buffer, "miku/apron/mesh_005.obj", 0x110, meta); // 002
-  packMesh(buffer, "miku/08_LEFT_ARM.obj", 0x120, meta); // 002
-  packMesh(buffer, "miku/apron/mesh_007.obj", 0x130, meta); // 003
+    return { tri, quad, vertices, triCount, quadCount, vertCount };
+  });
 
-  // Right Leg
-  packMesh(buffer, "miku/apron/mesh_008.obj", 0x140, meta); // 002
-  packMesh(buffer, "miku/10_LEG_RIGHT_TOP.obj", 0x150, meta); // 002
-  packMesh(buffer, "miku/apron/mesh_010.obj", 0x160, meta); // 003
-
-  // Left Leg
-  packMesh(buffer, "miku/apron/mesh_011.obj", 0x170, meta); // 002
-  packMesh(buffer, "miku/13_LEG_LEFT_TOP.obj", 0x180, meta); // 002
-  packMesh(buffer, "miku/apron/mesh_013.obj", 0x190, meta); // 003
-  packMesh(buffer, "miku/apron/mesh_014.obj", 0x1a0, meta); // 003
-
-  console.log("encode face");
-  packMesh(buffer, "miku/01_HEAD_FACE.obj", 0x1b0, meta, true); // 015
-  checkClear(buffer, meta);
-  console.log("encode mouth");
-  packMesh(buffer, "miku/01_HEAD_MOUTH.obj", 0x1c0, meta, true); // 016
-  console.log("encode hair");
-  checkClear(buffer, meta);
-
-  packMesh(buffer, "miku/apron/mesh_017.obj", 0x1d0, meta); // 017
-  packMesh(buffer, "miku/apron/mesh_018.obj", 0x1e0, meta); // 018
-
-  console.log(meta);
   // Update the content length to read
-  file.writeUInt32LE(meta.contentEnd, 0x04);
+  file.writeUInt32LE(contentEnd, 0x04);
   file.writeUInt32LE(0x1d, 0x08);
 
-  if (meta.contentEnd > 0xe800) {
+  if (contentEnd > 0xe800) {
     throw new Error("File content too big");
   }
 
   // Update the Texture
   updateApronBody2(file);
   writeFileSync("out/cut-ST0305.BIN", file);
-  writeFileSync("out/debug-apron456.ebd", buffer);
 
   // process.exit();
 };
