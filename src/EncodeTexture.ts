@@ -80,7 +80,7 @@ const encodePalette = (pngSrc: Buffer, palette: number[]) => {
 };
 
 const updateApronBody = () => {
-  const buffer = readFileSync(`miku/miku_body.png`);
+  const buffer = readFileSync(`miku/apron/body-01.png`);
   const palette: number[] = [];
   encodePalette(buffer, palette);
   if (palette.length > 16) {
@@ -937,4 +937,5 @@ export {
   encodeCutScenes,
   encodeCutSceneTexture,
   compressNewTexture,
+  encodeTexel,
 };
