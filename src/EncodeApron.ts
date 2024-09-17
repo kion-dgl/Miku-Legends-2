@@ -431,7 +431,15 @@ const encodeApronMegaman = () => {
   const file = readFileSync("out/cut-ST0305.BIN");
   const contentEnd = file.readUInt32LE(0x04);
   const buffer = file.subarray(0x30, 0xe000);
+
+  // Attempt to fix egg palette issue
+  const textureOfs = [0x1e70, 0x1e74, 0x1e78];
+  const frameBufferCoords = buffer.readUInt32LE(textureOfs[0]);
+  const eggTextureOfs = 0x4a1c;
+  buffer.writeUInt32LE(frameBufferCoords, eggTextureOfs);
+
   buffer.fill(0, contentEnd);
+
   writeFileSync("out/debug-apron000.ebd", buffer);
 
   const meta: Alloc = {
