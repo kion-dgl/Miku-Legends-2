@@ -20,7 +20,7 @@
 **/
 
 import { readFileSync, writeFileSync } from "fs";
-import { encodeMesh } from "./EncodeModel";
+import { encodeMeshWithMaterial } from "./EncodeModel";
 import {
   encodePalette,
   encodeCutSceneTexture,
@@ -375,7 +375,7 @@ const packMesh = (
 
   // Then we want to encode and pack
   const obj = readFileSync(filename, "ascii");
-  const { tri, quad, vertices } = encodeMesh(obj, isFace ? 2 : 0);
+  const { tri, quad, vertices } = encodeMeshWithMaterial(obj);
 
   // Write Counts
   const triCount = Math.floor(tri.length / 12);
@@ -429,15 +429,10 @@ const packMesh = (
 const encodeApronMegaman = () => {
   encodeCutScenes();
   const file = readFileSync("out/cut-ST0305.BIN");
-  // const image = Buffer.from(file.subarray(0xe000, 0x17000));
-  // for (let i = 0; i < image.length; i++) {
-  //   file[0xe800 + i] = image[i];
-  // }
   const contentEnd = file.readUInt32LE(0x04);
   const buffer = file.subarray(0x30, 0xe000);
   buffer.fill(0, contentEnd);
   writeFileSync("out/debug-apron000.ebd", buffer);
-  //buffer.fill(0, contentEnd);
 
   const meta: Alloc = {
     ranges: [
@@ -460,30 +455,6 @@ const encodeApronMegaman = () => {
     buffer.writeUInt8(flags & 0x3, ofs + 3);
     ofs += 4;
   }
-
-  // // Remove Prior Mesh from File
-  // clearMesh(buffer, 0xc0, meta); // 000
-  // console.log("Clear hair");
-  // clearMesh(buffer, 0xd0, meta); // 001
-  // clearMesh(buffer, 0xe0, meta); // 002
-  // clearMesh(buffer, 0xf0, meta); // 003
-  // clearMesh(buffer, 0x100, meta); // 004
-  // clearMesh(buffer, 0x110, meta); // 005
-  // clearMesh(buffer, 0x120, meta); // 006
-  // clearMesh(buffer, 0x130, meta); // 007
-  // clearMesh(buffer, 0x140, meta); // 008
-  // clearMesh(buffer, 0x150, meta); // 009
-  // clearMesh(buffer, 0x160, meta); // 010
-  // clearMesh(buffer, 0x170, meta); // 011
-  // clearMesh(buffer, 0x180, meta); // 012
-  // clearMesh(buffer, 0x190, meta); // 013
-  // clearMesh(buffer, 0x1a0, meta); // 014
-  // console.log("clear hair and mouth");
-  // clearMesh(buffer, 0x1b0, meta); // 015
-  // clearMesh(buffer, 0x1c0, meta); // 016
-  // clearMesh(buffer, 0x1d0, meta); // 017
-  // clearMesh(buffer, 0x1e0, meta); // 018
-  // checkClear(buffer, meta);
 
   buffer.fill(0, 0xc0, 0x1dc8);
 
@@ -528,7 +499,6 @@ const encodeApronMegaman = () => {
   packMesh(buffer, "miku/apron/09_RIGHT_HAND_PLATE.obj", 0x1d0, meta); // 017
   packMesh(buffer, "miku/apron/06_LEFT_HAND_PAN.obj", 0x1e0, meta); // 018
 
-  console.log(meta);
   // Update the content length to read
   file.writeUInt32LE(meta.contentEnd, 0x04);
   // file.writeUInt32LE(0x1d, 0x08);
