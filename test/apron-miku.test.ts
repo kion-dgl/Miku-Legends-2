@@ -229,7 +229,7 @@ test("it should dump all of the textures, from the texture files", () => {
 
       const name = `${filename}-${i.toString(16).padStart(6, "0")}-true`;
 
-      if (type === 0x02) {
+      if (type === 0x02 && width === 0) {
         console.log("Palette found");
 
         let ofs = i + 0x30;
@@ -265,6 +265,7 @@ test("it should dump all of the textures, from the texture files", () => {
         // Export file
         const buffer = PNG.sync.write(png);
         writeFileSync(`fixtures/APRON/${name}.png`, buffer);
+      } else {
       }
 
       if (width === 0 || height === 0) {

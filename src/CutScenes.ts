@@ -20,13 +20,6 @@ const CUT_SCENES = [
     png: "ST1FT.png",
     end: 0x054cac,
   },
-  // {
-  //   name: "cut-ST03T.BIN",
-  //   offset: 0x046000,
-  //   compressed: true,
-  //   png: "ST03T.png",
-  //   end: 0x047f58,
-  // },
   {
     name: "cut-ST3A02.BIN",
     offset: 0x03d800,
