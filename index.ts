@@ -2,6 +2,7 @@ import { encodeModel } from "./src/EncodeModel";
 import { encodeTexture, encodeCutScenes } from "./src/EncodeTexture";
 import { encodeTitle } from "./src/EncodeTitle";
 import { encodeRom } from "./src/EncodeRom";
+import { encodeApronMegaman } from "./src/EncodeApron";
 import {
   replaceCrusher,
   replaceBusterCannon,
@@ -201,6 +202,12 @@ replaceSpreadBuster("miku/weapons/PL00R0D_001.obj");
 replaceAquaBlaster("miku/weapons/PL00R0E_001.obj");
 replaceHunterSeeker("miku/weapons/PL00R0F_001.obj");
 replaceDrillArm("miku/weapons/PL00R10_001.obj");
+
+/**
+ Encode Apron
+**/
+
+encodeApronMegaman();
 
 /**
  Encode Rom

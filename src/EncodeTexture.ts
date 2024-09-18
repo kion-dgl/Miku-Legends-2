@@ -846,4 +846,7 @@ export {
   encodeImage,
   encodeFace,
   encodeCutScenes,
+  encodeCutSceneTexture,
+  compressNewTexture,
+  encodeTexel,
 };
