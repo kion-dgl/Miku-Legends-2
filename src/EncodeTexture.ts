@@ -453,6 +453,7 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
   const crossedOut: number[] = [];
   const commands: Command[] = [];
 
+  let skip = 0;
   const MAX_COMMAND = 7;
   const MIN_COMMAND = 0;
   let start = MAX_COMMAND;
@@ -467,6 +468,10 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
   } else if (makeBad === 3) {
     start = 5;
     end = 2;
+  } else if (makeBad === 4) {
+    start = 4;
+    end = 3;
+    skip = 50;
   }
 
   // Loop through the list of possible commands
@@ -499,6 +504,11 @@ const compressNewSegment = (inBuffer: Buffer, makeBad: number) => {
       // Check if the needle is in the haystack
       const index = haystack.indexOf(needle);
       if (index === -1) {
+        continue;
+      }
+
+      if (skip) {
+        skip--;
         continue;
       }
 
@@ -849,4 +859,6 @@ export {
   encodeCutSceneTexture,
   compressNewTexture,
   encodeTexel,
+  compressNewSegment,
+  encodeBitfield,
 };

@@ -547,6 +547,7 @@ const encodeRom = () => {
     "cut-ST1CT.BIN",
     "cut-ST1C01.BIN",
     "cut-ST1FT.BIN",
+    "cut-ST03.BIN",
     "cut-ST03T.BIN",
     "cut-ST3A02.BIN",
     "cut-ST4B01.BIN",

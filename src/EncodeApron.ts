@@ -527,4 +527,4 @@ const encodeApronMegaman = () => {
 };
 
 export default encodeApronMegaman;
-export { encodeApronMegaman };
+export { packMesh, encodeApronMegaman };
