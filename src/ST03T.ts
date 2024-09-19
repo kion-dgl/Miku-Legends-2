@@ -203,69 +203,102 @@ const updateBody = (src: Buffer, buffer: Buffer) => {
  * Takes a face texture and a body texture to replace in the opening cut scene
  * @param src Buffer of the bin file to be updated
  */
-const updateEggs = () => {
-  const swap = [
-    // Leaf
-    {
-      from: [0x63, 0xdb, 0xd7],
-      to: [0xd8, 0xf8, 0x78],
-    },
-    {
-      from: [0x4e, 0xcb, 0xcd],
-      to: [0xb8, 0xe0, 0x38],
-    },
-    {
-      from: [0x63, 0xdb, 0xd7],
-      to: [0xd8, 0xf8, 0x78],
-    },
-    // Egg
-    {
-      from: [0xe0, 0xe3, 0xe4],
-      to: [0xf8, 0xe8, 0xe0],
-    },
-    {
-      from: [0xbf, 0xc4, 0xc5],
-      to: [0xe0, 0xd0, 0xc8],
-    },
-    // Sausage
-    {
-      from: [0xfd, 0xcb, 0xb0],
-      to: [0xd8, 0x78, 0x58],
-    },
-    {
-      from: [0xff, 0xb1, 0x93],
-      to: [0xb8, 0x50, 0x30],
-    },
-    {
-      from: [0xeb, 0x88, 0x66],
-      to: [0x68, 0x28, 0x18],
-    },
-    {
-      from: [0xf7, 0x9f, 0x80],
-      to: [0x90, 0x30, 0x10],
-    },
-    // Plate + shadow
-    {
-      from: [0xe0, 0xe3, 0xe4],
-      to: [0xe0, 0xe0, 0xf0],
-    },
-    {
-      from: [0x7e, 0x8c, 0x90],
-      to: [0xa0, 0xa0, 0xa0],
-    },
-  ];
+const updateEggs = (src: Buffer) => {
+  const hits = [];
 
+  for (let i = 0; i < src.length; i += 0x800) {
+    const type = src.readUInt32LE(i);
+    const colorCount = src.readUInt16LE(i + 0x10);
+    const paletteCount = src.readUInt16LE(i + 0x12);
+    if (type !== 2) {
+      continue;
+    }
+
+    if (colorCount <= 0 || colorCount > 256) {
+      continue;
+    }
+
+    console.log("Paltte found at: 0x%s", i.toString(16));
+    hits.push(i);
+  }
+
+  const red = encodeTexel(255, 0, 0, 255);
+  const green = encodeTexel(0, 255, 0, 255);
+  const blue = encodeTexel(0, 0, 255, 255);
+  const yellow = encodeTexel(255, 255, 0, 255);
+  const cyan = encodeTexel(0, 255, 255, 255);
+
+  // Fry Pan
+  let ofs = 0x45830;
+  for (let i = 0; i < 16; i++) {
+    src.writeUInt16LE(red, ofs + i * 2);
+  }
+
+  // Eggs
+  ofs = 0x48030;
+  for (let i = 0; i < 16; i++) {
+    src.writeUInt16LE(green, ofs + i * 2);
+  }
+
+  // const swap = [
+  //   // Leaf
+  //   {
+  //     from: [0x63, 0xdb, 0xd7],
+  //     to: [0xd8, 0xf8, 0x78],
+  //   },
+  //   {
+  //     from: [0x4e, 0xcb, 0xcd],
+  //     to: [0xb8, 0xe0, 0x38],
+  //   },
+  //   {
+  //     from: [0x63, 0xdb, 0xd7],
+  //     to: [0xd8, 0xf8, 0x78],
+  //   },
+  //   // Egg
+  //   {
+  //     from: [0xe0, 0xe3, 0xe4],
+  //     to: [0xf8, 0xe8, 0xe0],
+  //   },
+  //   {
+  //     from: [0xbf, 0xc4, 0xc5],
+  //     to: [0xe0, 0xd0, 0xc8],
+  //   },
+  //   // Sausage
+  //   {
+  //     from: [0xfd, 0xcb, 0xb0],
+  //     to: [0xd8, 0x78, 0x58],
+  //   },
+  //   {
+  //     from: [0xff, 0xb1, 0x93],
+  //     to: [0xb8, 0x50, 0x30],
+  //   },
+  //   {
+  //     from: [0xeb, 0x88, 0x66],
+  //     to: [0x68, 0x28, 0x18],
+  //   },
+  //   {
+  //     from: [0xf7, 0x9f, 0x80],
+  //     to: [0x90, 0x30, 0x10],
+  //   },
+  //   // Plate + shadow
+  //   {
+  //     from: [0xe0, 0xe3, 0xe4],
+  //     to: [0xe0, 0xe0, 0xf0],
+  //   },
+  //   {
+  //     from: [0x7e, 0x8c, 0x90],
+  //     to: [0xa0, 0xa0, 0xa0],
+  //   },
+  // ];
   // const pal2 = [...palette];
   // swap.forEach(({ from, to }) => {
   //   const [fr, rg, rb] = from;
   //   const [tr, tg, tb] = to;
   //   const needle = encodeTexel(fr, rg, rb, 255);
   //   const replace = encodeTexel(tr, tg, tb, 255);
-
   //   const closest = pal2.reduce(function (prev, curr) {
   //     return Math.abs(curr - needle) < Math.abs(prev - needle) ? curr : prev;
   //   });
-
   //   const index = pal2.indexOf(closest);
   //   if (index === -1) {
   //     throw new Error("Unable to find " + JSON.stringify(from));
@@ -273,7 +306,6 @@ const updateEggs = () => {
   //   console.log("yay");
   //   pal2[index] = replace;
   // });
-
   // const eggFix = readFileSync("out/cut-ST03T.BIN");
   // for (let i = 0; i < 16; i++) {
   //   eggFix.writeUInt16LE(pal2[i] || 0x0000, i * 2 + 0x45830);
@@ -293,8 +325,8 @@ const updateST03T = (bodyTexture: string, faceTexture: string) => {
 
   // Encode and update the archive
   updateBody(src, body);
-
   updateFace(src, face);
+  updateEggs(src);
 
   // Write the resulting Archive
   writeFileSync("out/cut-ST03T.BIN", src);
