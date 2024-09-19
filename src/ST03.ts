@@ -106,7 +106,7 @@ const compressScene = (decompressed: Buffer) => {
     );
   }
 
-  const makeBad = 4;
+  const makeBad = 0;
   const bucket: boolean[] = [];
   const loads: Buffer[] = [];
   segments.forEach((segment, index) => {
@@ -124,8 +124,9 @@ const compressScene = (decompressed: Buffer) => {
  */
 const updateSceneModel = () => {
   const bin = readFileSync("bin/cut-ST03.BIN");
-  let contentEnd = bin.readUInt32LE(0x04);
-  const buffer = decompressScene(bin);
+  const scene3 = Buffer.from(bin.subarray(0xa800));
+  let contentEnd = scene3.readUInt32LE(0x04);
+  const buffer = decompressScene(scene3);
 
   console.log(`------------------------------`);
   console.log("Encoding all of the things!!!");
@@ -134,15 +135,15 @@ const updateSceneModel = () => {
   const meta: Alloc = {
     ranges: [
       {
-        start: 0x1f0,
-        end: 0x1dc8,
+        start: 0x1d0,
+        end: 0x1db8,
       },
     ],
     contentEnd,
   };
 
   // Remove share vertices flag
-  const heirarchyOfs = 0x1e24;
+  const heirarchyOfs = 0x1e14;
   const nbSegments = 19;
   let ofs = heirarchyOfs;
   let doStop = false;
@@ -153,40 +154,40 @@ const updateSceneModel = () => {
     ofs += 4;
   }
 
-  buffer.fill(0, 0xc0, 0x1dc8);
+  // buffer.fill(0, 0xb0, 0x1db8);
 
-  // Body
-  packMesh(buffer, "miku/apron/02_BODY.obj", 0xc0, meta); // 000
+  // // Body
+  // packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000
 
-  // Hair
-  packMesh(buffer, "miku/apron/01_HEAD_HAIR.obj", 0xd0, meta, true); // 001
+  // // Hair
+  // packMesh(buffer, "miku/apron/01_HEAD_HAIR.obj", 0xc0, meta, true); // 001
 
-  // Right Arm
-  packMesh(buffer, "miku/apron/07_RIGHT_SHOULDER.obj", 0xe0, meta); // 002
-  packMesh(buffer, "miku/apron/08_RIGHT_ARM.obj", 0xf0, meta); // 002
-  packMesh(buffer, "miku/apron/09_RIGHT_HAND.obj", 0x100, meta); // 003
+  // // Right Arm
+  // packMesh(buffer, "miku/apron/07_RIGHT_SHOULDER.obj", 0xd0, meta); // 002
+  // packMesh(buffer, "miku/apron/08_RIGHT_ARM.obj", 0xe0, meta); // 002
+  // packMesh(buffer, "miku/apron/09_RIGHT_HAND.obj", 0xf0, meta); // 003
 
-  // Left Arm
-  packMesh(buffer, "miku/apron/04_LEFT_SHOULDER.obj", 0x110, meta); // 002
-  packMesh(buffer, "miku/apron/05_LEFT_ARM.obj", 0x120, meta); // 002
-  packMesh(buffer, "miku/apron/06_LEFT_HAND.obj", 0x130, meta); // 003
+  // // Left Arm
+  // packMesh(buffer, "miku/apron/04_LEFT_SHOULDER.obj", 0x100, meta); // 002
+  // packMesh(buffer, "miku/apron/05_LEFT_ARM.obj", 0x110, meta); // 002
+  // packMesh(buffer, "miku/apron/06_LEFT_HAND.obj", 0x120, meta); // 003
 
-  // Hips (dont lie)
-  packMesh(buffer, "miku/apron/03_HIPS.obj", 0x140, meta); // 002
+  // // Hips (dont lie)
+  // packMesh(buffer, "miku/apron/03_HIPS.obj", 0x130, meta); // 002
 
-  // Right Leg
-  packMesh(buffer, "miku/apron/10_LEG_RIGHT_TOP.obj", 0x150, meta); // 002
-  packMesh(buffer, "miku/apron/11_LEG_RIGHT_BOTTOM.obj", 0x160, meta); // 003
-  packMesh(buffer, "miku/apron/12_RIGHT_FOOT.obj", 0x170, meta); // 002
+  // // Right Leg
+  // packMesh(buffer, "miku/apron/10_LEG_RIGHT_TOP.obj", 0x140, meta); // 002
+  // packMesh(buffer, "miku/apron/11_LEG_RIGHT_BOTTOM.obj", 0x150, meta); // 003
+  // packMesh(buffer, "miku/apron/12_RIGHT_FOOT.obj", 0x160, meta); // 002
 
-  // Left Leg
-  packMesh(buffer, "miku/apron/13_LEG_LEFT_TOP.obj", 0x180, meta); // 002
-  packMesh(buffer, "miku/apron/14_LEG_LEFT_BOTTOM.obj", 0x190, meta); // 003
-  packMesh(buffer, "miku/apron/15_LEFT_FOOT.obj", 0x1a0, meta); // 003
-  packMesh(buffer, "miku/apron/01_HEAD_FACE.obj", 0x1b0, meta, true); // 015
-  packMesh(buffer, "miku/apron/01_HEAD_MOUTH.obj", 0x1c0, meta, true); // 016
-  packMesh(buffer, "miku/apron/09_RIGHT_HAND_PLATE.obj", 0x1d0, meta); // 017
-  packMesh(buffer, "miku/apron/06_LEFT_HAND_PAN.obj", 0x1e0, meta); // 018
+  // // Left Leg
+  // packMesh(buffer, "miku/apron/13_LEG_LEFT_TOP.obj", 0x170, meta); // 002
+  // packMesh(buffer, "miku/apron/14_LEG_LEFT_BOTTOM.obj", 0x180, meta); // 003
+  // packMesh(buffer, "miku/apron/15_LEFT_FOOT.obj", 0x190, meta); // 003
+  // packMesh(buffer, "miku/apron/01_HEAD_FACE.obj", 0x1a0, meta, true); // 015
+  // packMesh(buffer, "miku/apron/01_HEAD_MOUTH.obj", 0x1b0, meta, true); // 016
+  // packMesh(buffer, "miku/apron/09_RIGHT_HAND_PLATE.obj", 0x1c0, meta); // 017
+  // packMesh(buffer, "miku/apron/06_LEFT_HAND_PAN.obj", 0x1d0, meta); // 018
 
   const content = Buffer.from(buffer.subarray(0, meta.contentEnd));
   const [bitField, updatedScene] = compressScene(content);
@@ -209,6 +210,7 @@ const updateSceneModel = () => {
     throw new Error("Fission mailed!!!! 0x" + ofs.toString(16));
   }
 
+  writeFileSync("out/st03.ebd", buffer);
   writeFileSync("out/cut-ST03.BIN", bin);
 };
 
