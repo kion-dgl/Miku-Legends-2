@@ -3,6 +3,7 @@ import { encodeTexture, encodeCutScenes } from "./src/EncodeTexture";
 import { encodeTitle } from "./src/EncodeTitle";
 import { encodeRom } from "./src/EncodeRom";
 import { encodeApronMegaman } from "./src/EncodeApron";
+import { updateST03T } from "./src/ST03T";
 import {
   replaceCrusher,
   replaceBusterCannon,
@@ -208,6 +209,7 @@ replaceDrillArm("miku/weapons/PL00R10_001.obj");
 **/
 
 encodeApronMegaman();
+updateST03T("miku/apron/body-01.png", "miku/faces/ST03T.png");
 
 /**
  Encode Rom
