@@ -247,7 +247,7 @@ const updateSceneModel = () => {
   for (let i = 0; i < nbSegments; i++) {
     const flags = buffer.readUInt8(ofs + 3);
     console.log("%d) 0x%s", i, flags.toString(16));
-    //  buffer.writeUInt8(flags & 0x83, ofs + 3);
+    buffer.writeUInt8(flags & 0x83, ofs + 3);
     ofs += 4;
   }
 
@@ -267,7 +267,6 @@ const updateSceneModel = () => {
   // packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000
 
   // Hair
-  packMesh(buffer, "miku/apron/01_HEAD_HAIR.obj", 0xc0, meta, true); // 001
 
   // Right Arm
   // packMesh(buffer, "miku/apron/07_RIGHT_SHOULDER.obj", 0xd0, meta); // 002
@@ -293,6 +292,7 @@ const updateSceneModel = () => {
   // packMesh(buffer, "miku/apron/15_LEFT_FOOT.obj", 0x190, meta); // 003
   packMesh(buffer, "miku/apron/01_HEAD_FACE.obj", 0x1a0, meta, true); // 015
   packMesh(buffer, "miku/apron/01_HEAD_MOUTH.obj", 0x1b0, meta, true); // 016
+  packMesh(buffer, "miku/apron/01_HEAD_HAIR.obj", 0xc0, meta, true); // 001
   // packMesh(buffer, "miku/apron/09_RIGHT_HAND_PLATE.obj", 0x1c0, meta); // 017
   // packMesh(buffer, "miku/apron/06_LEFT_HAND_PAN.obj", 0x1d0, meta); // 018
 
