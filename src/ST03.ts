@@ -166,6 +166,61 @@ const clearMesh = (src: Buffer, headerOfs: number, meta: Alloc) => {
   meta.ranges.push({ start: srcVertOfs, end: srcVertEnd });
 };
 
+const repackExistingModel = (src: Buffer) => {
+  let writeTo = 0x1e0;
+  let doStop = false;
+  const vertStack: Buffer[] = [];
+  for (let headerOfs = 0xb0; headerOfs < 0x01e0; headerOfs += 0x10) {
+    const srcTriCount = src.readUInt8(headerOfs + 0);
+    const srcQuadCount = src.readUInt8(headerOfs + 1);
+    const srcVertCount = src.readUInt8(headerOfs + 2);
+
+    const srcTriOfs = src.readUInt32LE(headerOfs + 4);
+    const srcQuadOfs = src.readUInt32LE(headerOfs + 8);
+    const srcVertOfs = src.readUInt32LE(headerOfs + 12);
+
+    const srcTriEnd = srcTriOfs + srcTriCount * 12;
+    const srcQuadEnd = srcQuadOfs + srcQuadCount * 12;
+    const srcVertEnd = srcVertOfs + srcVertCount * 4;
+
+    const tris = src.subarray(srcTriOfs, srcTriEnd);
+    const quads = src.subarray(srcQuadOfs, srcQuadEnd);
+    const verts = src.subarray(srcVertOfs, srcVertEnd);
+
+    if (verts.length) {
+      vertStack.forEach((vlist) => {
+        if (verts.indexOf(vlist) !== -1) {
+          console.error("ZOMG WE GOT A HIT!!!!!!!");
+          doStop = true;
+        }
+      });
+      vertStack.push(verts);
+    }
+
+    src.writeUInt32LE(writeTo, headerOfs + 4);
+    for (let i = 0; i < tris.length; i++) {
+      src[writeTo++] = tris[i];
+    }
+
+    src.writeUInt32LE(writeTo, headerOfs + 8);
+    for (let i = 0; i < quads.length; i++) {
+      src[writeTo++] = quads[i];
+    }
+
+    src.writeUInt32LE(writeTo, headerOfs + 12);
+    for (let i = 0; i < verts.length; i++) {
+      src[writeTo++] = verts[i];
+    }
+  }
+
+  console.log("End offset at: 0x%s", writeTo.toString(16));
+
+  // if (doStop) {
+  //   process.exit();
+  // }
+  return writeTo;
+};
+
 /**
  * Updates the model for Scene 3 act 0 in the Flutter during the opening cut scene
  */
@@ -180,24 +235,7 @@ const updateSceneModel = () => {
   console.log(`------------------------------`);
 
   const meta: Alloc = {
-    ranges: [
-      {
-        start: 888,
-        end: 2220,
-      },
-      {
-        start: 6036,
-        end: 6372,
-      },
-      {
-        start: 4752,
-        end: 4896,
-      },
-      {
-        start: 7224,
-        end: 7300,
-      },
-    ],
+    ranges: [],
     contentEnd,
   };
   meta.ranges.sort((a, b) => a.end - a.start - (b.end - b.start));
@@ -215,6 +253,9 @@ const updateSceneModel = () => {
 
   buffer.fill(0, 0xc0, 0xd0);
   buffer.fill(0, 0x1a0, 0x1c0);
+  const start = repackExistingModel(buffer);
+  const end = 0x1db8;
+  meta.ranges.push({ start, end });
 
   // clearMesh(buffer, 0xc0, meta); // Head
   // clearMesh(buffer, 0x1a0, meta); // Face
@@ -226,7 +267,7 @@ const updateSceneModel = () => {
   // packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000
 
   // Hair
-  // packMesh(buffer, "miku/apron/01_HEAD_HAIR.obj", 0xc0, meta, true); // 001
+  packMesh(buffer, "miku/apron/01_HEAD_HAIR.obj", 0xc0, meta, true); // 001
 
   // Right Arm
   // packMesh(buffer, "miku/apron/07_RIGHT_SHOULDER.obj", 0xd0, meta); // 002
