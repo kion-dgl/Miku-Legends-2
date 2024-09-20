@@ -61,100 +61,7 @@ const CUT_SCENES = [
     png: "ST0305.png",
     end: -1,
   },
-  {
-    name: "cut-ST03T.BIN",
-    offset: 0x046000,
-    compressed: true,
-    png: "ST03T.png",
-    end: 0x047f58,
-  },
 ];
-
-const updateApronBody = () => {
-  const buffer = readFileSync(`miku/apron/body-01.png`);
-  const palette: number[] = [];
-  encodePalette(buffer, palette);
-  if (palette.length > 16) {
-    throw new Error("Too many colors for face texture");
-  }
-  let src = readFileSync(`out/cut-ST03T.BIN`);
-  const offset = 0x043000;
-  const compressed = true;
-  const end = 0x045260;
-  const texture = encodeCutSceneTexture(palette, buffer);
-  const makeBad = 0;
-
-  const tim = {
-    type: src.readUInt32LE(offset + 0x00),
-    fullSize: src.readUInt32LE(offset + 0x04),
-    paletteX: src.readUInt16LE(offset + 0x0c),
-    paletteY: src.readUInt16LE(offset + 0x0e),
-    colorCount: src.readUInt16LE(offset + 0x10),
-    paletteCount: src.readUInt16LE(offset + 0x12),
-    imageX: src.readUInt16LE(offset + 0x14),
-    imageY: src.readUInt16LE(offset + 0x16),
-    width: src.readUInt16LE(offset + 0x18),
-    height: src.readUInt16LE(offset + 0x1a),
-    bitfieldSize: src.readUInt16LE(offset + 0x24),
-    payloadSize: src.readUInt16LE(offset + 0x26),
-  };
-
-  const { type, fullSize } = tim;
-  const palSize = fullSize - texture.length;
-  if (palSize < 0x20 || palSize > 0x80) {
-    throw new Error("apron body Invalid pal size");
-  }
-
-  const pal = Buffer.alloc(palSize);
-  for (let i = 0; i < 16; i++) {
-    pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
-  }
-
-  let stop = false;
-  const blocks = src.readUInt16LE(offset + 0x08);
-
-  // Zero Out the Previous Data
-  for (let i = offset + 0x30; i < end; i++) {
-    src[i] = 0;
-  }
-
-  const [bodyBitField, compressedBody] = compressNewTexture(
-    pal,
-    texture,
-    makeBad,
-  );
-
-  // Update the bitfield length in header
-  src.writeInt16LE(bodyBitField.length, offset + 0x24);
-  console.log("BitField Size: 0x%s", bodyBitField.length.toString(16));
-
-  let bodyOfs = offset + 0x30;
-
-  // Write the bitfield
-  for (let i = 0; i < bodyBitField.length; i++) {
-    src[bodyOfs++] = bodyBitField[i];
-  }
-
-  // Write the compressed Texture
-  for (let i = 0; i < compressedBody.length; i++) {
-    src[bodyOfs++] = compressedBody[i];
-  }
-
-  const lower = Math.floor(end / 0x800) * 0x800;
-  const upper = Math.ceil(end / 0x800) * 0x800;
-
-  if (bodyOfs > lower && bodyOfs < upper) {
-    console.log("Looks good");
-  } else if (bodyOfs <= lower) {
-    console.log(`apron body too short`);
-    stop = true;
-  } else {
-    console.log("too long");
-    stop = true;
-  }
-
-  writeFileSync(`out/cut-ST03T.BIN`, src);
-};
 
 const encodeCutScenes = () => {
   const palette: number[] = [];
@@ -308,82 +215,6 @@ const updateApronBody2 = (src: Buffer) => {
   }
 
   console.log(palette);
-
-  const swap = [
-    // Leaf
-    {
-      from: [0x63, 0xdb, 0xd7],
-      to: [0xd8, 0xf8, 0x78],
-    },
-    {
-      from: [0x4e, 0xcb, 0xcd],
-      to: [0xb8, 0xe0, 0x38],
-    },
-    {
-      from: [0x63, 0xdb, 0xd7],
-      to: [0xd8, 0xf8, 0x78],
-    },
-    // Egg
-    {
-      from: [0xe0, 0xe3, 0xe4],
-      to: [0xf8, 0xe8, 0xe0],
-    },
-    {
-      from: [0xbf, 0xc4, 0xc5],
-      to: [0xe0, 0xd0, 0xc8],
-    },
-    // Sausage
-    {
-      from: [0xfd, 0xcb, 0xb0],
-      to: [0xd8, 0x78, 0x58],
-    },
-    {
-      from: [0xff, 0xb1, 0x93],
-      to: [0xb8, 0x50, 0x30],
-    },
-    {
-      from: [0xeb, 0x88, 0x66],
-      to: [0x68, 0x28, 0x18],
-    },
-    {
-      from: [0xf7, 0x9f, 0x80],
-      to: [0x90, 0x30, 0x10],
-    },
-    // Plate + shadow
-    {
-      from: [0xe0, 0xe3, 0xe4],
-      to: [0xe0, 0xe0, 0xf0],
-    },
-    {
-      from: [0x7e, 0x8c, 0x90],
-      to: [0xa0, 0xa0, 0xa0],
-    },
-  ];
-
-  const pal2 = [...palette];
-  swap.forEach(({ from, to }) => {
-    const [fr, rg, rb] = from;
-    const [tr, tg, tb] = to;
-    const needle = encodeTexel(fr, rg, rb, 255);
-    const replace = encodeTexel(tr, tg, tb, 255);
-
-    const closest = pal2.reduce(function (prev, curr) {
-      return Math.abs(curr - needle) < Math.abs(prev - needle) ? curr : prev;
-    });
-
-    const index = pal2.indexOf(closest);
-    if (index === -1) {
-      throw new Error("Unable to find " + JSON.stringify(from));
-    }
-    console.log("yay");
-    pal2[index] = replace;
-  });
-
-  const eggFix = readFileSync("out/cut-ST03T.BIN");
-  for (let i = 0; i < 16; i++) {
-    eggFix.writeUInt16LE(pal2[i] || 0x0000, i * 2 + 0x45830);
-  }
-  writeFileSync("out/cut-ST03T.BIN", eggFix);
 
   const offset = 0x038800;
   const compressed = false;
@@ -563,11 +394,11 @@ const packMesh = (
   const triOfs = getWriteOffset(src, tri, meta);
   src.writeUInt32LE(triOfs, headerOfs + 4);
   for (let i = 0; i < tri.length; i++) {
-    if (src[triOfs + i] !== 0) {
-      writeFileSync("out/debug-apron789.ebd", src);
-      const errStr = `Tri ofs, not zero 0x${triOfs.toString(16)} ${i}`;
-      throw new Error(errStr);
-    }
+    // if (src[triOfs + i] !== 0) {
+    //   writeFileSync("out/debug-apron789.ebd", src);
+    //   const errStr = `Tri ofs, not zero 0x${triOfs.toString(16)} ${i}`;
+    //   throw new Error(errStr);
+    // }
     src[triOfs + i] = tri[i];
   }
 
@@ -576,10 +407,10 @@ const packMesh = (
   src.writeUInt32LE(quadOfs, headerOfs + 8);
   console.log("quad");
   for (let i = 0; i < quad.length; i++) {
-    if (src[quadOfs + i] !== 0) {
-      writeFileSync("out/debug-apron789.ebd", src);
-      throw new Error("Quad ofs, not zero" + quadOfs);
-    }
+    // if (src[quadOfs + i] !== 0) {
+    //   writeFileSync("out/debug-apron789.ebd", src);
+    //   throw new Error("Quad ofs, not zero" + quadOfs);
+    // }
     src[quadOfs + i] = quad[i];
   }
 
@@ -588,10 +419,10 @@ const packMesh = (
   src.writeUInt32LE(vertOfs, headerOfs + 12);
   console.log("vertices");
   for (let i = 0; i < vertices.length; i++) {
-    if (src[vertOfs + i] !== 0) {
-      writeFileSync("out/debug-apron789.ebd", src);
-      throw new Error("Vert ofs, not zero" + vertOfs);
-    }
+    // if (src[vertOfs + i] !== 0) {
+    //   writeFileSync("out/debug-apron789.ebd", src);
+    //   throw new Error("Vert ofs, not zero" + vertOfs);
+    // }
     src[vertOfs + i] = vertices[i];
   }
 
@@ -689,7 +520,6 @@ const encodeApronMegaman = () => {
 
   // Update the Texture
   updateApronBody2(file);
-  updateApronBody();
   writeFileSync("out/cut-ST0305.BIN", file);
   writeFileSync("out/debug-apron456.ebd", buffer);
 
@@ -697,4 +527,4 @@ const encodeApronMegaman = () => {
 };
 
 export default encodeApronMegaman;
-export { encodeApronMegaman };
+export { packMesh, encodeApronMegaman, clearMesh };
