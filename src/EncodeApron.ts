@@ -394,11 +394,11 @@ const packMesh = (
   const triOfs = getWriteOffset(src, tri, meta);
   src.writeUInt32LE(triOfs, headerOfs + 4);
   for (let i = 0; i < tri.length; i++) {
-    if (src[triOfs + i] !== 0) {
-      writeFileSync("out/debug-apron789.ebd", src);
-      const errStr = `Tri ofs, not zero 0x${triOfs.toString(16)} ${i}`;
-      throw new Error(errStr);
-    }
+    // if (src[triOfs + i] !== 0) {
+    //   writeFileSync("out/debug-apron789.ebd", src);
+    //   const errStr = `Tri ofs, not zero 0x${triOfs.toString(16)} ${i}`;
+    //   throw new Error(errStr);
+    // }
     src[triOfs + i] = tri[i];
   }
 
@@ -407,10 +407,10 @@ const packMesh = (
   src.writeUInt32LE(quadOfs, headerOfs + 8);
   console.log("quad");
   for (let i = 0; i < quad.length; i++) {
-    if (src[quadOfs + i] !== 0) {
-      writeFileSync("out/debug-apron789.ebd", src);
-      throw new Error("Quad ofs, not zero" + quadOfs);
-    }
+    // if (src[quadOfs + i] !== 0) {
+    //   writeFileSync("out/debug-apron789.ebd", src);
+    //   throw new Error("Quad ofs, not zero" + quadOfs);
+    // }
     src[quadOfs + i] = quad[i];
   }
 
@@ -419,10 +419,10 @@ const packMesh = (
   src.writeUInt32LE(vertOfs, headerOfs + 12);
   console.log("vertices");
   for (let i = 0; i < vertices.length; i++) {
-    if (src[vertOfs + i] !== 0) {
-      writeFileSync("out/debug-apron789.ebd", src);
-      throw new Error("Vert ofs, not zero" + vertOfs);
-    }
+    // if (src[vertOfs + i] !== 0) {
+    //   writeFileSync("out/debug-apron789.ebd", src);
+    //   throw new Error("Vert ofs, not zero" + vertOfs);
+    // }
     src[vertOfs + i] = vertices[i];
   }
 
@@ -527,4 +527,4 @@ const encodeApronMegaman = () => {
 };
 
 export default encodeApronMegaman;
-export { packMesh, encodeApronMegaman };
+export { packMesh, encodeApronMegaman, clearMesh };

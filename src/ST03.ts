@@ -119,6 +119,53 @@ const compressScene = (decompressed: Buffer) => {
   return [bitfied, Buffer.concat(loads)];
 };
 
+const clearMesh = (src: Buffer, headerOfs: number, meta: Alloc) => {
+  const srcTriCount = src.readUInt8(headerOfs + 0);
+  const srcQuadCount = src.readUInt8(headerOfs + 1);
+  const srcVertCount = src.readUInt8(headerOfs + 2);
+
+  const srcTriOfs = src.readUInt32LE(headerOfs + 4);
+  const srcQuadOfs = src.readUInt32LE(headerOfs + 8);
+  const srcVertOfs = src.readUInt32LE(headerOfs + 12);
+
+  const srcTriEnd = srcTriOfs + srcTriCount * 12;
+  const srcQuadEnd = srcQuadOfs + srcQuadCount * 12;
+  const srcVertEnd = srcVertOfs + srcVertCount * 4;
+
+  console.log(
+    "Triangles: 0x%s to 0s%s",
+    srcTriOfs.toString(16),
+    srcTriEnd.toString(16),
+  );
+  console.log(
+    "Quads: 0x%s to 0s%s",
+    srcQuadOfs.toString(16),
+    srcQuadEnd.toString(16),
+  );
+  console.log(
+    "Vertices: 0x%s to 0s%s",
+    srcVertOfs.toString(16),
+    srcVertEnd.toString(16),
+  );
+
+  src.fill(0, srcTriOfs, srcTriEnd);
+  src.fill(0, srcQuadOfs, srcQuadEnd);
+  src.fill(0, srcVertOfs, srcVertEnd);
+
+  src.writeUInt8(0, headerOfs + 0);
+  src.writeUInt8(0, headerOfs + 1);
+  src.writeUInt8(0, headerOfs + 2);
+  src.writeUInt8(0, headerOfs + 3);
+
+  src.writeUInt32LE(0, headerOfs + 4);
+  src.writeUInt32LE(0, headerOfs + 8);
+  src.writeUInt32LE(0, headerOfs + 12);
+
+  meta.ranges.push({ start: srcTriOfs, end: srcTriEnd });
+  meta.ranges.push({ start: srcQuadOfs, end: srcQuadEnd });
+  meta.ranges.push({ start: srcVertOfs, end: srcVertEnd });
+};
+
 /**
  * Updates the model for Scene 3 act 0 in the Flutter during the opening cut scene
  */
@@ -135,59 +182,78 @@ const updateSceneModel = () => {
   const meta: Alloc = {
     ranges: [
       {
-        start: 0x1d0,
-        end: 0x1db8,
+        start: 888,
+        end: 2220,
+      },
+      {
+        start: 6036,
+        end: 6372,
+      },
+      {
+        start: 4752,
+        end: 4896,
+      },
+      {
+        start: 7224,
+        end: 7300,
       },
     ],
     contentEnd,
   };
+  meta.ranges.sort((a, b) => a.end - a.start - (b.end - b.start));
 
   // Remove share vertices flag
   const heirarchyOfs = 0x1e14;
   const nbSegments = 19;
   let ofs = heirarchyOfs;
-  let doStop = false;
   for (let i = 0; i < nbSegments; i++) {
     const flags = buffer.readUInt8(ofs + 3);
     console.log("%d) 0x%s", i, flags.toString(16));
-    buffer.writeUInt8(flags & 0x3, ofs + 3);
+    //  buffer.writeUInt8(flags & 0x83, ofs + 3);
     ofs += 4;
   }
 
-  buffer.fill(0, 0xb0, 0x1db8);
+  buffer.fill(0, 0xc0, 0xd0);
+  buffer.fill(0, 0x1a0, 0x1c0);
+
+  // clearMesh(buffer, 0xc0, meta); // Head
+  // clearMesh(buffer, 0x1a0, meta); // Face
+  // clearMesh(buffer, 0x1b0, meta); // Mouth
+  // console.log(meta);
+  // process.exit();
 
   // Body
-  packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000
+  // packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000
 
   // Hair
-  packMesh(buffer, "miku/apron/01_HEAD_HAIR.obj", 0xc0, meta, true); // 001
+  // packMesh(buffer, "miku/apron/01_HEAD_HAIR.obj", 0xc0, meta, true); // 001
 
   // Right Arm
-  packMesh(buffer, "miku/apron/07_RIGHT_SHOULDER.obj", 0xd0, meta); // 002
-  packMesh(buffer, "miku/apron/08_RIGHT_ARM.obj", 0xe0, meta); // 002
-  packMesh(buffer, "miku/apron/09_RIGHT_HAND.obj", 0xf0, meta); // 003
+  // packMesh(buffer, "miku/apron/07_RIGHT_SHOULDER.obj", 0xd0, meta); // 002
+  // packMesh(buffer, "miku/apron/08_RIGHT_ARM.obj", 0xe0, meta); // 002
+  // packMesh(buffer, "miku/apron/09_RIGHT_HAND.obj", 0xf0, meta); // 003
 
-  // Left Arm
-  packMesh(buffer, "miku/apron/04_LEFT_SHOULDER.obj", 0x100, meta); // 002
-  packMesh(buffer, "miku/apron/05_LEFT_ARM.obj", 0x110, meta); // 002
-  packMesh(buffer, "miku/apron/06_LEFT_HAND.obj", 0x120, meta); // 003
+  // // Left Arm
+  // packMesh(buffer, "miku/apron/04_LEFT_SHOULDER.obj", 0x100, meta); // 002
+  // packMesh(buffer, "miku/apron/05_LEFT_ARM.obj", 0x110, meta); // 002
+  // packMesh(buffer, "miku/apron/06_LEFT_HAND.obj", 0x120, meta); // 003
 
-  // Hips (dont lie)
-  packMesh(buffer, "miku/apron/03_HIPS.obj", 0x130, meta); // 002
+  // // Hips (dont lie)
+  // packMesh(buffer, "miku/apron/03_HIPS.obj", 0x130, meta); // 002
 
-  // Right Leg
-  packMesh(buffer, "miku/apron/10_LEG_RIGHT_TOP.obj", 0x140, meta); // 002
-  packMesh(buffer, "miku/apron/11_LEG_RIGHT_BOTTOM.obj", 0x150, meta); // 003
-  packMesh(buffer, "miku/apron/12_RIGHT_FOOT.obj", 0x160, meta); // 002
+  // // Right Leg
+  // packMesh(buffer, "miku/apron/10_LEG_RIGHT_TOP.obj", 0x140, meta); // 002
+  // packMesh(buffer, "miku/apron/11_LEG_RIGHT_BOTTOM.obj", 0x150, meta); // 003
+  // packMesh(buffer, "miku/apron/12_RIGHT_FOOT.obj", 0x160, meta); // 002
 
-  // Left Leg
-  packMesh(buffer, "miku/apron/13_LEG_LEFT_TOP.obj", 0x170, meta); // 002
-  packMesh(buffer, "miku/apron/14_LEG_LEFT_BOTTOM.obj", 0x180, meta); // 003
-  packMesh(buffer, "miku/apron/15_LEFT_FOOT.obj", 0x190, meta); // 003
+  // // Left Leg
+  // packMesh(buffer, "miku/apron/13_LEG_LEFT_TOP.obj", 0x170, meta); // 002
+  // packMesh(buffer, "miku/apron/14_LEG_LEFT_BOTTOM.obj", 0x180, meta); // 003
+  // packMesh(buffer, "miku/apron/15_LEFT_FOOT.obj", 0x190, meta); // 003
   packMesh(buffer, "miku/apron/01_HEAD_FACE.obj", 0x1a0, meta, true); // 015
   packMesh(buffer, "miku/apron/01_HEAD_MOUTH.obj", 0x1b0, meta, true); // 016
-  packMesh(buffer, "miku/apron/09_RIGHT_HAND_PLATE.obj", 0x1c0, meta); // 017
-  packMesh(buffer, "miku/apron/06_LEFT_HAND_PAN.obj", 0x1d0, meta); // 018
+  // packMesh(buffer, "miku/apron/09_RIGHT_HAND_PLATE.obj", 0x1c0, meta); // 017
+  // packMesh(buffer, "miku/apron/06_LEFT_HAND_PAN.obj", 0x1d0, meta); // 018
 
   const content = Buffer.from(buffer.subarray(0, meta.contentEnd));
   const [bitField, updatedScene] = compressScene(content);
@@ -204,13 +270,15 @@ const updateSceneModel = () => {
     bin[ofs++] = updatedScene[i];
   }
 
+  writeFileSync("out/st03.ebd", buffer);
+  writeFileSync("out/st03-content.ebd", content);
+
   if (ofs < 0x18000 && ofs > 0x17800) {
     console.log("Pack it in, we good to go!!");
   } else {
     throw new Error("Fission mailed!!!! 0x" + ofs.toString(16));
   }
 
-  writeFileSync("out/st03.ebd", buffer);
   writeFileSync("out/cut-ST03.BIN", bin);
 };
 
