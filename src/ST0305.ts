@@ -21,12 +21,38 @@
 
 import { readFileSync, writeFileSync } from "fs";
 import { encodeMeshWithMaterial } from "./EncodeModel";
+import { PNG } from "pngjs";
 import {
   encodePalette,
   encodeCutSceneTexture,
   compressNewTexture,
   encodeTexel,
+  readPixel,
 } from "./EncodeTexture";
+
+const encodeEggPalette = (
+  pngSrc: Buffer,
+  palette: number[],
+  eggSrc: Buffer,
+  eggPal: number[],
+) => {
+  const pngInfo = PNG.sync.read(pngSrc);
+  const { width, height, data } = pngInfo;
+
+  // if (width !== 256 || height !== 256) {
+  //   throw new Error("Encoder expects a 256x256 image");
+  // }
+
+  let inOfs = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const index = readPixel(data, inOfs, palette);
+      inOfs += 4;
+    }
+  }
+
+  return palette;
+};
 
 type EntityHeader = {
   id: string;
@@ -216,7 +242,10 @@ const encodeCutScenes = () => {
 
 const updateApronBody2 = (src: Buffer) => {
   const buffer = readFileSync(`miku/apron/body-01.png`);
+  const eggsData = readFileSync(`miku/apron/eggs.png`);
+
   const palette: number[] = [];
+  const eggPal: number[] = [];
   encodePalette(buffer, palette);
   if (palette.length > 16) {
     throw new Error("Too many colors for aprob bodyyyss texture");

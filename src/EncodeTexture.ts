@@ -861,4 +861,5 @@ export {
   encodeTexel,
   compressNewSegment,
   encodeBitfield,
+  readPixel,
 };
