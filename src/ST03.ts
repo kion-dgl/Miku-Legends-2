@@ -20,7 +20,7 @@
 **/
 
 import { readFileSync, writeFileSync } from "fs";
-import { packMesh } from "./EncodeApron";
+import { packMesh } from "./ST0305";
 import { compressNewSegment, encodeBitfield } from "./EncodeTexture";
 
 type Range = { start: number; end: number };

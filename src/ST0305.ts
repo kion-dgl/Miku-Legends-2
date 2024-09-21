@@ -75,6 +75,7 @@ const encodeCutScenes = () => {
     throw new Error("Too many colors for face texture");
   }
 
+  const red = encodeTexel(255, 0, 0, 255);
   let ST4B01: Buffer = Buffer.alloc(0);
   CUT_SCENES.forEach(({ name, offset, compressed, png, end }) => {
     // Read the Source Image
@@ -115,8 +116,15 @@ const encodeCutScenes = () => {
     }
 
     const pal = Buffer.alloc(palSize);
-    for (let i = 0; i < 16; i++) {
-      pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+    console.log("---- here ----");
+    console.log(name);
+    console.log(tim);
+    for (let i = 0; i < 32; i++) {
+      if (i < 16) {
+        pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+      } else {
+        pal.writeUInt16LE(red, i * 2);
+      }
     }
 
     let stop = false;
@@ -215,6 +223,8 @@ const updateApronBody2 = (src: Buffer) => {
   }
 
   console.log(palette);
+  const red = encodeTexel(255, 0, 0, 255);
+  const green = encodeTexel(0, 255, 0, 255);
 
   const offset = 0x038800;
   const compressed = false;
@@ -236,6 +246,9 @@ const updateApronBody2 = (src: Buffer) => {
     payloadSize: src.readUInt16LE(offset + 0x26),
   };
 
+  console.log("----- body image!!!!!!! ----");
+  console.log(tim);
+
   const { type, fullSize } = tim;
   const palSize = fullSize - texture.length;
   if (palSize !== 0x7d0) {
@@ -243,8 +256,12 @@ const updateApronBody2 = (src: Buffer) => {
   }
 
   const pal = Buffer.alloc(palSize);
-  for (let i = 0; i < 16; i++) {
-    pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+  for (let i = 0; i < 32; i++) {
+    if (i < 16) {
+      pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+    } else {
+      pal.writeUInt16LE(green, i * 2);
+    }
   }
 
   for (let i = 0; i < pal.length; i++) {
@@ -429,17 +446,37 @@ const packMesh = (
   return vertCount;
 };
 
+const fixEggs = (buffer: Buffer) => {
+  // Image Coords
+  const eggImgOfs = 0x4a1c;
+  const imageX = 320;
+  const imageY = 0;
+
+  const imageCoords = imageX >> 2;
+  buffer.writeUInt16LE(imageCoords, eggImgOfs);
+
+  // Palette Coords
+  const eggPalOfs = 0x4a1c + 2;
+  const paletteX = 0 + 16;
+  const paletteY = 241;
+  const palCoords = (paletteX >> 4) | (paletteY << 6);
+  buffer.writeUInt16LE(palCoords, eggPalOfs);
+
+  // Attempt to fix egg palette issue
+
+  // const textureOfs = [0x1e70, 0x1e74, 0x1e78];
+  // const frameBufferCoords = buffer.readUInt32LE(textureOfs[0]);
+  //
+  //
+
+  // process.exit();
+};
+
 const encodeApronMegaman = () => {
   encodeCutScenes();
   const file = readFileSync("out/cut-ST0305.BIN");
   const contentEnd = file.readUInt32LE(0x04);
   const buffer = file.subarray(0x30, 0xe000);
-
-  // Attempt to fix egg palette issue
-  const textureOfs = [0x1e70, 0x1e74, 0x1e78];
-  const frameBufferCoords = buffer.readUInt32LE(textureOfs[0]);
-  const eggTextureOfs = 0x4a1c;
-  buffer.writeUInt32LE(frameBufferCoords, eggTextureOfs);
 
   buffer.fill(0, contentEnd);
 
@@ -468,7 +505,7 @@ const encodeApronMegaman = () => {
   }
 
   buffer.fill(0, 0xc0, 0x1dc8);
-
+  fixEggs(buffer);
   // Body
   packMesh(buffer, "miku/apron/02_BODY.obj", 0xc0, meta); // 000
 
