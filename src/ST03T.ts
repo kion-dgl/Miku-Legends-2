@@ -229,15 +229,15 @@ const updateEggs = (src: Buffer) => {
   const cyan = encodeTexel(0, 255, 255, 255);
 
   // Fry Pan
-  let ofs = 0x45830;
-  for (let i = 0; i < 16; i++) {
-    src.writeUInt16LE(red, ofs + i * 2);
-  }
+  // let panOfs = 0x45830;
+  // for (let i = 0; i < 16; i++) {
+  //   src.writeUInt16LE(red, panOfs + i * 2);
+  // }
 
   // Eggs
-  ofs = 0x48030;
+  let eggOfs = 0x48030;
   for (let i = 0; i < 16; i++) {
-    src.writeUInt16LE(green, ofs + i * 2);
+    src.writeUInt16LE(green, eggOfs + i * 2);
   }
 
   // const swap = [

@@ -235,8 +235,6 @@ const forceIndex = (
 
   if (pal[index] === 0) {
     pal[index] = texel;
-  } else if (pal[index] !== texel) {
-    console.error("Conflict!!", pal[index], texel);
   }
 };
 

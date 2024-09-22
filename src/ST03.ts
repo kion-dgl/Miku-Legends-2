@@ -257,11 +257,11 @@ const updateSceneModel = () => {
   buffer.fill(0, 0xb0, end);
   meta.ranges.push({ start, end });
 
-  // clearMesh(buffer, 0xc0, meta); // Head
-  // clearMesh(buffer, 0x1a0, meta); // Face
-  // clearMesh(buffer, 0x1b0, meta); // Mouth
-  // console.log(meta);
-  // process.exit();
+  // Update Frypan texture
+  // const mikuTextureOfs = 0x1e60;
+  // const panCoords = buffer.readUInt32LE(0x1e60);
+  // const panTextureOfs = 0x4dac;
+  // buffer.writeUInt32LE(panCoords, panTextureOfs);
 
   // Body
   packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000
