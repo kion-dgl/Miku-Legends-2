@@ -182,18 +182,14 @@ const updateBody = (src: Buffer, buffer: Buffer) => {
   }
 
   const eggsData = readFileSync(`miku/apron/eggs.png`);
-  const eggPal: number[] = [];
+  const eggPal: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   const offset = 0x043000;
   const end = 0x045260;
   // const texture = encodeCutSceneTexture(palette, buffer);
   const texture = encodeEggTexture(palette, eggPal, buffer, eggsData);
   const makeBad = 0;
 
-  let eggOfs = 0x48030;
   const green = encodeTexel(0, 255, 0, 255);
-  for (let i = 0; i < 16; i++) {
-    src.writeUInt16LE(eggPal[i], eggOfs + i * 2);
-  }
 
   const tim = {
     type: src.readUInt32LE(offset + 0x00),
@@ -219,6 +215,10 @@ const updateBody = (src: Buffer, buffer: Buffer) => {
   const pal = Buffer.alloc(palSize);
   for (let i = 0; i < 16; i++) {
     pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
+  }
+  for (let i = 0; i < 16; i++) {
+    pal.writeUInt16LE(eggPal[i], 0x20 + i * 2);
+    // pal.writeUInt16LE(green, 0x20 + i * 2);
   }
 
   let stop = false;

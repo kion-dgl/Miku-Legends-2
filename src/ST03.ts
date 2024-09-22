@@ -263,6 +263,13 @@ const updateSceneModel = () => {
   const panTextureOfs = 0x4dac;
   buffer.writeUInt32LE(panCoords, panTextureOfs);
 
+  // Update Plate Texture
+  const eggPalOfs = 0x4a0c + 2;
+  const paletteX = 0 + 16;
+  const paletteY = 241;
+  const palCoords = (paletteX >> 4) | (paletteY << 6);
+  buffer.writeUInt16LE(palCoords, eggPalOfs);
+
   // Body
   packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000
 
