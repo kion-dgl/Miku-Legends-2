@@ -216,9 +216,24 @@ const updateBody = (src: Buffer, buffer: Buffer) => {
   for (let i = 0; i < 16; i++) {
     pal.writeUInt16LE(palette[i] || 0x0000, i * 2);
   }
+
+  const white = encodeTexel(230, 230, 230, 255);
+  for (let i = 0; i < eggPal.length; i++) {
+    if (eggPal[i] === 0) {
+      eggPal[i] = white;
+    }
+  }
   for (let i = 0; i < 16; i++) {
     pal.writeUInt16LE(eggPal[i], 0x20 + i * 2);
     // pal.writeUInt16LE(green, 0x20 + i * 2);
+  }
+
+  palette[0] = encodeTexel(15, 15, 15, 255);
+  palette[1] = encodeTexel(15, 15, 15, 255);
+  // palette[2] = green;
+  // palette[3] = green;
+  for (let i = 0; i < 16; i++) {
+    pal.writeUInt16LE(palette[i] || 0x0000, 0x40 + i * 2);
   }
 
   let stop = false;
