@@ -20,7 +20,7 @@
 **/
 
 import { readFileSync, writeFileSync } from "fs";
-import { packMesh } from "./EncodeApron";
+import { packMesh } from "./ST0305";
 import { compressNewSegment, encodeBitfield } from "./EncodeTexture";
 
 type Range = { start: number; end: number };
@@ -257,11 +257,18 @@ const updateSceneModel = () => {
   buffer.fill(0, 0xb0, end);
   meta.ranges.push({ start, end });
 
-  // clearMesh(buffer, 0xc0, meta); // Head
-  // clearMesh(buffer, 0x1a0, meta); // Face
-  // clearMesh(buffer, 0x1b0, meta); // Mouth
-  // console.log(meta);
-  // process.exit();
+  // Update Frypan texture
+  const mikuTextureOfs = 0x1e60;
+  const panCoords = buffer.readUInt32LE(0x1e60);
+  const panTextureOfs = 0x4dac;
+  buffer.writeUInt32LE(panCoords, panTextureOfs);
+
+  // Update Plate Texture
+  const eggPalOfs = 0x4a0c + 2;
+  const paletteX = 0 + 16;
+  const paletteY = 241;
+  const palCoords = (paletteX >> 4) | (paletteY << 6);
+  buffer.writeUInt16LE(palCoords, eggPalOfs);
 
   // Body
   packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000

@@ -2,7 +2,7 @@ import { encodeModel } from "./src/EncodeModel";
 import { encodeTexture, encodeCutScenes } from "./src/EncodeTexture";
 import { encodeTitle } from "./src/EncodeTitle";
 import { encodeRom } from "./src/EncodeRom";
-import { encodeApronMegaman } from "./src/EncodeApron";
+import { encodeApronMegaman } from "./src/ST0305";
 import { updateST03T } from "./src/ST03T";
 import { updateSceneModel } from "./src/ST03";
 import {
