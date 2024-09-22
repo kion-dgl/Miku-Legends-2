@@ -257,18 +257,18 @@ const updateSceneModel = () => {
   buffer.fill(0, 0xb0, end);
   meta.ranges.push({ start, end });
 
-  // Update Frypan texture
-  const mikuTextureOfs = 0x1e60;
-  const panCoords = buffer.readUInt32LE(0x1e60);
-  const panTextureOfs = 0x4dac;
-  buffer.writeUInt32LE(panCoords, panTextureOfs);
-
   // Update Plate Texture
   const eggPalOfs = 0x4a0c + 2;
-  const paletteX = 0 + 16;
-  const paletteY = 241;
-  const palCoords = (paletteX >> 4) | (paletteY << 6);
+  const eggPalX = 0 + 16;
+  const eggPalY = 241;
+  const palCoords = (eggPalX >> 4) | (eggPalY << 6);
   buffer.writeUInt16LE(palCoords, eggPalOfs);
+
+  const panPalOfs = 0x4dac + 2;
+  const panPalX = 0 + 32;
+  const panPalY = 241;
+  const panCoords = (panPalX >> 4) | (panPalY << 6);
+  buffer.writeUInt16LE(panCoords, panPalOfs);
 
   // Body
   packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000
