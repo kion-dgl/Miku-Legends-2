@@ -20,11 +20,13 @@
 **/
 
 import { readFileSync, writeFileSync } from "fs";
+import { PNG } from "pngjs";
 import {
   encodePalette,
   encodeCutSceneTexture,
   compressNewTexture,
   encodeTexel,
+  readPixel,
 } from "./EncodeTexture";
 
 /**
@@ -113,6 +115,60 @@ const updateFace = (src: Buffer, buffer: Buffer) => {
   }
 };
 
+const encodeEggTexture = (
+  pal: number[],
+  eggPal: number[],
+  src: Buffer,
+  eggImg: Buffer,
+) => {
+  const face = PNG.sync.read(src);
+  const { data, width, height } = face;
+
+  const eggy = PNG.sync.read(eggImg);
+  const eggData = eggy.data;
+
+  let inOfs = 0;
+  let outOfs = 0;
+  const img = Buffer.alloc((width * height) / 2, 0);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x += 2) {
+      const lowByte = readPixel(data, inOfs, pal);
+      forceIndex(lowByte, eggData, inOfs, eggPal);
+      inOfs += 4;
+      const highByte = readPixel(data, inOfs, pal);
+      inOfs += 4;
+      const byte = ((highByte << 4) | lowByte) & 0xff;
+      img[outOfs] = byte;
+      outOfs++;
+    }
+  }
+
+  return img;
+};
+
+const forceIndex = (
+  index: number,
+  data: Buffer,
+  inOfs: number,
+  pal: number[],
+) => {
+  const a = data.readUInt8(inOfs + 3) === 0 ? 0 : 255;
+  const r = a === 0 ? 0 : data.readUInt8(inOfs + 0);
+  const g = a === 0 ? 0 : data.readUInt8(inOfs + 1);
+  const b = a === 0 ? 0 : data.readUInt8(inOfs + 2);
+  const texel = encodeTexel(r, g, b, a);
+
+  // If the color is transparent, we ignore
+  if (texel === 0) {
+    return;
+  }
+
+  if (pal[index] === 0) {
+    pal[index] = texel;
+  }
+};
+
 /**
  * Updates the body texture in the prodived archive
  * @param src Buffer of the bin file to be updated
@@ -124,10 +180,20 @@ const updateBody = (src: Buffer, buffer: Buffer) => {
   if (palette.length > 16) {
     throw new Error("Too many colors for face texture");
   }
+
+  const eggsData = readFileSync(`miku/apron/eggs.png`);
+  const eggPal: number[] = [];
   const offset = 0x043000;
   const end = 0x045260;
-  const texture = encodeCutSceneTexture(palette, buffer);
+  // const texture = encodeCutSceneTexture(palette, buffer);
+  const texture = encodeEggTexture(palette, eggPal, buffer, eggsData);
   const makeBad = 0;
+
+  let eggOfs = 0x48030;
+  const green = encodeTexel(0, 255, 0, 255);
+  for (let i = 0; i < 16; i++) {
+    src.writeUInt16LE(eggPal[i], eggOfs + i * 2);
+  }
 
   const tim = {
     type: src.readUInt32LE(offset + 0x00),
@@ -326,7 +392,7 @@ const updateST03T = (bodyTexture: string, faceTexture: string) => {
   // Encode and update the archive
   updateBody(src, body);
   updateFace(src, face);
-  updateEggs(src);
+  // updateEggs(src);
 
   // Write the resulting Archive
   writeFileSync("out/cut-ST03T.BIN", src);

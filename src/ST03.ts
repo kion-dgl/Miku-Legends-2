@@ -258,10 +258,10 @@ const updateSceneModel = () => {
   meta.ranges.push({ start, end });
 
   // Update Frypan texture
-  // const mikuTextureOfs = 0x1e60;
-  // const panCoords = buffer.readUInt32LE(0x1e60);
-  // const panTextureOfs = 0x4dac;
-  // buffer.writeUInt32LE(panCoords, panTextureOfs);
+  const mikuTextureOfs = 0x1e60;
+  const panCoords = buffer.readUInt32LE(0x1e60);
+  const panTextureOfs = 0x4dac;
+  buffer.writeUInt32LE(panCoords, panTextureOfs);
 
   // Body
   packMesh(buffer, "miku/apron/02_BODY.obj", 0xb0, meta); // 000
