@@ -213,7 +213,7 @@ replaceDrillArm("miku/weapons/PL00R10_001.obj");
 encodeApronMegaman();
 updateST03T("miku/apron/body-01.png", "miku/faces/ST03T.png");
 updateSceneModel();
-updateDemoLogo();
+updateDemoLogo("miku/title-smol.png");
 
 /**
  Encode Rom
