@@ -223,22 +223,10 @@ const updateDemoLogo = (pngPath: string) => {
     }
   }
 
-  const decompressed = Buffer.alloc((width * height) / 2, 0);
-
-  let index = 0;
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x += 2) {
-      const lowByte = imgData[index++];
-      const highByte = imgData[index++];
-      const byte = ((highByte << 4) | lowByte) & 0xff;
-      decompressed[outOfs++] = byte;
-    }
-  }
-
-  // Write the
+  // Write the texture to png to confirm it's working'
   const png = new PNG({ width, height });
 
-  index = 0;
+  let index = 0;
   let dst = 0;
   for (let y = 0; y < height; y++) {
     for (var x = 0; x < width; x++) {
@@ -254,6 +242,21 @@ const updateDemoLogo = (pngPath: string) => {
   // Export file
   const dat = PNG.sync.write(png);
   writeFileSync(`out/smol.png`, dat);
+
+  // Convert the image data back to a 4bit encoded buffer
+  const decompressed = Buffer.alloc((width * height) / 2, 0);
+
+  index = 0;
+  outOfs = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x += 2) {
+      const lowByte = imgData[index++];
+      const highByte = imgData[index++];
+      const byte = ((highByte << 4) | lowByte) & 0xff;
+      decompressed[outOfs] = byte;
+      outOfs++;
+    }
+  }
 
   // And then we compress and put it back in
   const [bodyBitField, compressedBody] = compressData(decompressed);
