@@ -572,6 +572,7 @@ const encodeRom = () => {
     "cut-ST1802T.BIN",
     "cut-ST1803.BIN",
     "cut-ST2501.BIN",
+    "GAME.BIN",
   ];
 
   console.log("--- Replacing Cut Scene Textures ---");

@@ -163,7 +163,7 @@ const renderImage = (src: Buffer, pos: number, palette: Pixel[]) => {
 };
 
 test("it should search for textures in the file", () => {
-  const src = readFileSync("bin/TITLE.BIN");
+  const src = readFileSync("bin/GAME.BIN");
   const pals: Pixel[][] = [];
 
   for (let i = 0; i < src.length; i += 0x800) {
@@ -182,7 +182,7 @@ test("it should search for textures in the file", () => {
       payloadSize: src.readUInt16LE(i + 0x26),
     };
 
-    if (tim.type !== 2 && tim.type !== 3) {
+    if (tim.type !== 2) {
       continue;
     }
 
@@ -196,7 +196,7 @@ test("it should search for textures in the file", () => {
     pals.push(palette);
   }
 
-  const img = src.subarray(0x20000);
+  const img = src.subarray(0x041800);
   pals.forEach((palette, index) => {
     renderImage(img, index, palette);
   });
