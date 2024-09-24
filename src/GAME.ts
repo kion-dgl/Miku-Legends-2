@@ -20,13 +20,30 @@
 **/
 
 import { readFileSync, writeFileSync } from "fs";
+import { PNG } from "pngjs";
 import {
   encodePalette,
   encodeCutSceneTexture,
   encodeTexel,
   compressNewSegment,
   encodeBitfield,
+  readPixel,
 } from "./EncodeTexture";
+
+type Pixel = {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+};
+
+const wordToColor = (word: number): Pixel => {
+  const r = ((word >> 0x00) & 0x1f) << 3;
+  const g = ((word >> 0x05) & 0x1f) << 3;
+  const b = ((word >> 0x0a) & 0x1f) << 3;
+  const a = word > 0 ? 255 : 0;
+  return { r, g, b, a };
+};
 
 const compressData = (decompressed: Buffer) => {
   const SEGMENT_LENGTH = 0x2000;
@@ -138,18 +155,44 @@ const decompress = (src: Buffer) => {
     }
   }
 
-  return target;
+  const imageData: number[] = new Array();
+  for (ofs = 0; ofs < target.length; ofs++) {
+    const byte = target.readUInt8(ofs);
+    imageData.push(byte & 0xf);
+    imageData.push(byte >> 4);
+  }
+
+  return imageData;
+};
+
+const encodeImage = (src: Buffer) => {
+  const face = PNG.sync.read(src);
+  const { data, width, height } = face;
+
+  let inOfs = 0;
+  const pal: number[] = [];
+  const img: number[] = [];
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x += 2) {
+      const lowByte = readPixel(data, inOfs, pal);
+      img.push(lowByte);
+      inOfs += 4;
+      const highByte = readPixel(data, inOfs, pal);
+      img.push(highByte);
+      inOfs += 4;
+    }
+  }
+
+  return { pal, img };
 };
 
 const updateDemoLogo = (pngPath: string) => {
   const bin = readFileSync("bin/GAME.BIN");
-  const png = readFileSync(pngPath);
-
-  const red = encodeTexel(255, 0, 0, 255);
+  const pngData = readFileSync(pngPath);
 
   // Encode Image
-  const pal = encodePalette(png, []);
-  const img = encodeCutSceneTexture(pal, png);
+  const { pal, img } = encodeImage(pngData);
 
   // Update Palette
   const palOfs = 0x44800;
@@ -161,7 +204,7 @@ const updateDemoLogo = (pngPath: string) => {
   const imgOfs = 0x041800;
   // First thing we want to do is get the decompressed texture
   const buffer = Buffer.from(bin.subarray(imgOfs));
-  const decompressed = decompress(buffer);
+  const imgData = decompress(buffer);
 
   // Then we splice in our updated encoded texture
   const height = 128;
@@ -169,10 +212,10 @@ const updateDemoLogo = (pngPath: string) => {
   let inOfs = 0;
   let outOfs = 0;
   for (let y = 0; y < height; y++) {
-    for (var x = 0; x < width; x += 2) {
+    for (var x = 0; x < width; x++) {
       if (y >= 64 && y < 104) {
         if (x >= 48 && x < 144) {
-          decompressed[outOfs] = img[inOfs];
+          imgData[outOfs] = img[inOfs];
           inOfs++;
         }
       }
@@ -180,8 +223,40 @@ const updateDemoLogo = (pngPath: string) => {
     }
   }
 
+  const decompressed = Buffer.alloc((width * height) / 2, 0);
+
+  let index = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x += 2) {
+      const lowByte = imgData[index++];
+      const highByte = imgData[index++];
+      const byte = ((highByte << 4) | lowByte) & 0xff;
+      decompressed[outOfs++] = byte;
+    }
+  }
+
+  // Write the
+  const png = new PNG({ width, height });
+
+  index = 0;
+  let dst = 0;
+  for (let y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      const colorIndex = imgData[index++];
+      const { r, g, b, a } = wordToColor(pal[colorIndex!]);
+      png.data[dst++] = r;
+      png.data[dst++] = g;
+      png.data[dst++] = b;
+      png.data[dst++] = a;
+    }
+  }
+
+  // Export file
+  const dat = PNG.sync.write(png);
+  writeFileSync(`out/smol.png`, dat);
+
   // And then we compress and put it back in
-  const [bodyBitField, compressedBody] = compressData(decompressed, 0);
+  const [bodyBitField, compressedBody] = compressData(decompressed);
   const len = bodyBitField.length + compressedBody.length;
   console.log("Segment 2: 0x%s", len.toString(16));
 
