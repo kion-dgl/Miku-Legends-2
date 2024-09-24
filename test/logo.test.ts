@@ -38,7 +38,7 @@ const wordToColor = (word: number): Pixel => {
   return { r, g, b, a };
 };
 
-const renderImage = (src: Buffer, pos: number) => {
+const renderImage = (src: Buffer, pos: number, palette: Pixel[]) => {
   const tim = {
     type: src.readUInt32LE(0x00),
     fullSize: src.readUInt32LE(0x04),
@@ -128,37 +128,6 @@ const renderImage = (src: Buffer, pos: number) => {
 
   ofs = 0;
   const { colorCount, paletteCount } = tim;
-  const palette: Pixel[][] = new Array();
-  if (paletteCount > 0) {
-    for (let i = 0; i < paletteCount; i++) {
-      palette[i] = new Array();
-      for (let k = 0; k < colorCount; k++) {
-        const word = target.readUInt16LE(ofs);
-        ofs += 2;
-        palette[i].push(wordToColor(word));
-      }
-    }
-  } else if (tim.colorCount === 256) {
-    palette[0] = new Array();
-    for (let i = 0; i < 256; i++) {
-      palette[0].push({
-        r: i,
-        g: i,
-        b: i,
-        a: 255,
-      });
-    }
-  } else {
-    palette[0] = new Array();
-    for (let i = 0; i < 16; i++) {
-      palette[0].push({
-        r: i * 16,
-        g: i * 16,
-        b: i * 16,
-        a: 255,
-      });
-    }
-  }
 
   // Read the image data
   const imageData: number[] = new Array();
@@ -180,7 +149,7 @@ const renderImage = (src: Buffer, pos: number) => {
   for (let y = 0; y < height; y++) {
     for (var x = 0; x < width; x++) {
       const colorIndex = imageData[index++];
-      const { r, g, b, a } = palette[0][colorIndex!];
+      const { r, g, b, a } = palette[colorIndex!];
       png.data[dst++] = r;
       png.data[dst++] = g;
       png.data[dst++] = b;
@@ -190,13 +159,14 @@ const renderImage = (src: Buffer, pos: number) => {
 
   // Export file
   const buffer = PNG.sync.write(png);
-  writeFileSync(`out/title_${pos.toString(16)}.png`, buffer);
+  writeFileSync(`out/logos_${pos.toString(16)}.png`, buffer);
 };
 
 test("it should search for textures in the file", () => {
   const src = readFileSync("bin/TITLE.BIN");
+  const pals: Pixel[][] = [];
 
-  for (let i = 0x20000; i < src.length; i += 0x800) {
+  for (let i = 0; i < src.length; i += 0x800) {
     const tim = {
       type: src.readUInt32LE(i + 0x00),
       fullSize: src.readUInt32LE(i + 0x04),
@@ -216,9 +186,18 @@ test("it should search for textures in the file", () => {
       continue;
     }
 
-    console.log("DOing offset: 0x%s", i.toString(16));
-    console.log(tim);
-    renderImage(src.subarray(i), i);
-    break;
+    const palette: Pixel[] = [];
+    for (let k = 0; k < 16; k++) {
+      const word = src.readUInt16LE(i + 0x30 + k * 2);
+      palette.push(wordToColor(word));
+    }
+    console.log(pals.length.toString(16));
+    console.log("Offset: 0x%s", i.toString(16));
+    pals.push(palette);
   }
+
+  const img = src.subarray(0x20000);
+  pals.forEach((palette, index) => {
+    renderImage(img, index, palette);
+  });
 });
