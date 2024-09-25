@@ -573,6 +573,7 @@ const encodeRom = () => {
     "cut-ST1803.BIN",
     "cut-ST2501.BIN",
     "GAME.BIN",
+    "flutter-ST05T.BIN",
   ];
 
   console.log("--- Replacing Cut Scene Textures ---");
