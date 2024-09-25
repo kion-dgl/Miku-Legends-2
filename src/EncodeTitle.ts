@@ -30,6 +30,116 @@ type Command = {
   word: number;
 };
 
+const updateSmallLogo = (src: Buffer) => {
+  const tim = {
+    type: src.readUInt32LE(0x00),
+    fullSize: src.readUInt32LE(0x04),
+    paletteX: src.readUInt16LE(0x0c),
+    paletteY: src.readUInt16LE(0x0e),
+    colorCount: src.readUInt16LE(0x10),
+    paletteCount: src.readUInt16LE(0x12),
+    imageX: src.readUInt16LE(0x14),
+    imageY: src.readUInt16LE(0x16),
+    width: src.readUInt16LE(0x18),
+    height: src.readUInt16LE(0x1a),
+    bitfieldSize: src.readUInt16LE(0x24),
+    payloadSize: src.readUInt16LE(0x26),
+  };
+
+  tim.width *= 4;
+
+  const { fullSize, bitfieldSize } = tim;
+  const bitfield: number[] = new Array();
+  const target = Buffer.alloc(fullSize);
+
+  // Read Bitfield
+  const bitfieldBuffer = src.subarray(0x30, 0x30 + bitfieldSize);
+  let ofs = 0x30;
+  for (let i = 0; i < bitfieldSize; i += 4) {
+    const dword = src.readUInt32LE(ofs + i);
+    for (let k = 31; k > -1; k--) {
+      bitfield.push(dword & (1 << k) ? 1 : 0);
+    }
+  }
+
+  ofs += bitfieldSize;
+  const payloadStart = 0;
+
+  // Decompress
+
+  let outOfs = 0;
+  let windowOfs = 0;
+  let cmdCount = 0;
+  let bytes = 0;
+
+  for (let i = 0; i < bitfield.length; i++) {
+    const bit = bitfield[i];
+    if (outOfs === fullSize) {
+      const payload = src.subarray(0x30 + bitfieldSize, ofs);
+      break;
+    }
+
+    const word = src.readUInt16LE(ofs);
+    ofs += 2;
+
+    switch (bit) {
+      case 0:
+        target.writeUInt16LE(word, outOfs);
+        outOfs += 2;
+        break;
+      case 1:
+        if (word === 0xffff) {
+          windowOfs += 0x2000;
+          cmdCount = 0;
+          bytes = 0;
+        } else {
+          cmdCount++;
+          const copyFrom = windowOfs + ((word >> 3) & 0x1fff);
+          const copyLen = ((word & 0x07) + 2) * 2;
+          bytes += copyLen;
+          for (let i = 0; i < copyLen; i++) {
+            target[outOfs++] = target[copyFrom + i];
+          }
+        }
+        break;
+    }
+  }
+
+  // Read the image data
+  const imageData: number[] = new Array();
+  for (ofs = 0; ofs < target.length; ofs++) {
+    const byte = target.readUInt8(ofs);
+    imageData.push(byte & 0xf);
+    imageData.push(byte >> 4);
+  }
+
+  // Update title to debug palette
+  const { width, height } = tim;
+  let index = 0;
+  for (let y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      if (x >= 48 && x < 48 + 96) {
+        imageData[index] = Math.floor((x - 48) / 12);
+        if (y >= 64 + 20 && y < 64 + 40) {
+          imageData[index] += 8;
+        }
+      }
+    }
+  }
+
+  // Re-encode the image data into a buffer
+  ofs = 0;
+  for (let i = 0; i < imageData.length; i += 2) {
+    const a = imageData[i] & 0x0f;
+    const b = imageData[i + 1] & 0x0f;
+    const byte = a | (b << 4);
+    target.writeUInt8(byte, ofs);
+    ofs++;
+  }
+
+  return target;
+};
+
 const encodeBitfield = (bits: boolean[]): Buffer => {
   const length = Math.ceil(bits.length / 32) * 4;
   let ofs = 0;
