@@ -159,7 +159,7 @@ const renderImage = (src: Buffer, pos: number, palette: Pixel[]) => {
 
   // Export file
   const buffer = PNG.sync.write(png);
-  writeFileSync(`out/logos_${pos.toString(16)}.png`, buffer);
+  writeFileSync(`out/miku_${pos.toString(16)}.png`, buffer);
 };
 
 test("it should search for textures in the file", () => {
