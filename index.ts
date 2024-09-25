@@ -23,6 +23,7 @@ import {
   replaceDrillArm,
 } from "./src/EncodeWeapon";
 import { updateDemoLogo } from "./src/GAME";
+import { updateFlutterPaintings } from "./src/ST05T";
 
 encodeTitle("miku/title.png");
 // process.exit();
@@ -214,6 +215,7 @@ encodeApronMegaman();
 updateST03T("miku/apron/body-01.png", "miku/faces/ST03T.png");
 updateSceneModel();
 updateDemoLogo("miku/title-smol.png");
+updateFlutterPaintings("miku/paintings/megaman-room.png");
 
 /**
  Encode Rom
