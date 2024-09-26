@@ -24,6 +24,7 @@ import {
 } from "./src/EncodeWeapon";
 import { updateDemoLogo } from "./src/GAME";
 import { updateFlutterPaintings } from "./src/ST05T";
+import { updateYosyonkePaintings } from "./src/ST47T";
 
 encodeTitle("miku/title.png");
 // process.exit();
@@ -219,7 +220,7 @@ updateFlutterPaintings(
   "miku/paintings/megaman-room.png",
   "miku/paintings/roll-room.png",
 );
-
+updateYosyonkePaintings("miku/paintings/room-203.png");
 /**
  Encode Rom
 **/
