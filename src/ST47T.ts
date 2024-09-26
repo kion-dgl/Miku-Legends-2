@@ -138,7 +138,6 @@ const updateRoom203 = (bin: Buffer, pngPath: string) => {
 
   const imgOfs = 0x29800;
   const pal: number[] = [];
-
   const encodedLogo = encodeCutSceneTexture(pal, pngData);
   const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
 
