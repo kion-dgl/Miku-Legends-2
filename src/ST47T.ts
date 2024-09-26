@@ -212,9 +212,89 @@ const updateRoom203 = (bin: Buffer, pngPath: string) => {
   bin.writeInt16LE(bodyBitField.length, 0x29824);
 };
 
-const updateYosyonkePaintings = (room203: string) => {
+const updateRoom203Poster = (bin: Buffer, pngPath: string) => {
+  const pngData = readFileSync(pngPath);
+
+  const imgOfs = 0x1c800;
+  const pal: number[] = [];
+
+  const encodedLogo = encodeCutSceneTexture(pal, pngData);
+  const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
+
+  const includedPal = Buffer.from(mpTexture.subarray(0, 0x20));
+  const encodedTexture = Buffer.from(mpTexture.subarray(0x20));
+
+  // Update Palette
+  const palOfs = 0x21000;
+  const red = encodeTexel(255, 0, 0, 255);
+  for (let i = 0; i < pal.length; i++) {
+    bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
+    // bin.writeUInt16LE(red, palOfs + 0x30 + i * 2);
+  }
+
+  const ROW_LEN = 0x80;
+  const X_START = 144;
+  const Y_START = 112;
+  let texOfs = ROW_LEN * Y_START; // + PAL_OFS;
+  let logoOfs = 0;
+  const HEIGHT = 48;
+  const WIDTH = 64;
+  for (let y = 0; y < HEIGHT; y++) {
+    texOfs += X_START / 2;
+    for (let x = 0; x < WIDTH / 2; x++) {
+      encodedTexture[texOfs++] = encodedLogo[logoOfs++];
+    }
+    texOfs += (256 - X_START - WIDTH) / 2;
+  }
+
+  // console.log("Logo Pos: 0x%s", logoOfs.toString(16));
+
+  const imageData: number[] = new Array();
+  for (let ofs = 0; ofs < encodedTexture.length; ofs++) {
+    const byte = encodedTexture.readUInt8(ofs);
+
+    imageData.push(byte & 0xf);
+    imageData.push(byte >> 4);
+  }
+
+  const [bodyBitField, compressedBody] = compressNewTexture(
+    includedPal,
+    encodedTexture,
+    1,
+  );
+  const len = bodyBitField.length + compressedBody.length;
+
+  for (let i = 0x1c830; i < 0x1ec40; i++) {
+    bin[i] = 0;
+  }
+
+  let ofs = 0x1c830;
+  for (let i = 0; i < bodyBitField.length; i++) {
+    bin[ofs++] = bodyBitField[i];
+  }
+
+  for (let i = 0; i < compressedBody.length; i++) {
+    bin[ofs++] = compressedBody[i];
+  }
+
+  if (ofs <= 0x1e800) {
+    console.log("too short!!!");
+    throw new Error("poster painting too short");
+  } else if (len > 0x1f000) {
+    console.log("too long");
+    throw new Error("poster painting too long");
+  } else {
+    console.log("yaya!!!");
+  }
+
+  console.log("End: 0x%s", ofs.toString(16));
+  bin.writeInt16LE(bodyBitField.length, 0x1c824);
+};
+
+const updateYosyonkePaintings = (room203: string, room203Poster: string) => {
   const bin = readFileSync("bin/yosyonke-ST47T.BIN");
   updateRoom203(bin, room203);
+  updateRoom203Poster(bin, room203Poster);
   writeFileSync("out/yosyonke-ST47T.BIN", bin);
 };
 
