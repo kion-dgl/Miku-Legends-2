@@ -223,7 +223,10 @@ updateFlutterPaintings(
   "miku/paintings/roll-room.png",
 );
 updateYosyonkePaintings("miku/paintings/room-203.png");
-updateYosyonkePaintings2("miku/paintings/comic-hero.png");
+updateYosyonkePaintings2(
+  "miku/paintings/comic-hero.png",
+  "miku/paintings/bar-room.png",
+);
 updateYosyonkePaintings3("miku/paintings/tiger-room.png");
 
 /**
