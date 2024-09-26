@@ -266,3 +266,42 @@ test("it should search for megaman palette", () => {
     renderImage(img, "megaman", i, pal);
   }
 });
+
+test("it should search for roll palette", () => {
+  const src = readFileSync("out/flutter-ST05T.BIN");
+
+  const img = src.subarray(0x10000);
+
+  for (let i = 0; i < src.length; i += 0x800) {
+    const tim = {
+      type: src.readUInt32LE(i + 0x00),
+      fullSize: src.readUInt32LE(i + 0x04),
+      paletteX: src.readUInt16LE(i + 0x0c),
+      paletteY: src.readUInt16LE(i + 0x0e),
+      colorCount: src.readUInt16LE(i + 0x10),
+      paletteCount: src.readUInt16LE(i + 0x12),
+      imageX: src.readUInt16LE(i + 0x14),
+      imageY: src.readUInt16LE(i + 0x16),
+      width: src.readUInt16LE(i + 0x18),
+      height: src.readUInt16LE(i + 0x1a),
+      bitfieldSize: src.readUInt16LE(i + 0x24),
+      payloadSize: src.readUInt16LE(i + 0x26),
+    };
+
+    if (tim.type !== 2) {
+      continue;
+    }
+
+    if (tim.paletteX === 0 && tim.paletteY === 0) {
+      continue;
+    }
+
+    const pal: Pixel[] = [];
+    for (let k = 0; k < 16; k++) {
+      const word = src.readUInt16LE(i + 0x30 + k * 2);
+      pal.push(wordToColor(word));
+    }
+
+    renderImage(img, "roll", i, pal);
+  }
+});

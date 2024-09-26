@@ -133,8 +133,7 @@ const decompress = (src: Buffer) => {
   return target;
 };
 
-const updateFlutterPaintings = (pngPath: string) => {
-  const bin = readFileSync("bin/flutter-ST05T.BIN");
+const updateMegaman = (bin: Buffer, pngPath: string) => {
   const pngData = readFileSync(pngPath);
 
   const imgOfs = 0x23800;
@@ -178,27 +177,6 @@ const updateFlutterPaintings = (pngPath: string) => {
     imageData.push(byte >> 4);
   }
 
-  const width = 256;
-  const height = 256;
-  const png = new PNG({ width, height });
-
-  let index = 0;
-  let dst = 0;
-  for (let y = 0; y < height; y++) {
-    for (var x = 0; x < width; x++) {
-      const colorIndex = imageData[index++];
-      const { r, g, b, a } = wordToColor(pal[colorIndex!]);
-      png.data[dst++] = r;
-      png.data[dst++] = g;
-      png.data[dst++] = b;
-      png.data[dst++] = a;
-    }
-  }
-
-  // Export file
-  const buffer = PNG.sync.write(png);
-  writeFileSync(`./debug.png`, buffer);
-
   const [bodyBitField, compressedBody] = compressNewTexture(
     includedPal,
     encodedTexture,
@@ -231,7 +209,91 @@ const updateFlutterPaintings = (pngPath: string) => {
 
   console.log("End: 0x%s", ofs.toString(16));
   bin.writeInt16LE(bodyBitField.length, 0x23824);
+};
 
+const updateRoll = (bin: Buffer, pngPath: string) => {
+  const pngData = readFileSync(pngPath);
+
+  const imgOfs = 0x10000;
+  const pal: number[] = [];
+
+  const encodedLogo = encodeCutSceneTexture(pal, pngData);
+  const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
+
+  const includedPal = Buffer.from(mpTexture.subarray(0, 0x20));
+  const encodedTexture = Buffer.from(mpTexture.subarray(0x20));
+
+  // Update Palette
+  const palOfs = 0x19800;
+  const red = encodeTexel(255, 0, 0, 255);
+  for (let i = 0; i < pal.length; i++) {
+    bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
+    // bin.writeUInt16LE(red, palOfs + 0x30 + i * 2);
+  }
+
+  const ROW_LEN = 0x80;
+  const X_START = 152;
+  const Y_START = 88;
+  let texOfs = ROW_LEN * Y_START; // + PAL_OFS;
+  let logoOfs = 0;
+  const HEIGHT = 40;
+  const WIDTH = 56;
+  for (let y = 0; y < HEIGHT; y++) {
+    texOfs += X_START / 2;
+    for (let x = 0; x < WIDTH / 2; x++) {
+      encodedTexture[texOfs++] = encodedLogo[logoOfs++];
+    }
+    texOfs += (256 - X_START - WIDTH) / 2;
+  }
+
+  // console.log("Logo Pos: 0x%s", logoOfs.toString(16));
+
+  const imageData: number[] = new Array();
+  for (let ofs = 0; ofs < encodedTexture.length; ofs++) {
+    const byte = encodedTexture.readUInt8(ofs);
+
+    imageData.push(byte & 0xf);
+    imageData.push(byte >> 4);
+  }
+
+  const [bodyBitField, compressedBody] = compressNewTexture(
+    includedPal,
+    encodedTexture,
+    1,
+  );
+  const len = bodyBitField.length + compressedBody.length;
+
+  for (let i = 0x10030; i < 0x16460; i++) {
+    bin[i] = 0;
+  }
+
+  let ofs = 0x10030;
+  for (let i = 0; i < bodyBitField.length; i++) {
+    bin[ofs++] = bodyBitField[i];
+  }
+
+  for (let i = 0; i < compressedBody.length; i++) {
+    bin[ofs++] = compressedBody[i];
+  }
+
+  if (ofs <= 0x16000) {
+    console.log("too short!!!");
+    throw new Error("roll painting too short");
+  } else if (len > 0x16800) {
+    console.log("too long");
+    throw new Error("roll painting too long");
+  } else {
+    console.log("yaya!!!");
+  }
+
+  console.log("End: 0x%s", ofs.toString(16));
+  bin.writeInt16LE(bodyBitField.length, 0x10024);
+};
+
+const updateFlutterPaintings = (megamanPath: string, rollPath: string) => {
+  const bin = readFileSync("bin/flutter-ST05T.BIN");
+  updateMegaman(bin, megamanPath);
+  updateRoll(bin, rollPath);
   writeFileSync("out/flutter-ST05T.BIN", bin);
 };
 
