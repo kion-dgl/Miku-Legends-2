@@ -25,6 +25,7 @@ import {
 import { updateDemoLogo } from "./src/GAME";
 import { updateFlutterPaintings } from "./src/ST05T";
 import { updateYosyonkePaintings } from "./src/ST47T";
+import { updateYosyonkePaintings2 } from "./src/ST0AT";
 
 encodeTitle("miku/title.png");
 // process.exit();
@@ -221,6 +222,7 @@ updateFlutterPaintings(
   "miku/paintings/roll-room.png",
 );
 updateYosyonkePaintings("miku/paintings/room-203.png");
+updateYosyonkePaintings2("miku/paintings/comic-hero.png");
 /**
  Encode Rom
 **/

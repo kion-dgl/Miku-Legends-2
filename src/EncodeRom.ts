@@ -575,6 +575,7 @@ const encodeRom = () => {
     "GAME.BIN",
     "flutter-ST05T.BIN",
     "yosyonke-ST47T.BIN",
+    "yosyonke-ST0AT.BIN",
   ];
 
   console.log("--- Replacing Cut Scene Textures ---");
