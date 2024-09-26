@@ -162,7 +162,7 @@ const renderImage = (src: Buffer, pos: number, palette: Pixel[]) => {
   writeFileSync(`out/miku_${pos.toString(16)}.png`, buffer);
 };
 
-test("it should search for textures in the file", () => {
+test("it should search for textures in the logo", () => {
   const src = readFileSync("bin/GAME.BIN");
   const pals: Pixel[][] = [];
 
