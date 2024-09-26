@@ -174,7 +174,7 @@ const renderImage = (
   writeFileSync(`out/${base}_${pos.toString(16)}.png`, buffer);
 };
 
-test("it should search for textures in the file", () => {
+test("it should search for textures in the flutter", () => {
   const src = readFileSync("bin/flutter-ST05T.BIN");
   const pals: Pixel[][] = [
     [
