@@ -24,6 +24,9 @@ import {
 } from "./src/EncodeWeapon";
 import { updateDemoLogo } from "./src/GAME";
 import { updateFlutterPaintings } from "./src/ST05T";
+import { updateYosyonkePaintings } from "./src/ST47T";
+import { updateYosyonkePaintings2 } from "./src/ST0AT";
+import { updateYosyonkePaintings3 } from "./src/ST0CT";
 
 encodeTitle("miku/title.png");
 // process.exit();
@@ -219,6 +222,15 @@ updateFlutterPaintings(
   "miku/paintings/megaman-room.png",
   "miku/paintings/roll-room.png",
 );
+updateYosyonkePaintings(
+  "miku/paintings/room-203.png",
+  "miku/paintings/room-203-poster.png",
+);
+updateYosyonkePaintings2(
+  "miku/paintings/comic-hero.png",
+  "miku/paintings/bar-room.png",
+);
+updateYosyonkePaintings3("miku/paintings/tiger-room.png");
 
 /**
  Encode Rom
