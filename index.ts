@@ -74,12 +74,12 @@ encodeModel(
   "miku/10_HELMET.obj",
 );
 
-// Helmet + Hydojets
+// Helmet + Cleated
 encodeModel(
   "PL00P002.BIN",
   // Feet
-  "miku/20_HYDRO_RIGHT_FOOT.obj",
-  "miku/20_HYDRO_LEFT_FOOT.obj",
+  "miku/20_CLEATED_RIGHT_FOOT.obj",
+  "miku/20_CLEATED_LEFT_FOOT.obj",
   // Head
   "miku/10_HELMET.obj",
 );
@@ -94,12 +94,12 @@ encodeModel(
   "miku/10_HELMET.obj",
 );
 
-// Helmet + Cleated
+// Helmet + Hydojets
 encodeModel(
   "PL00P004.BIN",
   // Feet
-  "miku/20_CLEATED_RIGHT_FOOT.obj",
-  "miku/20_CLEATED_LEFT_FOOT.obj",
+  "miku/20_HYDRO_RIGHT_FOOT.obj",
+  "miku/20_HYDRO_LEFT_FOOT.obj",
   // Head
   "miku/10_HELMET.obj",
 );
@@ -145,12 +145,12 @@ encodeModel(
   "miku/01_HEAD_HAIR.obj",
 );
 
-// No helmet + Hydro Jets
+// No helmet + Cleated shoes
 encodeModel(
   "PL00P012.BIN",
   // Feet
-  "miku/20_HYDRO_RIGHT_FOOT.obj",
-  "miku/20_HYDRO_LEFT_FOOT.obj",
+  "miku/20_CLEATED_RIGHT_FOOT.obj",
+  "miku/20_CLEATED_LEFT_FOOT.obj",
   // Head
   "miku/01_HEAD_HAIR.obj",
 );
@@ -165,17 +165,17 @@ encodeModel(
   "miku/01_HEAD_HAIR.obj",
 );
 
-// No helmet + Cleated shoes
+// No helmet + Hydro Jets
 encodeModel(
   "PL00P014.BIN",
   // Feet
-  "miku/20_CLEATED_RIGHT_FOOT.obj",
-  "miku/20_CLEATED_LEFT_FOOT.obj",
+  "miku/20_HYDRO_RIGHT_FOOT.obj",
+  "miku/20_HYDRO_LEFT_FOOT.obj",
   // Head
   "miku/01_HEAD_HAIR.obj",
 );
 
-// No helmet + Cleated shoes
+// No helmet + Hover shoes
 encodeModel(
   "PL00P015.BIN",
   // Feet
