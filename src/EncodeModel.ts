@@ -85,7 +85,7 @@ const encodeVertex = (x: number, y: number, z: number) => {
 const encodeMesh = (
   obj: string,
   materialIndex: number,
-  debugUV = false,
+  debugUV = true,
 ): Primitive => {
   const SCALE = 1 / 0.00125;
   const ROT_X = new Matrix4();
@@ -126,6 +126,8 @@ const encodeMesh = (
       }
     }
   });
+
+  // tris.splice(10);
 
   const vertices = Buffer.alloc(verts.length * 4, 0);
   let vertOfs = 0;
@@ -204,6 +206,7 @@ const encodeMesh = (
     const [bu, bv] = pixels[parseInt(bIdx) - 1];
     const [cu, cv] = pixels[parseInt(cIdx) - 1];
 
+    console.log(au, av, bu, bv, cu, cv);
     tri.writeUInt8(au, triOfs);
     triOfs++;
     tri.writeUInt8(av, triOfs);
@@ -917,6 +920,7 @@ const encodeModel = (
   headerOfs = 0x130;
   encodeBody(hairObject);
   // encodeFace();
+
   encodeBody("miku/01_HEAD_FACE.obj", 2);
   encodeBody("miku/01_HEAD_MOUTH.obj", 2);
 
