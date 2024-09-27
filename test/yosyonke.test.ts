@@ -175,7 +175,7 @@ const renderImage = (
 };
 
 test("it should search for textures in the yosyonke", () => {
-  const src = readFileSync("bin/yosyonke-ST47T.BIN");
+  const src = readFileSync("bin/nino-ST1AT.BIN");
   const pals: Pixel[][] = [
     [
       { r: 0, g: 0, b: 0, a: 0 },
@@ -224,14 +224,14 @@ test("it should search for textures in the yosyonke", () => {
     }
 
     const img = src.subarray(i);
-    renderImage(img, "yosyonke", i, pals[0]);
+    renderImage(img, "nino", i, pals[0]);
   }
 });
 
 test("it should search for room203 palette", () => {
-  const src = readFileSync("bin/yosyonke-ST47T.BIN");
+  const src = readFileSync("bin/nino-ST1AT.BIN");
 
-  const img = src.subarray(0x1c800);
+  const img = src.subarray(0x2c000);
 
   for (let i = 0; i < src.length; i += 0x800) {
     const tim = {

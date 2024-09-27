@@ -27,6 +27,7 @@ import { updateFlutterPaintings } from "./src/ST05T";
 import { updateYosyonkePaintings } from "./src/ST47T";
 import { updateYosyonkePaintings2 } from "./src/ST0AT";
 import { updateYosyonkePaintings3 } from "./src/ST0CT";
+import { updateNinoGiftShop } from "./src/ST1AT";
 
 encodeTitle("miku/title.png");
 // process.exit();
@@ -231,6 +232,7 @@ updateYosyonkePaintings2(
   "miku/paintings/bar-room.png",
 );
 updateYosyonkePaintings3("miku/paintings/tiger-room.png");
+updateNinoGiftShop("miku/paintings/gift-room.png");
 
 /**
  Encode Rom
