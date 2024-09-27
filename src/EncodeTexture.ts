@@ -31,6 +31,21 @@ type Command = {
   word: number;
 };
 
+type Pixel = {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+};
+
+const wordToColor = (word: number): Pixel => {
+  const r = ((word >> 0x00) & 0x1f) << 3;
+  const g = ((word >> 0x05) & 0x1f) << 3;
+  const b = ((word >> 0x0a) & 0x1f) << 3;
+  const a = word > 0 ? 255 : 0;
+  return { r, g, b, a };
+};
+
 const encodeTexel = (r: number, g: number, b: number, a: number) => {
   const rClr = Math.floor((r >> 3) & 0xff);
   const gClr = Math.floor((g >> 3) & 0xff);
@@ -295,7 +310,7 @@ const encodeFace = (
   return img;
 };
 
-const encodeImage = (pngSrc: Buffer) => {
+const encodeImage = (pngSrc: Buffer, debug = false) => {
   const pngInfo = PNG.sync.read(pngSrc);
   const { width, height, data } = pngInfo;
 
@@ -305,21 +320,47 @@ const encodeImage = (pngSrc: Buffer) => {
 
   let inOfs = 0;
   let outOfs = 0;
-  const palette: number[] = [0];
+  const palette: number[] = [];
   const pal = Buffer.alloc(0x80, 0);
   const img = Buffer.alloc(0x8000, 0);
 
+  const imageData: number[] = [];
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x += 2) {
       const lowByte = readPixel(data, inOfs, palette);
+      imageData.push(lowByte);
       inOfs += 4;
       const highByte = readPixel(data, inOfs, palette);
+      imageData.push(highByte);
       inOfs += 4;
       const byte = ((highByte << 4) | lowByte) & 0xff;
       img[outOfs] = byte;
       outOfs++;
     }
   }
+
+  if (palette.length > 16) {
+    throw new Error("Palette too long");
+  }
+
+  const png = new PNG({ width, height });
+
+  let index = 0;
+  let dst = 0;
+  for (let y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      const colorIndex = imageData[index++];
+      const { r, g, b, a } = wordToColor(palette[colorIndex!]);
+      png.data[dst++] = r;
+      png.data[dst++] = g;
+      png.data[dst++] = b;
+      png.data[dst++] = a;
+    }
+  }
+
+  // Export file
+  const buffer = PNG.sync.write(png);
+  writeFileSync(`debug.png`, buffer);
 
   outOfs = 0;
   for (let i = 0; i < 16; i++) {
@@ -628,7 +669,7 @@ const replaceBodyTexture = (
   st03a2: Buffer,
 ) => {
   // Replace Body
-  const [bodyPal, bodyImg] = encodeImage(bodyBuffer);
+  const [bodyPal, bodyImg] = encodeImage(bodyBuffer, true);
 
   const ST03A2_PAL_OFS = 0x2c830;
   const ST03A2_IMG_OFS = 0x2d000;
@@ -642,11 +683,18 @@ const replaceBodyTexture = (
     pl00t2[0x800 + i] = bodyImg[i];
   }
 
-  const [bodyBitField, compressedBody] = compressTexture(
+  // const [bodyBitField, compressedBody] = compressTexture(
+  //   bodyPal,
+  //   bodyImg,
+  //   9,
+  //   4,
+  // );
+
+  const makeBad = 0;
+  const [bodyBitField, compressedBody] = compressNewTexture(
     bodyPal,
     bodyImg,
-    9,
-    4,
+    makeBad,
   );
 
   // First we zero out the previous image
@@ -667,6 +715,14 @@ const replaceBodyTexture = (
   // Write the compressed Texture
   for (let i = 0; i < compressedBody.length; i++) {
     modded[bodyOfs++] = compressedBody[i];
+  }
+
+  if (bodyOfs < 0x2800) {
+    throw new Error("Bod Image Too Short");
+  } else if (bodyOfs >= 0x3000) {
+    throw new Error("Bod Image Too Long");
+  } else {
+    console.log("We cooking bro!!!");
   }
 
   // Replace Body Alternate Palette
