@@ -607,6 +607,14 @@ const encodeApronMegaman = () => {
   packMesh(buffer, "miku/apron/09_RIGHT_HAND_PLATE.obj", 0x1d0, meta); // 017
   packMesh(buffer, "miku/apron/06_LEFT_HAND_PAN.obj", 0x1e0, meta); // 018
 
+  // Update Vertex Colors
+  for (let ofs = 0x1e80; ofs < 0x2534; ofs += 4) {
+    buffer[ofs + 0] = 0x7f;
+    buffer[ofs + 1] = 0x7f;
+    buffer[ofs + 2] = 0x7f;
+    buffer[ofs + 3] = 0;
+  }
+
   // Update the content length to read
   file.writeUInt32LE(meta.contentEnd, 0x04);
   // file.writeUInt32LE(0x1d, 0x08);
