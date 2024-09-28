@@ -160,10 +160,7 @@ const updatePoster = (bin: Buffer, pngPath: string) => {
   const tan = encodeTexel(182, 151, 159, 255); // 52822
   const darkGrey = encodeTexel(49, 44, 66, 255); // 41126
 
-  const pal: number[] = [
-    39246, 39178, 45357, 52822, 41126, 64943, 47271, 44199, 52457, 58635, 61106,
-    45268, 45273, 48445, 32768, 59230,
-  ];
+  const pal: number[] = [];
 
   // console.log(findClosestIndex(pal, darkGrey));
   // process.exit();
