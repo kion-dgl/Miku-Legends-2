@@ -133,13 +133,50 @@ const decompress = (src: Buffer) => {
   return target;
 };
 
+const findClosestIndex = (arr: number[], target: number): number => {
+  let closestIndex = 0;
+  let closestDifference = Math.abs(arr[0] - target);
+
+  for (let i = 1; i < arr.length; i++) {
+    const currentDifference = Math.abs(arr[i] - target);
+
+    if (currentDifference < closestDifference) {
+      closestDifference = currentDifference;
+      closestIndex = i;
+    }
+  }
+
+  return closestIndex;
+};
+
 const updatePoster = (bin: Buffer, pngPath: string) => {
   const pngData = readFileSync(pngPath);
 
   const imgOfs = 0x29800;
-  const pal: number[] = [];
+
+  const darkBrown = encodeTexel(86, 68, 45, 255); // 39178
+  const purpleBrown = encodeTexel(104, 75, 100, 255); // 45357
+  const brown = encodeTexel(117, 83, 50, 255); // 39246
+  const tan = encodeTexel(182, 151, 159, 255); // 52822
+  const darkGrey = encodeTexel(49, 44, 66, 255); // 41126
+
+  const pal: number[] = [
+    39246, 39178, 45357, 52822, 41126, 64943, 47271, 44199, 52457, 58635, 61106,
+    45268, 45273, 48445, 32768, 59230,
+  ];
+
+  // console.log(findClosestIndex(pal, darkGrey));
+  // process.exit();
 
   const encodedLogo = encodeCutSceneTexture(pal, pngData);
+
+  const red = encodeTexel(255, 0, 0, 255);
+  // pal[0] = red;
+  // pal[1] = red;
+  // pal[2] = red; // light purple in table
+  // pal[3] = red; // dark purple in table
+  // pal[4] = red; // dark purple in table
+
   const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
 
   const includedPal = Buffer.from(mpTexture.subarray(0, 0x20));
@@ -147,7 +184,7 @@ const updatePoster = (bin: Buffer, pngPath: string) => {
 
   // Update Palette
   const palOfs = 0x32800;
-  const red = encodeTexel(255, 0, 0, 255);
+
   for (let i = 0; i < pal.length; i++) {
     bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
     // bin.writeUInt16LE(red, palOfs + 0x30 + i * 2);

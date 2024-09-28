@@ -234,7 +234,7 @@ updateYosyonkePaintings2(
 );
 updateYosyonkePaintings3("miku/paintings/tiger-room.png");
 updateNinoGiftShop("miku/paintings/gift-room.png");
-updateNinoPigRoom("miku/paintings/rollerminedoodletiny.png");
+updateNinoPigRoom("miku/paintings/sumigumi.png");
 
 /**
  Encode Rom
