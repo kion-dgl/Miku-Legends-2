@@ -578,6 +578,7 @@ const encodeRom = () => {
     "yosyonke-ST0AT.BIN",
     "yosyonke-ST0CT.BIN",
     "nino-ST1AT.BIN",
+    "nino-ST1BT.BIN",
   ];
 
   console.log("--- Replacing Cut Scene Textures ---");
