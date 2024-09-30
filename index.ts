@@ -220,9 +220,11 @@ encodeApronMegaman();
 updateST03T("miku/apron/body-01.png", "miku/faces/ST03T.png");
 updateSceneModel();
 updateDemoLogo("miku/title-smol.png");
+
 updateFlutterPaintings(
   "miku/paintings/megaman-room.png",
   "miku/paintings/roll-room.png",
+  "miku/paintings/roll-lofi.png",
 );
 updateYosyonkePaintings(
   "miku/paintings/room-203.png",
