@@ -354,7 +354,7 @@ const updateDiggerPoster = (bin: Buffer, pngPath: string) => {
 
   for (let i = 0; i < pal.length; i++) {
     bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
-    includedPal.writeUInt16LE(pal[i], i * 2);
+    // includedPal.writeUInt16LE(pal[i], i * 2);
     // bin.writeUInt16LE(red, palOfs + 0x30 + i * 2);
   }
 

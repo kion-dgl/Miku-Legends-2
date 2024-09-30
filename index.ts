@@ -238,8 +238,8 @@ updateYosyonkePaintings3("miku/paintings/tiger-room.png");
 updateNinoGiftShop("miku/paintings/gift-room.png");
 updateNinoPigRoom(
   "miku/paintings/sumigumi.png",
-  "miku/paintings/ribby.png",
-  "miku/paintings/suitntie.png",
+  "miku/paintings/suitntie2.png",
+  "miku/paintings/ribby2.png",
 );
 
 /**
