@@ -290,10 +290,94 @@ const updateRoll = (bin: Buffer, pngPath: string) => {
   bin.writeInt16LE(bodyBitField.length, 0x10024);
 };
 
-const updateFlutterPaintings = (megamanPath: string, rollPath: string) => {
+const updateBarrel = (bin: Buffer, pngPath: string) => {
+  const pngData = readFileSync(pngPath);
+
+  const imgOfs = 0x37800;
+  const pal: number[] = [];
+
+  const encodedLogo = encodeCutSceneTexture(pal, pngData);
+  const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
+
+  const includedPal = Buffer.from(mpTexture.subarray(0, 0x20));
+  const encodedTexture = Buffer.from(mpTexture.subarray(0x20));
+
+  // Update Palette
+  const palOfs = 0x3f800;
+  const red = encodeTexel(255, 0, 0, 255);
+  for (let i = 0; i < pal.length; i++) {
+    bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
+    // bin.writeUInt16LE(red, palOfs + 0x30 + i * 2);
+  }
+
+  const ROW_LEN = 0x80;
+  const X_START = 192;
+  const Y_START = 208;
+  let texOfs = ROW_LEN * Y_START; // + PAL_OFS;
+  let logoOfs = 0;
+  const HEIGHT = 48;
+  const WIDTH = 64;
+  for (let y = 0; y < HEIGHT; y++) {
+    texOfs += X_START / 2;
+    for (let x = 0; x < WIDTH / 2; x++) {
+      encodedTexture[texOfs++] = encodedLogo[logoOfs++];
+    }
+    texOfs += (256 - X_START - WIDTH) / 2;
+  }
+
+  // console.log("Logo Pos: 0x%s", logoOfs.toString(16));
+
+  const imageData: number[] = new Array();
+  for (let ofs = 0; ofs < encodedTexture.length; ofs++) {
+    const byte = encodedTexture.readUInt8(ofs);
+
+    imageData.push(byte & 0xf);
+    imageData.push(byte >> 4);
+  }
+
+  const [bodyBitField, compressedBody] = compressNewTexture(
+    includedPal,
+    encodedTexture,
+    1,
+  );
+  const len = bodyBitField.length + compressedBody.length;
+
+  for (let i = 0x37830; i < 0x3cd30; i++) {
+    bin[i] = 0;
+  }
+
+  let ofs = 0x37830;
+  for (let i = 0; i < bodyBitField.length; i++) {
+    bin[ofs++] = bodyBitField[i];
+  }
+
+  for (let i = 0; i < compressedBody.length; i++) {
+    bin[ofs++] = compressedBody[i];
+  }
+
+  if (ofs <= 0x3c800) {
+    console.log("too short!!!");
+    throw new Error("barell painting too short");
+  } else if (len > 0x3d000) {
+    console.log("too long");
+    throw new Error("barell painting too long");
+  } else {
+    console.log("yaya!!!");
+  }
+
+  console.log("End: 0x%s", ofs.toString(16));
+  bin.writeInt16LE(bodyBitField.length, 0x37824);
+};
+
+const updateFlutterPaintings = (
+  megamanPath: string,
+  rollPath: string,
+  barPath: string,
+) => {
   const bin = readFileSync("bin/flutter-ST05T.BIN");
   updateMegaman(bin, megamanPath);
   updateRoll(bin, rollPath);
+  updateBarrel(bin, barPath);
   writeFileSync("out/flutter-ST05T.BIN", bin);
 };
 
