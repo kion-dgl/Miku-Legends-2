@@ -228,16 +228,15 @@ updateYosyonkePaintings(
   "miku/paintings/room-203.png",
   "miku/paintings/room-203-poster.png",
 );
+
 updateYosyonkePaintings2(
   "miku/paintings/comic-hero.png",
   "miku/paintings/bar-room.png",
+  "miku/paintings/yosyonke-junk.png",
 );
 updateYosyonkePaintings3("miku/paintings/tiger-room.png");
 updateNinoGiftShop("miku/paintings/gift-room.png");
-updateNinoPigRoom(
-  "miku/paintings/sumigumi.png",
-  "miku/paintings/rollerminedoodletiny.png",
-);
+updateNinoPigRoom("miku/paintings/sumigumi.png", "miku/paintings/ribby.png");
 
 /**
  Encode Rom
