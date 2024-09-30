@@ -27,6 +27,8 @@ import { updateFlutterPaintings } from "./src/ST05T";
 import { updateYosyonkePaintings } from "./src/ST47T";
 import { updateYosyonkePaintings2 } from "./src/ST0AT";
 import { updateYosyonkePaintings3 } from "./src/ST0CT";
+import { updateNinoGiftShop } from "./src/ST1AT";
+import { updateNinoPigRoom } from "./src/ST1BT";
 
 encodeTitle("miku/title.png");
 // process.exit();
@@ -226,11 +228,19 @@ updateYosyonkePaintings(
   "miku/paintings/room-203.png",
   "miku/paintings/room-203-poster.png",
 );
+
 updateYosyonkePaintings2(
   "miku/paintings/comic-hero.png",
   "miku/paintings/bar-room.png",
+  "miku/paintings/yosyonke-junk.png",
 );
 updateYosyonkePaintings3("miku/paintings/tiger-room.png");
+updateNinoGiftShop("miku/paintings/gift-room.png");
+updateNinoPigRoom(
+  "miku/paintings/sumigumi.png",
+  "miku/paintings/suitntie2.png",
+  "miku/paintings/ribby2.png",
+);
 
 /**
  Encode Rom

@@ -212,10 +212,10 @@ const updateComicHero = (bin: Buffer, pngPath: string) => {
   bin.writeInt16LE(bodyBitField.length, 0x31024);
 };
 
-const updateBar = (bin: Buffer, pngPath: string) => {
+const updatePoster = (bin: Buffer, pngPath: string) => {
   const pngData = readFileSync(pngPath);
 
-  const imgOfs = 0x11000;
+  const imgOfs = 0x2c000;
   const pal: number[] = [];
 
   const encodedLogo = encodeCutSceneTexture(pal, pngData);
@@ -225,7 +225,7 @@ const updateBar = (bin: Buffer, pngPath: string) => {
   const encodedTexture = Buffer.from(mpTexture.subarray(0x20));
 
   // Update Palette
-  const palOfs = 0x16000;
+  const palOfs = 0x2f800;
   const red = encodeTexel(255, 0, 0, 255);
   for (let i = 0; i < pal.length; i++) {
     bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
@@ -233,12 +233,12 @@ const updateBar = (bin: Buffer, pngPath: string) => {
   }
 
   const ROW_LEN = 0x80;
-  const X_START = 176;
-  const Y_START = 64;
+  const X_START = 80;
+  const Y_START = 0;
   let texOfs = ROW_LEN * Y_START; // + PAL_OFS;
   let logoOfs = 0;
-  const HEIGHT = 48;
-  const WIDTH = 64;
+  const HEIGHT = 64;
+  const WIDTH = 48;
   for (let y = 0; y < HEIGHT; y++) {
     texOfs += X_START / 2;
     for (let x = 0; x < WIDTH / 2; x++) {
@@ -284,11 +284,11 @@ const updateBar = (bin: Buffer, pngPath: string) => {
   );
   const len = bodyBitField.length + compressedBody.length;
 
-  for (let i = 0x11030; i < 0x13dc0; i++) {
+  for (let i = 0x2c030; i < 0x2ec00; i++) {
     bin[i] = 0;
   }
 
-  let ofs = 0x11030;
+  let ofs = 0x2c030;
   for (let i = 0; i < bodyBitField.length; i++) {
     bin[ofs++] = bodyBitField[i];
   }
@@ -297,10 +297,10 @@ const updateBar = (bin: Buffer, pngPath: string) => {
     bin[ofs++] = compressedBody[i];
   }
 
-  if (ofs <= 0x13800) {
+  if (ofs <= 0x2e800) {
     console.log("too short!!!");
     throw new Error("bar painting too short");
-  } else if (len > 0x14000) {
+  } else if (len > 0x2f000) {
     console.log("too long");
     throw new Error("bar painting too long");
   } else {
@@ -308,99 +308,14 @@ const updateBar = (bin: Buffer, pngPath: string) => {
   }
 
   console.log("End: 0x%s", ofs.toString(16));
-  bin.writeInt16LE(bodyBitField.length, 0x11024);
+  bin.writeInt16LE(bodyBitField.length, 0x2c024);
 };
 
-const updateAirship = (bin: Buffer, pngPath: string) => {
-  const pngData = readFileSync(pngPath);
-
-  const imgOfs = 0x24000;
-  const pal: number[] = [];
-
-  const encodedLogo = encodeCutSceneTexture(pal, pngData);
-  const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
-
-  const includedPal = Buffer.from(mpTexture.subarray(0, 0x20));
-  const encodedTexture = Buffer.from(mpTexture.subarray(0x20));
-
-  // Update Palette
-  const palOfs = 0x2c800;
-  const red = encodeTexel(255, 0, 0, 255);
-  for (let i = 0; i < pal.length; i++) {
-    bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
-    // bin.writeUInt16LE(red, palOfs + 0x30 + i * 2);
-  }
-
-  const ROW_LEN = 0x80;
-  const X_START = 192;
-  const Y_START = 0;
-  let texOfs = ROW_LEN * Y_START; // + PAL_OFS;
-  let logoOfs = 0;
-  const HEIGHT = 64;
-  const WIDTH = 48;
-  for (let y = 0; y < HEIGHT; y++) {
-    texOfs += X_START / 2;
-    for (let x = 0; x < WIDTH / 2; x++) {
-      encodedTexture[texOfs++] = encodedLogo[logoOfs++];
-    }
-    texOfs += (256 - X_START - WIDTH) / 2;
-  }
-
-  // console.log("Logo Pos: 0x%s", logoOfs.toString(16));
-
-  const imageData: number[] = new Array();
-  for (let ofs = 0; ofs < encodedTexture.length; ofs++) {
-    const byte = encodedTexture.readUInt8(ofs);
-
-    imageData.push(byte & 0xf);
-    imageData.push(byte >> 4);
-  }
-
-  const [bodyBitField, compressedBody] = compressNewTexture(
-    includedPal,
-    encodedTexture,
-    1,
-  );
-  const len = bodyBitField.length + compressedBody.length;
-
-  for (let i = 0x24030; i < 0x273e0; i++) {
-    bin[i] = 0;
-  }
-
-  let ofs = 0x24030;
-  for (let i = 0; i < bodyBitField.length; i++) {
-    bin[ofs++] = bodyBitField[i];
-  }
-
-  for (let i = 0; i < compressedBody.length; i++) {
-    bin[ofs++] = compressedBody[i];
-  }
-
-  if (ofs <= 0x27000) {
-    console.log("too short!!!");
-    throw new Error("airship painting too short");
-  } else if (len > 0x27800) {
-    console.log("too long");
-    throw new Error("airship painting too long");
-  } else {
-    console.log("yaya!!!");
-  }
-
-  console.log("End: 0x%s", ofs.toString(16));
-  bin.writeInt16LE(bodyBitField.length, 0x24024);
+const updateNinoGiftShop = (poster: string) => {
+  const bin = readFileSync("bin/nino-ST1AT.BIN");
+  updatePoster(bin, poster);
+  writeFileSync("out/nino-ST1AT.BIN", bin);
 };
 
-const updateYosyonkePaintings2 = (
-  comicHero: string,
-  barPainting: string,
-  airship: string,
-) => {
-  const bin = readFileSync("bin/yosyonke-ST0AT.BIN");
-  updateComicHero(bin, comicHero);
-  updateBar(bin, barPainting);
-  updateAirship(bin, airship);
-  writeFileSync("out/yosyonke-ST0AT.BIN", bin);
-};
-
-export default updateYosyonkePaintings2;
-export { updateYosyonkePaintings2 };
+export default updateNinoGiftShop;
+export { updateNinoGiftShop };
