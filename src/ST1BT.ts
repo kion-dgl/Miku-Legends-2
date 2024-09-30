@@ -331,10 +331,101 @@ const updateDiggerRoom = (bin: Buffer, pngPath: string) => {
   bin.writeInt16LE(bodyBitField.length, 0x4d824);
 };
 
-const updateNinoPigRoom = (poster: string, digger: string) => {
+const updateDiggerPoster = (bin: Buffer, pngPath: string) => {
+  const pngData = readFileSync(pngPath);
+
+  const imgOfs = 0x4d800;
+
+  const pal: number[] = [];
+
+  // console.log(findClosestIndex(pal, darkGrey));
+  // process.exit();
+
+  const encodedLogo = encodeCutSceneTexture(pal, pngData);
+
+  const red = encodeTexel(255, 0, 0, 255);
+  const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
+
+  const includedPal = Buffer.from(mpTexture.subarray(0, 0x20));
+  const encodedTexture = Buffer.from(mpTexture.subarray(0x20));
+
+  // Update Palette
+  const palOfs = 0x50000;
+
+  for (let i = 0; i < pal.length; i++) {
+    bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
+    includedPal.writeUInt16LE(pal[i], i * 2);
+    // bin.writeUInt16LE(red, palOfs + 0x30 + i * 2);
+  }
+
+  const ROW_LEN = 0x80;
+  const X_START = 0;
+  const Y_START = 64;
+  let texOfs = ROW_LEN * Y_START; // + PAL_OFS;
+  let logoOfs = 0;
+  const HEIGHT = 64;
+  const WIDTH = 80;
+  for (let y = 0; y < HEIGHT; y++) {
+    texOfs += X_START / 2;
+    for (let x = 0; x < WIDTH / 2; x++) {
+      encodedTexture[texOfs++] = encodedLogo[logoOfs++];
+    }
+    texOfs += (256 - X_START - WIDTH) / 2;
+  }
+
+  // console.log("Logo Pos: 0x%s", logoOfs.toString(16));
+
+  const imageData: number[] = new Array();
+  for (let ofs = 0; ofs < encodedTexture.length; ofs++) {
+    const byte = encodedTexture.readUInt8(ofs);
+
+    imageData.push(byte & 0xf);
+    imageData.push(byte >> 4);
+  }
+
+  const [bodyBitField, compressedBody] = compressNewTexture(
+    includedPal,
+    encodedTexture,
+    1,
+  );
+  const len = bodyBitField.length + compressedBody.length;
+
+  for (let i = 0x4d830; i < 0x4fc00; i++) {
+    bin[i] = 0;
+  }
+
+  let ofs = 0x4d830;
+  for (let i = 0; i < bodyBitField.length; i++) {
+    bin[ofs++] = bodyBitField[i];
+  }
+
+  for (let i = 0; i < compressedBody.length; i++) {
+    bin[ofs++] = compressedBody[i];
+  }
+
+  if (ofs <= 0x4f800) {
+    console.log("too short!!!");
+    throw new Error("pig painting too short");
+  } else if (len > 0x50000) {
+    console.log("too long");
+    throw new Error("pig painting too long");
+  } else {
+    console.log("yaya!!!");
+  }
+
+  console.log("End: 0x%s", ofs.toString(16));
+  bin.writeInt16LE(bodyBitField.length, 0x4d824);
+};
+
+const updateNinoPigRoom = (
+  poster: string,
+  digger: string,
+  widePoster: string,
+) => {
   const bin = readFileSync("bin/nino-ST1BT.BIN");
   updatePoster(bin, poster);
   updateDiggerRoom(bin, digger);
+  updateDiggerPoster(bin, widePoster);
   writeFileSync("out/nino-ST1BT.BIN", bin);
 };
 

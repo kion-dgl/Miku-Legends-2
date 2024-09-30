@@ -229,8 +229,8 @@ test("it should search for textures in the yosyonke", () => {
 });
 
 test("it should search for room203 palette", () => {
-  const src = readFileSync("bin/yosyonke-ST0AT.BIN");
-  const img = src.subarray(0x24000);
+  const src = readFileSync("bin/nino-ST1BT.BIN");
+  const img = src.subarray(0x4d800);
 
   for (let i = 0; i < src.length; i += 0x800) {
     const tim = {
