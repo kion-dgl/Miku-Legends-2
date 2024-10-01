@@ -179,8 +179,95 @@ const renderImage = (
   writeFileSync(`out/${base}_${pos.toString(16)}.png`, buffer);
 };
 
+const renderImg = (
+  src: Buffer,
+  base: string,
+  pos: number,
+  palette: Pixel[],
+) => {
+  const tim = {
+    type: src.readUInt32LE(0x00),
+    fullSize: src.readUInt32LE(0x04),
+    paletteX: src.readUInt16LE(0x0c),
+    paletteY: src.readUInt16LE(0x0e),
+    colorCount: src.readUInt16LE(0x10),
+    paletteCount: src.readUInt16LE(0x12),
+    imageX: src.readUInt16LE(0x14),
+    imageY: src.readUInt16LE(0x16),
+    width: src.readUInt16LE(0x18),
+    height: src.readUInt16LE(0x1a),
+    bitfieldSize: src.readUInt16LE(0x24),
+    payloadSize: src.readUInt16LE(0x26),
+  };
+
+  switch (tim.colorCount) {
+    case 16:
+      tim.width *= 4;
+      break;
+    case 256:
+      tim.width *= 2;
+      break;
+    default:
+      tim.paletteCount *= tim.colorCount / 16;
+      tim.colorCount = 16;
+      tim.width *= 4;
+      break;
+  }
+
+  const { fullSize } = tim;
+
+  // Read Bitfield
+
+  let ofs = 0x30;
+  const { colorCount, paletteCount } = tim;
+  const polly: Pixel[][] = new Array();
+  for (let i = 0; i < paletteCount; i++) {
+    polly[i] = new Array();
+    for (let k = 0; k < colorCount; k++) {
+      const word = src.readUInt16LE(ofs);
+      ofs += 2;
+      polly[i].push(wordToColor(word));
+    }
+  }
+  const diff = ofs - 0x30;
+  ofs = 0x800;
+
+  // Read the image data
+  const imageData: number[] = new Array();
+  for (let i = 0; i < fullSize - diff; i++) {
+    const byte = src.readUInt8(ofs);
+    ofs++;
+    if (colorCount === 256) {
+      imageData.push(byte);
+    } else {
+      imageData.push(byte & 0xf);
+      imageData.push(byte >> 4);
+    }
+  }
+
+  const { width, height } = tim;
+  const png = new PNG({ width, height });
+
+  let index = 0;
+  let dst = 0;
+  for (let y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      const colorIndex = imageData[index++];
+      const { r, g, b, a } = palette[colorIndex!];
+      png.data[dst++] = r;
+      png.data[dst++] = g;
+      png.data[dst++] = b;
+      png.data[dst++] = a;
+    }
+  }
+
+  // Export file
+  const buffer = PNG.sync.write(png);
+  writeFileSync(`out/${base}_${pos.toString(16)}.png`, buffer);
+};
+
 test("it should search for textures in the flutter", () => {
-  const src = readFileSync("bin/cut-ST03T.BIN");
+  const src = readFileSync("bin/cut-ST0305.BIN");
   const pals: Pixel[][] = [
     [
       { r: 0, g: 0, b: 0, a: 0 },
@@ -220,7 +307,7 @@ test("it should search for textures in the flutter", () => {
       payloadSize: src.readUInt16LE(i + 0x26),
     };
 
-    if (tim.type !== 2 && tim.type !== 3) {
+    if (tim.type !== 2) {
       continue;
     }
 
@@ -229,13 +316,13 @@ test("it should search for textures in the flutter", () => {
     }
 
     const img = src.subarray(i);
-    renderImage(img, "scene", i, pals[0]);
+    renderImg(img, "scene", i, pals[0]);
   }
 });
 
 test("it should search for room203 palette", () => {
-  const src = readFileSync("bin/cut-ST03T.BIN");
-  const img = src.subarray(0x2e000);
+  const src = readFileSync("bin/cut-ST0305.BIN");
+  const img = src.subarray(0x1a000);
 
   for (let i = 0; i < src.length; i += 0x800) {
     const tim = {
@@ -267,6 +354,6 @@ test("it should search for room203 palette", () => {
       pal.push(wordToColor(word));
     }
 
-    renderImage(img, "poster", i, pal);
+    renderImg(img, "poster", i, pal);
   }
 });
