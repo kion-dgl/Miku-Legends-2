@@ -163,7 +163,10 @@ const renderImage = (
   for (let y = 0; y < height; y++) {
     for (var x = 0; x < width; x++) {
       const colorIndex = imageData[index++];
-      const { r, g, b, a } = wordToColor(polly[colorIndex!]);
+
+      // const { r, g, b, a } = wordToColor(polly[colorIndex!]);
+      const { r, g, b, a } = palette[colorIndex!];
+
       png.data[dst++] = r;
       png.data[dst++] = g;
       png.data[dst++] = b;
@@ -176,63 +179,63 @@ const renderImage = (
   writeFileSync(`out/${base}_${pos.toString(16)}.png`, buffer);
 };
 
-// test("it should search for textures in the yosyonke", () => {
-//   const src = readFileSync("bin/carlbania-ST20T.BIN");
-//   const pals: Pixel[][] = [
-//     [
-//       { r: 0, g: 0, b: 0, a: 0 },
-//       { r: 0, g: 0, b: 0, a: 255 },
-//       { r: 16, g: 16, b: 16, a: 255 },
-//       { r: 32, g: 32, b: 32, a: 255 },
-//       { r: 48, g: 48, b: 48, a: 255 },
-//       { r: 64, g: 64, b: 64, a: 255 },
-//       { r: 72, g: 72, b: 72, a: 255 },
-//       { r: 90, g: 90, b: 90, a: 255 },
-//       { r: 110, g: 110, b: 110, a: 255 },
-//       { r: 120, g: 120, b: 120, a: 255 },
-//       { r: 130, g: 130, b: 130, a: 255 },
-//       { r: 140, g: 140, b: 140, a: 255 },
-//       { r: 150, g: 150, b: 150, a: 255 },
-//       { r: 160, g: 160, b: 160, a: 255 },
-//       { r: 190, g: 190, b: 190, a: 255 },
-//       { r: 210, g: 210, b: 210, a: 255 },
-//       { r: 220, g: 220, b: 220, a: 255 },
-//       { r: 255, g: 255, b: 255, a: 255 },
-//     ],
-//   ];
+test("it should search for textures in the flutter", () => {
+  const src = readFileSync("bin/flutter-ST06T.BIN");
+  const pals: Pixel[][] = [
+    [
+      { r: 0, g: 0, b: 0, a: 0 },
+      { r: 0, g: 0, b: 0, a: 255 },
+      { r: 16, g: 16, b: 16, a: 255 },
+      { r: 32, g: 32, b: 32, a: 255 },
+      { r: 48, g: 48, b: 48, a: 255 },
+      { r: 64, g: 64, b: 64, a: 255 },
+      { r: 72, g: 72, b: 72, a: 255 },
+      { r: 90, g: 90, b: 90, a: 255 },
+      { r: 110, g: 110, b: 110, a: 255 },
+      { r: 120, g: 120, b: 120, a: 255 },
+      { r: 130, g: 130, b: 130, a: 255 },
+      { r: 140, g: 140, b: 140, a: 255 },
+      { r: 150, g: 150, b: 150, a: 255 },
+      { r: 160, g: 160, b: 160, a: 255 },
+      { r: 190, g: 190, b: 190, a: 255 },
+      { r: 210, g: 210, b: 210, a: 255 },
+      { r: 220, g: 220, b: 220, a: 255 },
+      { r: 255, g: 255, b: 255, a: 255 },
+    ],
+  ];
 
-//   for (let i = 0; i < src.length; i += 0x800) {
-//     const tim = {
-//       type: src.readUInt32LE(i + 0x00),
-//       fullSize: src.readUInt32LE(i + 0x04),
-//       paletteX: src.readUInt16LE(i + 0x0c),
-//       paletteY: src.readUInt16LE(i + 0x0e),
-//       colorCount: src.readUInt16LE(i + 0x10),
-//       paletteCount: src.readUInt16LE(i + 0x12),
-//       imageX: src.readUInt16LE(i + 0x14),
-//       imageY: src.readUInt16LE(i + 0x16),
-//       width: src.readUInt16LE(i + 0x18),
-//       height: src.readUInt16LE(i + 0x1a),
-//       bitfieldSize: src.readUInt16LE(i + 0x24),
-//       payloadSize: src.readUInt16LE(i + 0x26),
-//     };
+  for (let i = 0; i < src.length; i += 0x800) {
+    const tim = {
+      type: src.readUInt32LE(i + 0x00),
+      fullSize: src.readUInt32LE(i + 0x04),
+      paletteX: src.readUInt16LE(i + 0x0c),
+      paletteY: src.readUInt16LE(i + 0x0e),
+      colorCount: src.readUInt16LE(i + 0x10),
+      paletteCount: src.readUInt16LE(i + 0x12),
+      imageX: src.readUInt16LE(i + 0x14),
+      imageY: src.readUInt16LE(i + 0x16),
+      width: src.readUInt16LE(i + 0x18),
+      height: src.readUInt16LE(i + 0x1a),
+      bitfieldSize: src.readUInt16LE(i + 0x24),
+      payloadSize: src.readUInt16LE(i + 0x26),
+    };
 
-//     if (tim.type !== 2 && tim.type !== 3) {
-//       continue;
-//     }
+    if (tim.type !== 2 && tim.type !== 3) {
+      continue;
+    }
 
-//     if (tim.width == 0 || tim.height == 0) {
-//       continue;
-//     }
+    if (tim.width == 0 || tim.height == 0) {
+      continue;
+    }
 
-//     const img = src.subarray(i);
-//     renderImage(img, "nino", i, pals[0]);
-//   }
-// });
+    const img = src.subarray(i);
+    renderImage(img, "scene", i, pals[0]);
+  }
+});
 
 test("it should search for room203 palette", () => {
-  const src = readFileSync("bin/carlbania-ST20T.BIN");
-  const img = src.subarray(0x3c000);
+  const src = readFileSync("bin/flutter-ST06T.BIN");
+  const img = src.subarray(0x20800);
 
   for (let i = 0; i < src.length; i += 0x800) {
     const tim = {
@@ -265,45 +268,5 @@ test("it should search for room203 palette", () => {
     }
 
     renderImage(img, "poster", i, pal);
-    break;
   }
 });
-
-// test("it should search for roll palette", () => {
-//   const src = readFileSync("out/flutter-ST05T.BIN");
-
-//   const img = src.subarray(0x10000);
-
-//   for (let i = 0; i < src.length; i += 0x800) {
-//     const tim = {
-//       type: src.readUInt32LE(i + 0x00),
-//       fullSize: src.readUInt32LE(i + 0x04),
-//       paletteX: src.readUInt16LE(i + 0x0c),
-//       paletteY: src.readUInt16LE(i + 0x0e),
-//       colorCount: src.readUInt16LE(i + 0x10),
-//       paletteCount: src.readUInt16LE(i + 0x12),
-//       imageX: src.readUInt16LE(i + 0x14),
-//       imageY: src.readUInt16LE(i + 0x16),
-//       width: src.readUInt16LE(i + 0x18),
-//       height: src.readUInt16LE(i + 0x1a),
-//       bitfieldSize: src.readUInt16LE(i + 0x24),
-//       payloadSize: src.readUInt16LE(i + 0x26),
-//     };
-
-//     if (tim.type !== 2) {
-//       continue;
-//     }
-
-//     if (tim.paletteX === 0 && tim.paletteY === 0) {
-//       continue;
-//     }
-
-//     const pal: Pixel[] = [];
-//     for (let k = 0; k < 16; k++) {
-//       const word = src.readUInt16LE(i + 0x30 + k * 2);
-//       pal.push(wordToColor(word));
-//     }
-
-//     renderImage(img, "roll", i, pal);
-//   }
-// });

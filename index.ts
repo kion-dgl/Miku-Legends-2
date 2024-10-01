@@ -24,6 +24,7 @@ import {
 } from "./src/EncodeWeapon";
 import { updateDemoLogo } from "./src/GAME";
 import { updateFlutterPaintings } from "./src/ST05T";
+import { updateFlutterPaintings2 } from "./src/ST06T";
 import { updateYosyonkePaintings } from "./src/ST47T";
 import { updateYosyonkePaintings2 } from "./src/ST0AT";
 import { updateYosyonkePaintings3 } from "./src/ST0CT";
@@ -226,6 +227,9 @@ updateFlutterPaintings(
   "miku/paintings/roll-room.png",
   "miku/paintings/roll-lofi.png",
 );
+
+updateFlutterPaintings2("miku/paintings/dashie2.png");
+
 updateYosyonkePaintings(
   "miku/paintings/room-203.png",
   "miku/paintings/room-203-poster.png",
