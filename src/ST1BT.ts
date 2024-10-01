@@ -26,6 +26,7 @@ import {
   encodeTexel,
 } from "./EncodeTexture";
 import { PNG } from "pngjs";
+import { mx_bits_to_01 } from "three/examples/jsm/nodes/materialx/lib/mx_noise.js";
 
 type Pixel = {
   r: number;
@@ -338,18 +339,47 @@ const updateDiggerPoster = (bin: Buffer, pngPath: string) => {
 
   // 50839
 
+  const red = encodeTexel(255, 0, 0, 255);
+
   const pal: number[] = [
-    48724, 50839, 52955, 56159, 59327, 44460, 52982, 43436, 38252, 42350, 45553,
-    46641, 42346, 38053, 34882, 40199,
+    43436, 45553, 46641, 42346, 38053, 34882, 40199, 48724, 42350, 38252, 50839,
+    52955, 56159, 59327, 44460, 52982,
   ];
 
-  // console.log(findClosestIndex(pal, darkGrey));
-  // process.exit();
+  // const LIGHT_BROWN = 48724; // creamy
+  // const RED_BROWN = 42350;
+  // const CREAM = 50839;
+  // const ALT_CREAM = 52955;
+  // const WHITE_CREAM = 56159;
+
+  // pal[0] = LIGHT_BROWN;
+  // pal[1] = RED_BROWN;
+  // pal[2] = CREAM;
+  // pal[3] = ALT_CREAM;
+  // pal[3] = WHITE_CREAM;
+  // pal[4] = 44460;
+  // pal[5] = 52982;
+  // pal[6] = 43436;
+
+  // pal[7] = 38252;
+  // pal[8] = 59327; // frame
+  // pal[9] = 45553; // dots on frame
+  // pal[10] = 46641;
+  // pal[11] = 42346;
+  // pal[12] = 38053;
+  // pal[13] = 34882;
+  // pal[14] = 40199;
 
   const encodedLogo = encodeCutSceneTexture(pal, pngData);
-
-  const red = encodeTexel(255, 0, 0, 255);
   const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
+
+  // console.log(pal);
+  // const brown = encodeTexel(98, 90, 47, 255); // 38252
+  // const light = encodeTexel(113, 93, 76, 255);
+  // console.log(brown);
+  // const index = findClosestIndex(pal, light);
+  // console.log(index, pal[index]);
+  // process.exit();
 
   const includedPal = Buffer.from(mpTexture.subarray(0, 0x20));
   const encodedTexture = Buffer.from(mpTexture.subarray(0x20));
