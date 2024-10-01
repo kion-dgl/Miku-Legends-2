@@ -180,7 +180,7 @@ const renderImage = (
 };
 
 test("it should search for textures in the flutter", () => {
-  const src = readFileSync("bin/flutter-ST06T.BIN");
+  const src = readFileSync("bin/cut-ST03T.BIN");
   const pals: Pixel[][] = [
     [
       { r: 0, g: 0, b: 0, a: 0 },
@@ -234,8 +234,8 @@ test("it should search for textures in the flutter", () => {
 });
 
 test("it should search for room203 palette", () => {
-  const src = readFileSync("bin/flutter-ST06T.BIN");
-  const img = src.subarray(0x20800);
+  const src = readFileSync("bin/cut-ST03T.BIN");
+  const img = src.subarray(0x2e000);
 
   for (let i = 0; i < src.length; i += 0x800) {
     const tim = {

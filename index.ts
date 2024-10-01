@@ -218,7 +218,11 @@ replaceDrillArm("miku/weapons/PL00R10_001.obj");
 **/
 
 encodeApronMegaman();
-updateST03T("miku/apron/body-01.png", "miku/faces/ST03T.png");
+updateST03T(
+  "miku/apron/body-01.png",
+  "miku/faces/ST03T.png",
+  "miku/paintings/dashie2.png",
+);
 updateSceneModel();
 updateDemoLogo("miku/title-smol.png");
 
