@@ -336,7 +336,12 @@ const updateDiggerPoster = (bin: Buffer, pngPath: string) => {
 
   const imgOfs = 0x4d800;
 
-  const pal: number[] = [];
+  // 50839
+
+  const pal: number[] = [
+    48724, 50839, 52955, 56159, 59327, 44460, 52982, 43436, 38252, 42350, 45553,
+    46641, 42346, 38053, 34882, 40199,
+  ];
 
   // console.log(findClosestIndex(pal, darkGrey));
   // process.exit();

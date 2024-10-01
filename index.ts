@@ -245,6 +245,9 @@ updateYosyonkePaintings2(
   "miku/paintings/yosyonke-junk.png",
 );
 updateYosyonkePaintings3("miku/paintings/tiger-room.png");
+
+// Nino Island
+
 updateNinoGiftShop("miku/paintings/gift-room.png");
 updateNinoPigRoom(
   "miku/paintings/sumigumi.png",
