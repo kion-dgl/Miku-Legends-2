@@ -65,6 +65,44 @@ const CUT_SCENES = [
   },
 ];
 
+const updateDashie = (bin: Buffer, pngPath: string) => {
+  const pngData = readFileSync(pngPath);
+
+  const imgOfs = 0x1a000;
+  const pal: number[] = [];
+
+  const encodedLogo = encodeCutSceneTexture(pal, pngData);
+  const encodedTexture = Buffer.from(bin.subarray(0x1a800, 0x22800));
+
+  // Update Palette
+  const palOfs = 0x23800;
+  const red = encodeTexel(255, 0, 0, 255);
+  for (let i = 0; i < pal.length; i++) {
+    bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
+    // bin.writeUInt16LE(red, palOfs + 0x30 + i * 2);
+  }
+
+  const ROW_LEN = 0x80;
+  const X_START = 0;
+  const Y_START = 88;
+  let texOfs = ROW_LEN * Y_START; // + PAL_OFS;
+  let logoOfs = 0;
+  const HEIGHT = 40;
+  const WIDTH = 64;
+  for (let y = 0; y < HEIGHT; y++) {
+    texOfs += X_START / 2;
+    for (let x = 0; x < WIDTH / 2; x++) {
+      encodedTexture[texOfs++] = encodedLogo[logoOfs++];
+    }
+    texOfs += (256 - X_START - WIDTH) / 2;
+  }
+
+  let ofs = 0x1a800;
+  for (let i = 0; i < encodedTexture.length; i++) {
+    bin[ofs + i] = encodedTexture[i];
+  }
+};
+
 const encodeCutScenes = () => {
   const palette: number[] = [];
 
@@ -535,6 +573,7 @@ const fixEggs = (buffer: Buffer) => {
 const encodeApronMegaman = () => {
   encodeCutScenes();
   const file = readFileSync("out/cut-ST0305.BIN");
+  updateDashie(file, "miku/paintings/dashie2.png");
   const contentEnd = file.readUInt32LE(0x04);
   const buffer = file.subarray(0x30, 0xe000);
 

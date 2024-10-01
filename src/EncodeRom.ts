@@ -574,6 +574,7 @@ const encodeRom = () => {
     "cut-ST2501.BIN",
     "GAME.BIN",
     "flutter-ST05T.BIN",
+    "flutter-ST06T.BIN",
     "yosyonke-ST47T.BIN",
     "yosyonke-ST0AT.BIN",
     "yosyonke-ST0CT.BIN",
