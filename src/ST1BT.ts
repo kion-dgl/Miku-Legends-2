@@ -458,7 +458,7 @@ const updateNinoPigRoom = (
   widePoster: string,
 ) => {
   const bin = readFileSync("bin/nino-ST1BT.BIN");
-  updatePoster(bin, poster);
+  // updatePoster(bin, poster);
   updateDiggerRoom(bin, digger);
   updateDiggerPoster(bin, widePoster);
   writeFileSync("out/nino-ST1BT.BIN", bin);

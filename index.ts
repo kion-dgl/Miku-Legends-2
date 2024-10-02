@@ -241,7 +241,7 @@ updateYosyonkePaintings(
 
 updateYosyonkePaintings2(
   "miku/paintings/comic-hero.png",
-  "miku/paintings/bar-room.png",
+  "miku/paintings/bar-room2.png",
   "miku/paintings/yosyonke-junk.png",
 );
 updateYosyonkePaintings3("miku/paintings/tiger-room.png");
