@@ -252,14 +252,19 @@ const updateDiggerRoom = (bin: Buffer, pngPath: string) => {
 
   const imgOfs = 0x4d800;
 
-  const pal: number[] = [];
+  const pal: number[] = [
+    37131, 39341, 41489, 36071, 40362, 38218, 37028, 45417, 50848, 39280, 38189,
+    55170, 54895, 63352, 48727, 45372,
+  ];
 
   // console.log(findClosestIndex(pal, darkGrey));
   // process.exit();
 
   const encodedLogo = encodeCutSceneTexture(pal, pngData);
-
   const red = encodeTexel(255, 0, 0, 255);
+
+  // pal[9] = red;
+  // pal[10] = red;
   const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
 
   const includedPal = Buffer.from(mpTexture.subarray(0, 0x20));
