@@ -30,6 +30,7 @@ import { updateYosyonkePaintings2 } from "./src/ST0AT";
 import { updateYosyonkePaintings3 } from "./src/ST0CT";
 import { updateNinoGiftShop } from "./src/ST1AT";
 import { updateNinoPigRoom } from "./src/ST1BT";
+import { updateFlutterFire } from "./src/ST1ET";
 
 encodeTitle("miku/title.png");
 // process.exit();
@@ -233,6 +234,7 @@ updateFlutterPaintings(
 );
 
 updateFlutterPaintings2("miku/paintings/dashie2.png");
+updateFlutterFire("miku/paintings/dashie2-burn.png");
 
 updateYosyonkePaintings(
   "miku/paintings/room-203.png",
