@@ -263,66 +263,69 @@ const renderImg = (
 
   // Export file
   const buffer = PNG.sync.write(png);
-  writeFileSync(`out/${base}_${pos.toString(16)}.png`, buffer);
+  const name = `out/${base}_${pos.toString(16)}.png`;
+  console.log(name);
+
+  writeFileSync(name, buffer);
 };
 
-test("it should search for textures in the flutter", () => {
-  const src = readFileSync("bin/cut-ST0305.BIN");
-  const pals: Pixel[][] = [
-    [
-      { r: 0, g: 0, b: 0, a: 0 },
-      { r: 0, g: 0, b: 0, a: 255 },
-      { r: 16, g: 16, b: 16, a: 255 },
-      { r: 32, g: 32, b: 32, a: 255 },
-      { r: 48, g: 48, b: 48, a: 255 },
-      { r: 64, g: 64, b: 64, a: 255 },
-      { r: 72, g: 72, b: 72, a: 255 },
-      { r: 90, g: 90, b: 90, a: 255 },
-      { r: 110, g: 110, b: 110, a: 255 },
-      { r: 120, g: 120, b: 120, a: 255 },
-      { r: 130, g: 130, b: 130, a: 255 },
-      { r: 140, g: 140, b: 140, a: 255 },
-      { r: 150, g: 150, b: 150, a: 255 },
-      { r: 160, g: 160, b: 160, a: 255 },
-      { r: 190, g: 190, b: 190, a: 255 },
-      { r: 210, g: 210, b: 210, a: 255 },
-      { r: 220, g: 220, b: 220, a: 255 },
-      { r: 255, g: 255, b: 255, a: 255 },
-    ],
-  ];
+// test("it should search for textures in the flutter", () => {
+//   const src = readFileSync("bin/flutter-ST1ET.BIN");
+//   const pals: Pixel[][] = [
+//     [
+//       { r: 0, g: 0, b: 0, a: 0 },
+//       { r: 0, g: 0, b: 0, a: 255 },
+//       { r: 16, g: 16, b: 16, a: 255 },
+//       { r: 32, g: 32, b: 32, a: 255 },
+//       { r: 48, g: 48, b: 48, a: 255 },
+//       { r: 64, g: 64, b: 64, a: 255 },
+//       { r: 72, g: 72, b: 72, a: 255 },
+//       { r: 90, g: 90, b: 90, a: 255 },
+//       { r: 110, g: 110, b: 110, a: 255 },
+//       { r: 120, g: 120, b: 120, a: 255 },
+//       { r: 130, g: 130, b: 130, a: 255 },
+//       { r: 140, g: 140, b: 140, a: 255 },
+//       { r: 150, g: 150, b: 150, a: 255 },
+//       { r: 160, g: 160, b: 160, a: 255 },
+//       { r: 190, g: 190, b: 190, a: 255 },
+//       { r: 210, g: 210, b: 210, a: 255 },
+//       { r: 220, g: 220, b: 220, a: 255 },
+//       { r: 255, g: 255, b: 255, a: 255 },
+//     ],
+//   ];
 
-  for (let i = 0; i < src.length; i += 0x800) {
-    const tim = {
-      type: src.readUInt32LE(i + 0x00),
-      fullSize: src.readUInt32LE(i + 0x04),
-      paletteX: src.readUInt16LE(i + 0x0c),
-      paletteY: src.readUInt16LE(i + 0x0e),
-      colorCount: src.readUInt16LE(i + 0x10),
-      paletteCount: src.readUInt16LE(i + 0x12),
-      imageX: src.readUInt16LE(i + 0x14),
-      imageY: src.readUInt16LE(i + 0x16),
-      width: src.readUInt16LE(i + 0x18),
-      height: src.readUInt16LE(i + 0x1a),
-      bitfieldSize: src.readUInt16LE(i + 0x24),
-      payloadSize: src.readUInt16LE(i + 0x26),
-    };
+//   for (let i = 0; i < src.length; i += 0x800) {
+//     const tim = {
+//       type: src.readUInt32LE(i + 0x00),
+//       fullSize: src.readUInt32LE(i + 0x04),
+//       paletteX: src.readUInt16LE(i + 0x0c),
+//       paletteY: src.readUInt16LE(i + 0x0e),
+//       colorCount: src.readUInt16LE(i + 0x10),
+//       paletteCount: src.readUInt16LE(i + 0x12),
+//       imageX: src.readUInt16LE(i + 0x14),
+//       imageY: src.readUInt16LE(i + 0x16),
+//       width: src.readUInt16LE(i + 0x18),
+//       height: src.readUInt16LE(i + 0x1a),
+//       bitfieldSize: src.readUInt16LE(i + 0x24),
+//       payloadSize: src.readUInt16LE(i + 0x26),
+//     };
 
-    if (tim.type !== 2) {
-      continue;
-    }
+//     if (tim.type !== 2 && tim.type !== 3) {
+//       continue;
+//     }
 
-    if (tim.width == 0 || tim.height == 0) {
-      continue;
-    }
+//     if (tim.width == 0 || tim.height == 0) {
+//       continue;
+//     }
 
-    const img = src.subarray(i);
-    renderImg(img, "scene", i, pals[0]);
-  }
-});
+//     const img = src.subarray(i);
+//     renderImg(img, "scene", i, pals[0]);
+//   }
+// });
 
 test("it should search for room203 palette", () => {
-  const src = readFileSync("bin/cut-ST0305.BIN");
-  const img = src.subarray(0x1a000);
+  const src = readFileSync("bin/flutter-ST1ET.BIN");
+  const img = src.subarray(0x02a800);
 
   for (let i = 0; i < src.length; i += 0x800) {
     const tim = {
@@ -354,6 +357,6 @@ test("it should search for room203 palette", () => {
       pal.push(wordToColor(word));
     }
 
-    renderImg(img, "poster", i, pal);
+    renderImage(img, "poster", i, pal);
   }
 });
