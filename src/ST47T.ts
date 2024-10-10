@@ -137,7 +137,22 @@ const updateRoom203 = (bin: Buffer, pngPath: string) => {
   const pngData = readFileSync(pngPath);
 
   const imgOfs = 0x29800;
-  const pal: number[] = [];
+  const pal: number[] = [
+    54262, 55216, 56111, 57113, 56280, 56913, 57036, 59960, 61940, 62235, 65535,
+    60790, 59068, 63005, 62644, 62844,
+  ];
+
+  // 1 purple
+  // 7 darkish purple
+  // 9 dark green
+  // 10 dark grey
+  // 11 light green
+  const actualShifts = 7;
+  for (let i = 0; i < actualShifts; i++) {
+    // Remove the last element and insert it at the start
+    pal.unshift(pal.pop() as number);
+  }
+
   const encodedLogo = encodeCutSceneTexture(pal, pngData);
   const mpTexture = decompress(Buffer.from(bin.subarray(imgOfs)));
 
@@ -147,6 +162,7 @@ const updateRoom203 = (bin: Buffer, pngPath: string) => {
   // Update Palette
   const palOfs = 0x2f800;
   const red = encodeTexel(255, 0, 0, 255);
+
   for (let i = 0; i < pal.length; i++) {
     bin.writeUInt16LE(pal[i], palOfs + 0x30 + i * 2);
     // bin.writeUInt16LE(red, palOfs + 0x30 + i * 2);
