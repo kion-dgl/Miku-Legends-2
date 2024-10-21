@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Browser BSPatch</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
+    </head>
+    <body>
+        <h1>BSPatch in Browser</h1>
+
+        <label>Original File: <input type="file" id="input" /></label><br />
+        <button id="applyPatch">Apply Patch</button>
+
+        <a id="downloadLink" style="display: none">Download Patched File</a>
+
+        <script type="module">
+            function calculateMD5(file) {
+                return new Promise((resolve, reject) => {
+                    const spark = new SparkMD5.ArrayBuffer();
+                    const reader = new FileReader();
+                    let offset = 0;
+                    const CHUNK_SIZE = 64 * 1024;
+
+                    reader.onload = (e) => {
+                        spark.append(e.target.result);
+                        offset += CHUNK_SIZE;
+
+                        if (offset < file.size) {
+                            readNextChunk();
+                        } else {
+                            resolve(spark.end());
+                        }
+                    };
+
+                    reader.onerror = (err) => reject(err);
+
+                    function readNextChunk() {
+                        const slice = file.slice(offset, offset + CHUNK_SIZE);
+                        reader.readAsArrayBuffer(slice);
+                    }
+
+                    readNextChunk();
+                });
+            }
+
+            const input = document.getElementById("input");
+            input.addEventListener("change", async (evt) => {
+                event.preventDefault();
+                if (!evt.target.files) {
+                    return;
+                }
+
+                console.log("change!!");
+
+                const file = evt.target.files[0];
+
+                const CHECK_SUM = false;
+                if (CHECK_SUM) {
+                    const MML2_MD5 = "e7039345d54c1bfc3775a468d4125d48";
+                    const md5 = await calculateMD5(file);
+
+                    if (md5 !== MML2_MD5) {
+                        return confirm(
+                            "md5 does not match, would you like to proceed?",
+                        );
+                    }
+                }
+
+                const req = await fetch("./patch.json");
+                const patch = await req.json();
+                const buffer = await file.arrayBuffer();
+                const data = new Uint8Array(buffer);
+                console.log(buffer);
+                console.log(data);
+
+                console.log("apply patch!!");
+                patch.forEach((patch) => {
+                    const { offset, bytes } = patch;
+                    const patchBytes = Uint8Array.from(atob(bytes), (c) =>
+                        c.charCodeAt(0),
+                    );
+
+                    // Apply the patch bytes at the given offset
+                    for (let i = 0; i < patchBytes.length; i++) {
+                        data[offset + i] = patchBytes[i];
+                    }
+                });
+
+                console.log("DOWNLAOD Patch");
+                const blob = new Blob([data.buffer], {
+                    type: "application/octet-stream",
+                });
+                const url = URL.createObjectURL(blob);
+
+                const downloadLink = document.getElementById("downloadLink");
+                downloadLink.href = url;
+                downloadLink.download = "MIKU2.bin";
+                downloadLink.style.display = "block";
+                downloadLink.textContent = "Download Patched File";
+            });
+        </script>
+    </body>
+</html>

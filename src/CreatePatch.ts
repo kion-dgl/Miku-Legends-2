@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "fs";
 
 type GamePatch = {
   offset: number;
-  bytes: Buffer;
+  bytes: string;
 };
 
 const createPatch = () => {
@@ -42,7 +42,7 @@ const createPatch = () => {
       // Only once the bytes stop being different do we log them into the patch
       patch.push({
         offset: i,
-        bytes: mod.subarray(start, start + len),
+        bytes: mod.subarray(start, start + len).toString("base64"),
       });
       isDiff = false;
       len = 0;
