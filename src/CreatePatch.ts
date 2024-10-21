@@ -41,7 +41,7 @@ const createPatch = () => {
     } else if (isDiff && mod[i] === rom[i]) {
       // Only once the bytes stop being different do we log them into the patch
       patch.push({
-        offset: i,
+        offset: start,
         bytes: mod.subarray(start, start + len).toString("base64"),
       });
       isDiff = false;
