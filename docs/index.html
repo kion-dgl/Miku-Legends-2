@@ -104,25 +104,24 @@
 
         <!-- START HERO -->
         <div class="hero flex-grow relative z-10">
-            <div class="hero-content text-center">
-                <div class="max-w-5xl">
-                    <h1 class="text-5xl font-bold">Hello there</h1>
-                    <p class="py-6">
-                        <canvas
-                            id="myCanvas"
-                            width="800"
-                            height="800"
-                            class="b-1 shadow border-4 border-indigo-500"
-                        ></canvas>
-                        <label
-                            >Original File:
-                            <input type="file" id="input" /></label
-                        ><br />
-                        <button id="applyPatch">Apply Patch</button>
-                        <a id="downloadLink" style="display: none"
-                            >Download Patched File</a
-                        >
-                    </p>
+            <div class="hero-content flex-col lg:flex-row">
+                <canvas
+                    id="myCanvas"
+                    width="700"
+                    height="600"
+                    class="b-1 shadow border-4 border-indigo-500"
+                ></canvas>
+                <div>
+                    <h1 class="text-2xl font-bold">
+                        Select `MegaMan Legends 2 Track 1.bin`
+                    </h1>
+                    <label
+                        >Original File: <input type="file" id="input" /></label
+                    ><br />
+                    <button id="applyPatch">Apply Patch</button>
+                    <a id="downloadLink" style="display: none"
+                        >Download Patched File</a
+                    >
                     <button class="btn btn-primary">Get Started</button>
                 </div>
             </div>
@@ -147,7 +146,7 @@
                 0.1, // Near clipping plane
                 1000, // Far clipping plane
             );
-            camera.position.y = 5; // Move camera away from the center
+            camera.position.y = 2; // Move camera away from the center
 
             // Create a WebGL renderer and link it to the canvas
             const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
