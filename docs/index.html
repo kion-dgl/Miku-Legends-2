@@ -38,7 +38,11 @@
             </div>
 
             <div class="navbar-end">
-                <button class="btn btn-ghost btn-circle">
+                <a
+                    class="btn btn-ghost btn-circle"
+                    href="https://github.com/kion-dgl/Miku-Legends-2"
+                    target="_blank"
+                >
                     <svg
                         class="w-6 h-6 text-gray-800 dark:text-white"
                         aria-hidden="true"
@@ -54,9 +58,13 @@
                             clip-rule="evenodd"
                         />
                     </svg>
-                </button>
+                </a>
 
-                <button class="btn btn-ghost btn-circle">
+                <a
+                    class="btn btn-ghost btn-circle"
+                    href="https://x.com/WagieWeeb"
+                    target="_blank"
+                >
                     <svg
                         class="w-6 h-6 text-gray-800 dark:text-white"
                         aria-hidden="true"
@@ -70,9 +78,13 @@
                             d="M13.795 10.533 20.68 2h-3.073l-5.255 6.517L7.69 2H1l7.806 10.91L1.47 22h3.074l5.705-7.07L15.31 22H22l-8.205-11.467Zm-2.38 2.95L9.97 11.464 4.36 3.627h2.31l4.528 6.317 1.443 2.02 6.018 8.409h-2.31l-4.934-6.89Z"
                         />
                     </svg>
-                </button>
+                </a>
 
-                <button class="btn btn-ghost btn-circle">
+                <a
+                    class="btn btn-ghost btn-circle"
+                    href="https://www.patreon.com/c/dashkion"
+                    target="_blank"
+                >
                     <svg
                         class="w-6 h-6 text-gray-800 dark:text-white"
                         version="1.1"
@@ -97,7 +109,7 @@
 	c55.78-74.81,127.6-95.94,216.01-117.82C929.71,603.22,1033.27,483.3,1033.05,324.45z"
                         />
                     </svg>
-                </button>
+                </a>
             </div>
         </nav>
         <!-- END NAVBAR -->
@@ -112,7 +124,7 @@
                 id="myCanvas"
                 width="700"
                 height="600"
-                class="absolute left-0 top-0"
+                class="absolute left-0 top-0 z-10"
             ></canvas>
 
             <div class="absolute right-10 bottom-10 card glass w-96">
@@ -210,7 +222,7 @@
             );
 
             // Add Ambient Light
-            const light = new THREE.AmbientLight(0xffffff, 0.9); // Soft white light
+            const light = new THREE.AmbientLight(0xffffff, 0.95); // Soft white light
             scene.add(light);
 
             // Add Directional Light for better shading
