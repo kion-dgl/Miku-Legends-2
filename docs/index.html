@@ -162,6 +162,71 @@
         </div>
         <!-- END HERO -->
 
+        <!-- Start Modal -->
+        <dialog id="my_modal_1" class="modal">
+            <div class="modal-box">
+                <h3 class="text-lg font-bold">
+                    Thank you for Downloading Miku Mod !!
+                </h3>
+                <p class="py-4">
+                    I want to say thank you to all of my patreons for making
+                    this possible!
+                </p>
+
+                <div class="w-full">
+                    <ul class="grid grid-cols-3 gap-1 w-full">
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Zero Koneko</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">GMP</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Dirtboy</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Biorang</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Logan M</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Mateus P</span>
+                        </li>
+                    </ul>
+
+                    <p class="py-4">
+                        <a
+                            href="https://www.patreon.com/c/dashkion"
+                            class="text-fuchsia-300 text-lg font-bold"
+                            >Subscribe</a
+                        >
+                        if you want to support more mods like this!!!
+                    </p>
+                </div>
+
+                <div class="modal-action">
+                    <form method="dialog">
+                        <!-- if there is a button in form, it will close the modal -->
+                        <button class="btn btn-primary">Close Modal</button>
+                    </form>
+                </div>
+            </div>
+        </dialog>
+        <!-- End Modal -->
+
         <script type="module">
             import * as THREE from "three";
             import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -339,6 +404,7 @@
 
                 // Revoke the object URL after a short delay to free up resources
                 setTimeout(() => URL.revokeObjectURL(link.href), 100);
+                document.getElementById("my_modal_1").showModal();
             });
 
             const cue = `FILE "Miku Legends 2.bin" BINARY
