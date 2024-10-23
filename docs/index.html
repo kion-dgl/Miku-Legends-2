@@ -7,6 +7,8 @@
         <title>Miku Legends 2</title>
         <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
+        <script src="https://unpkg.com/three@0.139.2/build/three.min.js"></script>
+        <script src="https://unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js"></script>
 
         <link
             href="https://cdn.jsdelivr.net/npm/daisyui@4.12.13/dist/full.min.css"
@@ -15,7 +17,7 @@
         />
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
-    <body class="flex flex-col h-screen" id="particles-js">
+    <body class="flex flex-col min-h-screen" id="particles-js">
         <!-- START NAVBAR -->
         <nav class="navbar bg-base-100 relative z-10">
             <div class="flex-1">
@@ -90,9 +92,15 @@
         <!-- START HERO -->
         <div class="hero flex-grow relative z-10">
             <div class="hero-content text-center">
-                <div class="max-w-md">
+                <div class="max-w-5xl">
                     <h1 class="text-5xl font-bold">Hello there</h1>
                     <p class="py-6">
+                        <canvas
+                            id="myCanvas"
+                            width="800"
+                            height="800"
+                            class="b-1 shadow border-4 border-indigo-500"
+                        ></canvas>
                         <label
                             >Original File:
                             <input type="file" id="input" /></label
@@ -109,87 +117,49 @@
         <!-- END HERO -->
 
         <script type="module">
-            // Initialize the particles
-            tsParticles.load("particles-js", {
-                particles: {
-                    number: {
-                        value: 160,
-                        density: { enable: true, value_area: 800 },
-                    },
-                    color: { value: "#ffffff" },
-                    shape: {
-                        type: "circle",
-                        stroke: { width: 0, color: "#000000" },
-                        polygon: { nb_sides: 5 },
-                        image: {
-                            src: "img/github.svg",
-                            width: 100,
-                            height: 100,
-                        },
-                    },
-                    opacity: {
-                        value: 1,
-                        random: true,
-                        anim: {
-                            enable: true,
-                            speed: 1,
-                            opacity_min: 0,
-                            sync: false,
-                        },
-                    },
-                    size: {
-                        value: 3,
-                        random: true,
-                        anim: {
-                            enable: false,
-                            speed: 4,
-                            size_min: 0.3,
-                            sync: false,
-                        },
-                    },
-                    line_linked: {
-                        enable: false,
-                        distance: 150,
-                        color: "#ffffff",
-                        opacity: 0.4,
-                        width: 1,
-                    },
-                    move: {
-                        enable: true,
-                        speed: 1,
-                        direction: "none",
-                        random: true,
-                        straight: false,
-                        out_mode: "out",
-                        bounce: false,
-                        attract: { enable: false, rotateX: 600, rotateY: 600 },
-                    },
-                },
-                interactivity: {
-                    detect_on: "canvas",
-                    events: {
-                        onhover: { enable: true, mode: "bubble" },
-                        onclick: { enable: false, mode: "repulse" },
-                        resize: true,
-                    },
-                    modes: {
-                        grab: { distance: 400, line_linked: { opacity: 1 } },
-                        bubble: {
-                            distance: 250,
-                            size: 0,
-                            duration: 2,
-                            opacity: 0,
-                            speed: 3,
-                        },
-                        repulse: { distance: 400, duration: 0.4 },
-                        push: { particles_nb: 4 },
-                        remove: { particles_nb: 2 },
-                    },
-                },
-                retina_detect: true,
-            });
-        </script>
-        <script type="module">
+            // Select the canvas element
+            const canvas = document.querySelector("#myCanvas");
+
+            // Create a new Three.js scene
+            const scene = new THREE.Scene();
+
+            // Set up a camera
+            const camera = new THREE.PerspectiveCamera(
+                75, // Field of view
+                800 / 600, // Aspect ratio (width / height)
+                0.1, // Near clipping plane
+                1000, // Far clipping plane
+            );
+            camera.position.z = 5; // Move camera away from the center
+
+            // Create a WebGL renderer and link it to the canvas
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+
+            // Set the renderer size to match the canvas size
+            // renderer.setSize(800, 600);
+            renderer.setClearColor(0x000000, 0);
+
+            // Add a basic geometry (cube) to the scene
+            const geometry = new THREE.BoxGeometry(1, 1, 1); // A 1x1x1 cube
+            const material = new THREE.MeshBasicMaterial({ color: 0x44aa88 });
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube); // Add the cube to the scene
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Rotate the cube for some animation
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+
+                // Render the scene from the perspective of the camera
+                renderer.render(scene, camera);
+            }
+
+            // Start the animation loop
+            animate();
+
             function calculateMD5(file) {
                 return new Promise((resolve, reject) => {
                     const spark = new SparkMD5.ArrayBuffer();
@@ -275,5 +245,6 @@
                 downloadLink.textContent = "Download Patched File";
             });
         </script>
+        <!-- <script src="initParticles.js"></script> -->
     </body>
 </html>
