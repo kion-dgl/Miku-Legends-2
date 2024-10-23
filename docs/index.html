@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <title>Miku Legends 2</title>
+        <title>Miku Legends 2 - Patcher</title>
         <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
         <!-- <script src="https://unpkg.com/three@0.139.2/build/three.min.js"></script>
@@ -32,7 +32,7 @@
     </head>
     <body class="flex flex-col min-h-screen" id="particles-js">
         <!-- START NAVBAR -->
-        <nav class="navbar bg-base-100 relative z-10">
+        <nav class="navbar bg-base-100 relative z-10 shadow-lg">
             <div class="flex-1">
                 <a class="btn btn-ghost text-xl">Miku Legends 2</a>
             </div>
@@ -103,26 +103,48 @@
         <!-- END NAVBAR -->
 
         <!-- START HERO -->
-        <div class="hero flex-grow relative z-10">
-            <div class="hero-content flex-col lg:flex-row">
-                <canvas
-                    id="myCanvas"
-                    width="700"
-                    height="600"
-                    class="b-1 shadow border-4 border-indigo-500"
-                ></canvas>
-                <div>
-                    <h1 class="text-2xl font-bold">
-                        Select `MegaMan Legends 2 Track 1.bin`
-                    </h1>
-                    <label
-                        >Original File: <input type="file" id="input" /></label
-                    ><br />
-                    <button id="applyPatch">Apply Patch</button>
-                    <a id="downloadLink" style="display: none"
-                        >Download Patched File</a
-                    >
-                    <button class="btn btn-primary">Get Started</button>
+        <div
+            class="hero flex-grow relative"
+            style="background-image: url(NIGHT.png)"
+        >
+            <div class="hero-overlay bg-opacity-80"></div>
+            <canvas
+                id="myCanvas"
+                width="700"
+                height="600"
+                class="absolute left-0 top-0"
+            ></canvas>
+
+            <div class="absolute right-10 bottom-10 card glass w-96">
+                <figure>
+                    <img src="panel.png" alt="miku legeds 2 light logo" />
+                </figure>
+                <div class="card-body">
+                    <h2 class="card-title">How to Patch</h2>
+                    <p>
+                        First click on <b>Patch Bin</b> and Select
+                        <b>MegaMan Legends 2 Track 1.bin</b>. This will apply
+                        the patch and download <b>Miku Legends 2 Track 1.bin</b>
+                    </p>
+                    <p>
+                        Then click on <b>Download Cue</b> to download
+                        <b>Miku Legends 2.cue</b>. That's it. Enjoy!!
+                    </p>
+                    <input
+                        type="file"
+                        id="input"
+                        class="opacity-0"
+                        accept=".bin"
+                    />
+
+                    <div class="card-actions justify-around">
+                        <button class="btn btn-primary" id="step-1">
+                            1. Patch Bin
+                        </button>
+                        <a class="btn btn-secondary" id="step-2">
+                            2. Download Cue
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,6 +157,7 @@
 
             // Select the canvas element
             const canvas = document.querySelector("#myCanvas");
+            const container = canvas.parentNode;
 
             // Create a new Three.js scene
             const scene = new THREE.Scene();
@@ -142,7 +165,7 @@
             // Set up a camera
             const camera = new THREE.PerspectiveCamera(
                 75, // Field of view
-                800 / 600, // Aspect ratio (width / height)
+                (container.clientWidth - 440) / container.clientHeight, // Aspect ratio (width / height)
                 0.1, // Near clipping plane
                 1000, // Far clipping plane
             );
@@ -150,12 +173,16 @@
 
             // Create a WebGL renderer and link it to the canvas
             const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+            renderer.setSize(
+                container.clientWidth - 440,
+                container.clientHeight,
+            );
+            renderer.setPixelRatio(window.devicePixelRatio);
 
             const orbitControls = new OrbitControls(
                 camera,
                 renderer.domElement,
             );
-            orbitControls.maxPolarAngle = Math.PI * 0.5;
             orbitControls.minDistance = 0.1;
             orbitControls.maxDistance = 100;
             orbitControls.autoRotate = true; // カメラの自動回転設定
@@ -183,7 +210,7 @@
             );
 
             // Add Ambient Light
-            const light = new THREE.AmbientLight(0xffffff, 0.8); // Soft white light
+            const light = new THREE.AmbientLight(0xffffff, 0.9); // Soft white light
             scene.add(light);
 
             // Add Directional Light for better shading
@@ -201,6 +228,17 @@
 
             // Start the animation loop
             animate();
+
+            window.addEventListener("resize", () => {
+                // Adjust camera aspect ratio and renderer size
+                camera.aspect =
+                    (container.clientWidth - 440) / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(
+                    container.clientWidth - 440,
+                    container.clientHeight,
+                );
+            });
 
             function calculateMD5(file) {
                 return new Promise((resolve, reject) => {
@@ -232,6 +270,9 @@
             }
 
             const input = document.getElementById("input");
+            document.getElementById("step-1").addEventListener("click", () => {
+                input.click();
+            });
             input.addEventListener("change", async (evt) => {
                 event.preventDefault();
                 if (!evt.target.files) {
@@ -258,10 +299,7 @@
                 const patch = await req.json();
                 const buffer = await file.arrayBuffer();
                 const data = new Uint8Array(buffer);
-                console.log(buffer);
-                console.log(data);
 
-                console.log("apply patch!!");
                 patch.forEach((patch) => {
                     const { offset, bytes } = patch;
                     const patchBytes = Uint8Array.from(atob(bytes), (c) =>
@@ -274,18 +312,32 @@
                     }
                 });
 
-                console.log("DOWNLAOD Patch");
                 const blob = new Blob([data.buffer], {
                     type: "application/octet-stream",
                 });
-                const url = URL.createObjectURL(blob);
 
-                const downloadLink = document.getElementById("downloadLink");
-                downloadLink.href = url;
-                downloadLink.download = "MIKU2-patched.bin";
-                downloadLink.style.display = "block";
-                downloadLink.textContent = "Download Patched File";
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob); // Convert Blob to an object URL
+                link.download = "Miku Legends 2.bin"; // Set the file name for download
+
+                // Trigger the download by clicking the link
+                document.body.appendChild(link); // Append link to the document
+                link.click(); // Simulate a click to start download
+                document.body.removeChild(link); // Remove the link element after download
+
+                // Revoke the object URL after a short delay to free up resources
+                setTimeout(() => URL.revokeObjectURL(link.href), 100);
             });
+
+            const cue = `FILE "Miku Legends 2.bin" BINARY
+            TRACK 01 MODE2/2352
+            INDEX 01 00:00:00`;
+            const step2 = document.getElementById("step-2");
+            const blob = new Blob([cue], {
+                type: "text/plain",
+            });
+            step2.href = URL.createObjectURL(blob);
+            step2.download = "Miku Legends 2.cue";
         </script>
         <!-- <script src="initParticles.js"></script> -->
     </body>
