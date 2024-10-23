@@ -1,0 +1,11 @@
+Model Information:
+* title:	Postal X (PSX CD-R Disk)
+* source:	https://sketchfab.com/3d-models/postal-x-psx-cd-r-disk-59475e899e164884aef067aec7f7388c
+* author:	xqspx (https://sketchfab.com/xqspx)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Postal X (PSX CD-R Disk)" (https://sketchfab.com/3d-models/postal-x-psx-cd-r-disk-59475e899e164884aef067aec7f7388c) by xqspx (https://sketchfab.com/xqspx) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

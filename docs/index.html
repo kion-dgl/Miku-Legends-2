@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Miku Legends 2 - Patcher</title>
+        <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
+        <!-- <script src="https://unpkg.com/three@0.139.2/build/three.min.js"></script>
+        <script src="https://unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js"></script>
+        <script
+            type="module"
+            src="https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/loaders/GLTFLoader.js"
+        ></script> -->
+
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@4.12.13/dist/full.min.css"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+                    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+                }
+            }
+        </script>
+    </head>
+    <body class="flex flex-col min-h-screen" id="particles-js">
+        <!-- START NAVBAR -->
+        <nav class="navbar bg-base-100 relative z-10 shadow-lg">
+            <div class="flex-1">
+                <a class="btn btn-ghost text-xl">Miku Legends 2</a>
+            </div>
+
+            <div class="navbar-end">
+                <a
+                    class="btn btn-ghost btn-circle"
+                    href="https://github.com/kion-dgl/Miku-Legends-2"
+                    target="_blank"
+                >
+                    <svg
+                        class="w-6 h-6 text-gray-800 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
+                </a>
+
+                <a
+                    class="btn btn-ghost btn-circle"
+                    href="https://x.com/WagieWeeb"
+                    target="_blank"
+                >
+                    <svg
+                        class="w-6 h-6 text-gray-800 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M13.795 10.533 20.68 2h-3.073l-5.255 6.517L7.69 2H1l7.806 10.91L1.47 22h3.074l5.705-7.07L15.31 22H22l-8.205-11.467Zm-2.38 2.95L9.97 11.464 4.36 3.627h2.31l4.528 6.317 1.443 2.02 6.018 8.409h-2.31l-4.934-6.89Z"
+                        />
+                    </svg>
+                </a>
+
+                <a
+                    class="btn btn-ghost btn-circle"
+                    href="https://www.patreon.com/c/dashkion"
+                    target="_blank"
+                >
+                    <svg
+                        class="w-6 h-6 text-gray-800 dark:text-white"
+                        version="1.1"
+                        id="Layer_1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                        x="0px"
+                        y="0px"
+                        viewBox="0 0 1080 1080"
+                        style="enable-background: new 0 0 1080 1080"
+                        xml:space="preserve"
+                    >
+                        <style type="text/css">
+                            .st0 {
+                                fill: #ffffff;
+                            }
+                        </style>
+                        <path
+                            class="st0"
+                            d="M1033.05,324.45c-0.19-137.9-107.59-250.92-233.6-291.7c-156.48-50.64-362.86-43.3-512.28,27.2
+	C106.07,145.41,49.18,332.61,47.06,519.31c-1.74,153.5,13.58,557.79,241.62,560.67c169.44,2.15,194.67-216.18,273.07-321.33
+	c55.78-74.81,127.6-95.94,216.01-117.82C929.71,603.22,1033.27,483.3,1033.05,324.45z"
+                        />
+                    </svg>
+                </a>
+            </div>
+        </nav>
+        <!-- END NAVBAR -->
+
+        <!-- START HERO -->
+        <div
+            class="hero flex-grow relative"
+            style="background-image: url(NIGHT.png)"
+        >
+            <div class="hero-overlay bg-opacity-80"></div>
+            <canvas
+                id="myCanvas"
+                width="700"
+                height="600"
+                class="absolute left-0 top-0 z-10"
+            ></canvas>
+
+            <div class="absolute right-10 bottom-10 card glass w-96">
+                <figure>
+                    <img src="panel.png" alt="miku legeds 2 light logo" />
+                </figure>
+                <div class="card-body">
+                    <h2 class="card-title">How to Patch</h2>
+                    <p>
+                        First click on <b>Patch Bin</b> and Select
+                        <b>MegaMan Legends 2 Track 1.bin</b>. This will apply
+                        the patch and download <b>Miku Legends 2 Track 1.bin</b>
+                    </p>
+                    <p>
+                        Then click on <b>Download Cue</b> to download
+                        <b>Miku Legends 2.cue</b>. That's it. Enjoy!!
+                    </p>
+                    <input
+                        type="file"
+                        id="input"
+                        class="opacity-0"
+                        accept=".bin"
+                    />
+
+                    <div class="card-actions justify-around">
+                        <button class="btn btn-primary" id="step-1">
+                            1. Patch Bin
+                        </button>
+                        <a class="btn btn-secondary" id="step-2">
+                            2. Download Cue
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END HERO -->
+
+        <!-- Start Modal -->
+        <dialog id="my_modal_1" class="modal">
+            <div class="modal-box">
+                <h3 class="text-lg font-bold">
+                    Thank you for Downloading Miku Mod !!
+                </h3>
+                <p class="py-4">
+                    I want to say thank you to all of my patreons for making
+                    this possible!
+                </p>
+
+                <div class="w-full">
+                    <ul class="grid grid-cols-3 gap-1 w-full">
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Zero Koneko</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">GMP</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Dirtboy</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Biorang</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Logan M</span>
+                        </li>
+                        <li
+                            class="bg-base-200 rounded-lg p-4 text-center hover:bg-base-300 transition-colors cursor-pointer"
+                        >
+                            <span class="text-lg font-medium">Mateus P</span>
+                        </li>
+                    </ul>
+
+                    <p class="py-4">
+                        <a
+                            href="https://www.patreon.com/c/dashkion"
+                            class="text-fuchsia-300 text-lg font-bold"
+                            >Subscribe</a
+                        >
+                        if you want to support more mods like this!!!
+                    </p>
+                </div>
+
+                <div class="modal-action">
+                    <form method="dialog">
+                        <!-- if there is a button in form, it will close the modal -->
+                        <button class="btn btn-primary">Close Modal</button>
+                    </form>
+                </div>
+            </div>
+        </dialog>
+        <!-- End Modal -->
+
+        <script type="module">
+            import * as THREE from "three";
+            import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+            import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+            // Select the canvas element
+            const canvas = document.querySelector("#myCanvas");
+            const container = canvas.parentNode;
+
+            // Create a new Three.js scene
+            const scene = new THREE.Scene();
+
+            // Set up a camera
+            const camera = new THREE.PerspectiveCamera(
+                75, // Field of view
+                (container.clientWidth - 440) / container.clientHeight, // Aspect ratio (width / height)
+                0.1, // Near clipping plane
+                1000, // Far clipping plane
+            );
+            camera.position.y = 2; // Move camera away from the center
+
+            // Create a WebGL renderer and link it to the canvas
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+            renderer.setSize(
+                container.clientWidth - 440,
+                container.clientHeight,
+            );
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            const orbitControls = new OrbitControls(
+                camera,
+                renderer.domElement,
+            );
+            orbitControls.minDistance = 0.1;
+            orbitControls.maxDistance = 100;
+            orbitControls.autoRotate = true; // カメラの自動回転設定
+            orbitControls.autoRotateSpeed = 1.0; // カメラの自動回転速度
+
+            // Set the renderer size to match the canvas size
+            // renderer.setSize(800, 600);
+            renderer.setClearColor(0x000000, 0);
+
+            // Load the GLTF Model
+            const loader = new GLTFLoader();
+            loader.load(
+                "disk/scene.gltf",
+                (gltf) => {
+                    scene.add(gltf.scene); // Add model to the scene
+                    console.log("GLTF loaded successfully");
+                },
+                undefined,
+                (error) => {
+                    console.error(
+                        "An error occurred while loading GLTF",
+                        error,
+                    );
+                },
+            );
+
+            // Add Ambient Light
+            const light = new THREE.AmbientLight(0xffffff, 0.95); // Soft white light
+            scene.add(light);
+
+            // Add Directional Light for better shading
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Render the scene from the perspective of the camera
+                renderer.render(scene, camera);
+            }
+
+            // Start the animation loop
+            animate();
+
+            window.addEventListener("resize", () => {
+                // Adjust camera aspect ratio and renderer size
+                camera.aspect =
+                    (container.clientWidth - 440) / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(
+                    container.clientWidth - 440,
+                    container.clientHeight,
+                );
+            });
+
+            function calculateMD5(file) {
+                return new Promise((resolve, reject) => {
+                    const spark = new SparkMD5.ArrayBuffer();
+                    const reader = new FileReader();
+                    let offset = 0;
+                    const CHUNK_SIZE = 64 * 1024;
+
+                    reader.onload = (e) => {
+                        spark.append(e.target.result);
+                        offset += CHUNK_SIZE;
+
+                        if (offset < file.size) {
+                            readNextChunk();
+                        } else {
+                            resolve(spark.end());
+                        }
+                    };
+
+                    reader.onerror = (err) => reject(err);
+
+                    function readNextChunk() {
+                        const slice = file.slice(offset, offset + CHUNK_SIZE);
+                        reader.readAsArrayBuffer(slice);
+                    }
+
+                    readNextChunk();
+                });
+            }
+
+            const input = document.getElementById("input");
+            document.getElementById("step-1").addEventListener("click", () => {
+                input.click();
+            });
+            input.addEventListener("change", async (evt) => {
+                event.preventDefault();
+                if (!evt.target.files) {
+                    return;
+                }
+
+                console.log("change!!");
+
+                const file = evt.target.files[0];
+
+                const CHECK_SUM = false;
+                if (CHECK_SUM) {
+                    const MML2_MD5 = "e7039345d54c1bfc3775a468d4125d48";
+                    const md5 = await calculateMD5(file);
+
+                    if (md5 !== MML2_MD5) {
+                        return confirm(
+                            "md5 does not match, would you like to proceed?",
+                        );
+                    }
+                }
+
+                const req = await fetch("./patch.json");
+                const patch = await req.json();
+                const buffer = await file.arrayBuffer();
+                const data = new Uint8Array(buffer);
+
+                patch.forEach((patch) => {
+                    const { offset, bytes } = patch;
+                    const patchBytes = Uint8Array.from(atob(bytes), (c) =>
+                        c.charCodeAt(0),
+                    );
+
+                    // Apply the patch bytes at the given offset
+                    for (let i = 0; i < patchBytes.length; i++) {
+                        data[offset + i] = patchBytes[i];
+                    }
+                });
+
+                const blob = new Blob([data.buffer], {
+                    type: "application/octet-stream",
+                });
+
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob); // Convert Blob to an object URL
+                link.download = "Miku Legends 2.bin"; // Set the file name for download
+
+                // Trigger the download by clicking the link
+                document.body.appendChild(link); // Append link to the document
+                link.click(); // Simulate a click to start download
+                document.body.removeChild(link); // Remove the link element after download
+
+                // Revoke the object URL after a short delay to free up resources
+                setTimeout(() => URL.revokeObjectURL(link.href), 100);
+                document.getElementById("my_modal_1").showModal();
+            });
+
+            const cue = `FILE "Miku Legends 2.bin" BINARY
+            TRACK 01 MODE2/2352
+            INDEX 01 00:00:00`;
+            const step2 = document.getElementById("step-2");
+            const blob = new Blob([cue], {
+                type: "text/plain",
+            });
+            step2.href = URL.createObjectURL(blob);
+            step2.download = "Miku Legends 2.cue";
+        </script>
+        <!-- <script src="initParticles.js"></script> -->
+    </body>
+</html>

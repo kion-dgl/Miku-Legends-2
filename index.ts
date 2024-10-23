@@ -31,6 +31,7 @@ import { updateYosyonkePaintings3 } from "./src/ST0CT";
 import { updateNinoGiftShop } from "./src/ST1AT";
 import { updateNinoPigRoom } from "./src/ST1BT";
 import { updateFlutterFire } from "./src/ST1ET";
+import { createPatch } from "./src/CreatePatch";
 
 encodeTitle("miku/title.png");
 // process.exit();
@@ -262,3 +263,4 @@ updateNinoPigRoom(
 **/
 
 encodeRom();
+createPatch();
