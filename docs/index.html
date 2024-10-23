@@ -7,8 +7,12 @@
         <title>Miku Legends 2</title>
         <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
-        <script src="https://unpkg.com/three@0.139.2/build/three.min.js"></script>
+        <!-- <script src="https://unpkg.com/three@0.139.2/build/three.min.js"></script>
         <script src="https://unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js"></script>
+        <script
+            type="module"
+            src="https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/loaders/GLTFLoader.js"
+        ></script> -->
 
         <link
             href="https://cdn.jsdelivr.net/npm/daisyui@4.12.13/dist/full.min.css"
@@ -16,6 +20,15 @@
             type="text/css"
         />
         <script src="https://cdn.tailwindcss.com"></script>
+
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+                    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+                }
+            }
+        </script>
     </head>
     <body class="flex flex-col min-h-screen" id="particles-js">
         <!-- START NAVBAR -->
@@ -117,6 +130,10 @@
         <!-- END HERO -->
 
         <script type="module">
+            import * as THREE from "three";
+            import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+            import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
             // Select the canvas element
             const canvas = document.querySelector("#myCanvas");
 
@@ -130,28 +147,54 @@
                 0.1, // Near clipping plane
                 1000, // Far clipping plane
             );
-            camera.position.z = 5; // Move camera away from the center
+            camera.position.y = 5; // Move camera away from the center
 
             // Create a WebGL renderer and link it to the canvas
             const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+
+            const orbitControls = new OrbitControls(
+                camera,
+                renderer.domElement,
+            );
+            orbitControls.maxPolarAngle = Math.PI * 0.5;
+            orbitControls.minDistance = 0.1;
+            orbitControls.maxDistance = 100;
+            orbitControls.autoRotate = true; // カメラの自動回転設定
+            orbitControls.autoRotateSpeed = 1.0; // カメラの自動回転速度
 
             // Set the renderer size to match the canvas size
             // renderer.setSize(800, 600);
             renderer.setClearColor(0x000000, 0);
 
-            // Add a basic geometry (cube) to the scene
-            const geometry = new THREE.BoxGeometry(1, 1, 1); // A 1x1x1 cube
-            const material = new THREE.MeshBasicMaterial({ color: 0x44aa88 });
-            const cube = new THREE.Mesh(geometry, material);
-            scene.add(cube); // Add the cube to the scene
+            // Load the GLTF Model
+            const loader = new GLTFLoader();
+            loader.load(
+                "disk/scene.gltf",
+                (gltf) => {
+                    scene.add(gltf.scene); // Add model to the scene
+                    console.log("GLTF loaded successfully");
+                },
+                undefined,
+                (error) => {
+                    console.error(
+                        "An error occurred while loading GLTF",
+                        error,
+                    );
+                },
+            );
+
+            // Add Ambient Light
+            const light = new THREE.AmbientLight(0xffffff, 0.8); // Soft white light
+            scene.add(light);
+
+            // Add Directional Light for better shading
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
 
             // Animation loop
             function animate() {
                 requestAnimationFrame(animate);
-
-                // Rotate the cube for some animation
-                cube.rotation.x += 0.01;
-                cube.rotation.y += 0.01;
 
                 // Render the scene from the perspective of the camera
                 renderer.render(scene, camera);
